@@ -26,8 +26,6 @@ My profile and project Site
         <ul>Python</ul>
         <ul>GenAI</ul> 
         <ul>Agile  Methodology</ul>
-        <a href='aphadke77.github.io/bash-cheatsheet.html'>bash cheetsheet</a>
-        <a href='aphadke77.github.io/llm-tools.html'>LLM Tools</a>    </div>
 </div>
 <hr>
 <p>phadke.abhijit@gmail.com</p>
