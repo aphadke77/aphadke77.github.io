@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bash Command Line Cheatsheet</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+        }
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+        .section {
+            background-color: white;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            color: #c0392b;
+        }
+        .note {
+            background-color: #e7f3fe;
+            border-left: 4px solid #2196F3;
+            padding: 10px;
+            margin: 15px 0;
+        }
+        .tip {
+            background-color: #e7fee7;
+            border-left: 4px solid #4CAF50;
+            padding: 10px;
+            margin: 15px 0;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Bash Command Line Cheatsheet</h1>
+        <p>A comprehensive reference for Bash shell commands and syntax</p>
+    </header>
+
+    <div class="section">
+        <h2>Basic Commands</h2>
+        <table>
+            <tr>
+                <th>Command</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td><code>ls</code></td>
+                <td>List directory contents</td>
+                <td><code>ls -la</code> (list all files including hidden ones in long format)</td>
+            </tr>
+            <tr>
+                <td><code>cd</code></td>
+                <td>Change directory</td>
+                <td><code>cd /path/to/directory</code></td>
+            </tr>
+            <tr>
+                <td><code>pwd</code></td>
+                <td>Print working directory</td>
+                <td><code>pwd</code></td>
+            </tr>
+            <tr>
+                <td><code>mkdir</code></td>
+                <td>Create a new directory</td>
+                <td><code>mkdir new_directory</code></td>
+            </tr>
+            <tr>
+                <td><code>touch</code></td>
+                <td>Create a new file or update timestamp</td>
+                <td><code>touch file.txt</code></td>
+            </tr>
+            <tr>
+                <td><code>cp</code></td>
+                <td>Copy files or directories</td>
+                <td><code>cp file.txt /path/to/copy</code></td>
+            </tr>
+            <tr>
+                <td><code>mv</code></td>
+                <td>Move or rename files or directories</td>
+                <td><code>mv file.txt newname.txt</code></td>
+            </tr>
+            <tr>
+                <td><code>rm</code></td>
+                <td>Remove files or directories</td>
+                <td><code>rm file.txt</code> or <code>rm -rf directory</code></td>
+            </tr>
+            <tr>
+                <td><code>cat</code></td>
+                <td>Concatenate and display file content</td>
+                <td><code>cat file.txt</code></td>
+            </tr>
+            <tr>
+                <td><code>less</code></td>
+                <td>View file contents with pagination</td>
+                <td><code>less large_file.txt</code></td>
+            </tr>
+        </table>
+
+        <div class="warning">
+            Be very careful with <code>rm -rf</code> as it forcefully removes directories and their contents without confirmation.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>File Permissions</h2>
+        <table>
+            <tr>
+                <th>Command</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td><code>chmod</code></td>
+                <td>Change file mode (permissions)</td>
+                <td><code>chmod 755 script.sh</code> or <code>chmod u+x script.sh</code></td>
+            </tr>
+            <tr>
+                <td><code>chown</code></td>
+                <td>Change file owner</td>
+                <td><code>chown user:group file.txt</code></td>
+            </tr>
+        </table>
+
+        <div class="note">
+            <p>Permission numbers:</p>
+            <ul>
+                <li><strong>4</strong> = read (r)</li>
+                <li><strong>2</strong> = write (w)</li>
+                <li><strong>1</strong> = execute (x)</li>
+            </ul>
+            <p>Common permission sets:</p>
+            <ul>
+                <li><strong>755</strong> = rwxr-xr-x (owner: rwx, group: r-x, others: r-x)</li>
+                <li><strong>644</strong> = rw-r--r-- (owner: rw-, group: r--, others: r--)</li>
+                <li><strong>777</strong> = rwxrwxrwx (everyone has full permissions - use with caution)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Text Processing</h2>
+        <table>
+            <tr>
+                <th>Command</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td><code>grep</code></td>
+                <td>Search for patterns in files</td>
+                <td><code>grep "pattern" file.txt</code> or <code>grep -r "pattern" directory/</code></td>
+            </tr>
+            <tr>
+                <td><code>sed</code></td>
+                <td>Stream editor for filtering and transforming text</td>
+                <td><code>sed 's/old/new/g' file.txt</code></td>
+            </tr>
+            <tr>
+                <td><code>awk</code></td>
+                <td>Pattern scanning and processing language</td>
+                <td><code>awk '{print $1}' file.txt</code></td>
+            </tr>
+            <tr>
+                <td><code>sort</code></td>
+                <td>Sort lines of text files</td>
+                <td><code>sort file.txt</code> or <code>sort -n numbers.txt</code></td>
+            </tr>
+            <tr>
+                <td><code>uniq</code></td>
+                <td>Report or omit repeated lines</td>
+                <td><code>sort file.txt | uniq</code></td>
+            </tr>
+            <tr>
+                <td><code>wc</code></td>
+                <td>Count lines, words, and characters</td>
+                <td><code>wc -l file.txt</code> (count lines)</td>
+            </tr>
+            <tr>
+                <td><code>cut</code></td>
+                <td>Remove sections from each line</td>
+                <td><code>cut -d ',' -f 1 data.csv</code></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Process Management</h2>
+        <table>
+            <tr>
+                <th>Command</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td><code>ps</code></td>
+                <td>Report process status</td>
+                <td><code>ps aux</code></td>
+            </tr>
+            <tr>
+                <td><code>top</code></td>
+                <td>Display processes in real-time</td>
+                <td><code>top</code></td>
+            </tr>
+            <tr>
+                <td><code>kill</code></td>
+                <td>Terminate processes</td>
+                <td><code>kill PID</code> or <code>kill -9 PID</code> (force kill)</td>
+            </tr>
+            <tr>
+                <td><code>bg</code></td>
+                <td>Resume suspended jobs in the background</td>
+                <td><code>bg %1</code></td>
+            </tr>
+            <tr>
+                <td><code>fg</code></td>
+                <td>Bring job to the foreground</td>
+                <td><code>fg %1</code></td>
+            </tr>
+            <tr>
+                <td><code>jobs</code></td>
+                <td>List background jobs</td>
+                <td><code>jobs</code></td>
+            </tr>
+            <tr>
+                <td><code>nohup</code></td>
+                <td>Run command immune to hangups</td>
+                <td><code>nohup command &</code></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>I/O Redirection</h2>
+        <table>
+            <tr>
+                <th>Operator</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td><code>></code></td>
+                <td>Redirect output to a file (overwrite)</td>
+                <td><code>ls > output.txt</code></td>
+            </tr>
+            <tr>
+                <td><code>>></code></td>
+                <td>Redirect output to a file (append)</td>
+                <td><code>echo "text" >> file.txt</code></td>
+            </tr>
+            <tr>
+                <td><code><</code></td>
+                <td>Redirect input from a file</td>
+                <td><code>sort < input.txt</code></td>
+            </tr>
+            <tr>
+                <td><code>2></code></td>
+                <td>Redirect error output</td>
+                <td><code>command 2> error.log</code></td>
+            </tr>
+            <tr>
+                <td><code>&></code></td>
+                <td>Redirect both standard output and errors</td>
+                <td><code>command &> output.log</code></td>
+            </tr>
+            <tr>
+                <td><code>|</code></td>
+                <td>Pipe output to another command</td>
+                <td><code>ls -la | grep ".txt"</code></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Bash Script Basics</h2>
+        <h3>Script Header</h3>
+        <pre><code>#!/bin/bash
+# Script description</code></pre>
+
+        <h3>Variables</h3>
+        <pre><code># Define variables (no spaces around =)
+NAME="John"
+AGE=30
+
+# Using variables
+echo "Hello, $NAME"
+echo "You are $AGE years old"</code></pre>
+
+        <h3>Conditionals</h3>
+        <pre><code>if [ "$NAME" == "John" ]; then
+    echo "Hello John!"
+elif [ "$NAME" == "Jane" ]; then
+    echo "Hello Jane!"
+else
+    echo "Hello stranger!"
+fi</code></pre>
+
+        <h3>Loops</h3>
+        <pre><code># For loop
+for i in {1..5}; do
+    echo "Number: $i"
+done
+
+# While loop
+count=1
+while [ $count -le 5 ]; do
+    echo "Count: $count"
+    ((count++))
+done</code></pre>
+
+        <h3>Functions</h3>
+        <pre><code>function greet() {
+    local name=$1
+    echo "Hello, $name!"
+}
+
+# Call function
+greet "World"</code></pre>
+
+        <div class="tip">
+            <p>Save your script with a <code>.sh</code> extension, make it executable with <code>chmod +x script.sh</code>, and run it with <code>./script.sh</code></p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Useful Shortcuts</h2>
+        <table>
+            <tr>
+                <th>Shortcut</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>Ctrl+C</code></td>
+                <td>Interrupt (kill) current process</td>
+            </tr>
+            <tr>
+                <td><code>Ctrl+Z</code></td>
+                <td>Suspend current process</td>
+            </tr>
+            <tr>
+                <td><code>Ctrl+D</code></td>
+                <td>Exit current shell</td>
+            </tr>
+            <tr>
+                <td><code>Ctrl+L</code></td>
+                <td>Clear the screen</td>
+            </tr>
+            <tr>
+                <td><code>Ctrl+A</code></td>
+                <td>Move cursor to beginning of line</td>
+            </tr>
+            <tr>
+                <td><code>Ctrl+E</code></td>
+                <td>Move cursor to end of line</td>
+            </tr>
+            <tr>
+                <td><code>Tab</code></td>
+                <td>Auto-complete commands and filenames</td>
+            </tr>
+            <tr>
+                <td><code>Up/Down Arrows</code></td>
+                <td>Navigate through command history</td>
+            </tr>
+            <tr>
+                <td><code>!!</code></td>
+                <td>Repeat last command</td>
+            </tr>
+            <tr>
+                <td><code>!string</code></td>
+                <td>Repeat last command starting with "string"</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>System Information</h2>
+        <table>
+            <tr>
+                <th>Command</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td><code>uname</code></td>
+                <td>Print system information</td>
+                <td><code>uname -a</code></td>
+            </tr>
+            <tr>
+                <td><code>df</code></td>
+                <td>Report filesystem disk space usage</td>
+                <td><code>df -h</code></td>
+            </tr>
+            <tr>
+                <td><code>du</code></td>
+                <td>Estimate file space usage</td>
+                <td><code>du -sh directory/</code></td>
+            </tr>
+            <tr>
+                <td><code>free</code></td>
+                <td>Display amount of free and used memory</td>
+                <td><code>free -h</code></td>
+            </tr>
+            <tr>
+                <td><code>uptime</code></td>
+                <td>Show how long system has been running</td>
+                <td><code>uptime</code></td>
+            </tr>
+            <tr>
+                <td><code>whoami</code></td>
+                <td>Print effective user ID</td>
+                <td><code>whoami</code></td>
+            </tr>
+            <tr>
+                <td><code>which</code></td>
+                <td>Locate a command</td>
+                <td><code>which python</code></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Networking</h2>
+        <table>
+            <tr>
+                <th>Command</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td><code>ping</code></td>
+                <td>Send ICMP ECHO requests to network hosts</td>
+                <td><code>ping google.com</code></td>
+            </tr>
+            <tr>
+                <td><code>traceroute</code></td>
+                <td>Print the route packets trace to a network host</td>
+                <td><code>traceroute google.com</code></td>
+            </tr>
+            <tr>
+                <td><code>netstat</code></td>
+                <td>Network statistics</td>
+                <td><code>netstat -tuln</code></td>
+            </tr>
+            <tr>
+                <td><code>ssh</code></td>
+                <td>Secure shell remote login</td>
+                <td><code>ssh user@hostname</code></td>
+            </tr>
+            <tr>
+                <td><code>scp</code></td>
+                <td>Secure copy (remote file copy)</td>
+                <td><code>scp file.txt user@hostname:/path</code></td>
+            </tr>
+            <tr>
+                <td><code>wget</code></td>
+                <td>Retrieve files from the web</td>
+                <td><code>wget https://example.com/file.txt</code></td>
+            </tr>
+            <tr>
+                <td><code>curl</code></td>
+                <td>Transfer data from or to a server</td>
+                <td><code>curl -O https://example.com/file.txt</code></td>
+            </tr>
+            <tr>
+                <td><code>ip</code></td>
+                <td>Show/manipulate routing, network devices, etc.</td>
+                <td><code>ip addr show</code></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Compression & Archives</h2>
+        <table>
+            <tr>
+                <th>Command</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td><code>tar</code></td>
+                <td>Tape archiver</td>
+                <td><code>tar -czvf archive.tar.gz directory/</code></td>
+            </tr>
+            <tr>
+                <td><code>gzip</code></td>
+                <td>Compress or expand files</td>
+                <td><code>gzip file.txt</code></td>
+            </tr>
+            <tr>
+                <td><code>gunzip</code></td>
+                <td>Uncompress gzipped files</td>
+                <td><code>gunzip file.txt.gz</code></td>
+            </tr>
+            <tr>
+                <td><code>zip</code></td>
+                <td>Package and compress files</td>
+                <td><code>zip -r archive.zip directory/</code></td>
+            </tr>
+            <tr>
+                <td><code>unzip</code></td>
+                <td>List, test and extract compressed files</td>
+                <td><code>unzip archive.zip</code></td>
+            </tr>
+        </table>
+
+        <div class="note">
+            <p>Common tar options:</p>
+            <ul>
+                <li><strong>c</strong> - create a new archive</li>
+                <li><strong>x</strong> - extract files from an archive</li>
+                <li><strong>t</strong> - list the contents of an archive</li>
+                <li><strong>v</strong> - verbose output</li>
+                <li><strong>f</strong> - use archive file</li>
+                <li><strong>z</strong> - filter the archive through gzip</li>
+                <li><strong>j</strong> - filter the archive through bzip2</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Find & Search</h2>
+        <table>
+            <tr>
+                <th>Command</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td><code>find</code></td>
+                <td>Search for files in a directory hierarchy</td>
+                <td><code>find /path -name "*.txt"</code></td>
+            </tr>
+            <tr>
+                <td><code>locate</code></td>
+                <td>Find files by name (uses database)</td>
+                <td><code>locate filename</code></td>
+            </tr>
+            <tr>
+                <td><code>grep</code></td>
+                <td>Print lines matching a pattern</td>
+                <td><code>grep -r "text" /path
