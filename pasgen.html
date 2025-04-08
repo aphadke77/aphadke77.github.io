@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Generator</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      text-align: center;
+    }
+
+    #password-container {
+      max-width: 400px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #generated-password {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="password-container">
+    <h2>Password Generator</h2>
+    <label for="length">Password Length:</label>
+    <input type="number" id="length" min="6" max="20" value="12">
+
+    <label for="useSpecialChars">
+      <input type="checkbox" id="useSpecialChars"> Include Special Characters
+    </label>
+
+    <label for="useNumbers">
+      <input type="checkbox" id="useNumbers"> Include Numbers
+    </label>
+
+    <button onclick="generatePassword()">Generate Password</button>
+
+    <p id="generated-password"></p>
+  </div>
+
+  <script>
+    function generatePassword() {
+      const length = document.getElementById("length").value;
+      const useSpecialChars = document.getElementById("useSpecialChars").checked;
+      const useNumbers = document.getElementById("useNumbers").checked;
+
+      const lowercaseChars = "abcdefghijklmnopqrstuvwxyz";
+      const uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const specialChars = "!@#$%^&*()_-+=<>?/[]{}|";
+      const numericChars = "0123456789";
+
+      let allowedChars = lowercaseChars + uppercaseChars;
+
+      if (useSpecialChars) {
+        allowedChars += specialChars;
+      }
+
+      if (useNumbers) {
+        allowedChars += numericChars;
+      }
+
+      let password = "";
+      for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * allowedChars.length);
+        password += allowedChars.charAt(randomIndex);
+      }
+
+      document.getElementById("generated-password").textContent = "Generated Password: " + password;
+    }
+  </script>
+</body>
+</html>
