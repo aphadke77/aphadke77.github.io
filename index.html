@@ -1,21 +1,245 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Abhijit's GitHub Site</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abhijit's Portfolio</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --text-color: #1f2937;
+            --light-bg: #f9fafb;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            font-weight: 300;
+            margin-bottom: 1rem;
+        }
+
+        .content {
+            padding: 3rem 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-link {
+            display: inline-block;
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .card-link:hover {
+            color: var(--primary-color);
+        }
+
+        .card-description {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+            display: inline-block;
+        }
+
+        footer {
+            background-color: #1f2937;
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .social-links {
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            color: white;
+            margin: 0 10px;
+            text-decoration: none;
+        }
+
+        .social-links a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Site Directory</h1>
-    <ul>
-        <li><a href="/Profile.html">Profile</a></li>
-        <li><a href="/Story.html">Skills</a></li>
-        <li><a href="/counter.html">Counter</a></li>
-        <li><a href="/bash-cheatsheet.html">Bash Cheatsheet</a></li>
-        <li><a href="/llm-tools.html">LLM Tools</a></li>
-        <li><a href="/pandas-eda-cheatshee.html">Pandas Cheatsheet</a></li>
-        <li><a href="/pasgen.html">Password Generator</a></li>
-        <li><a href="/cyber-kill-chain-quiz.html">Cyberkill Chain Quiz</a></li>
-        
-        <!-- Add all your pages here -->
-    </ul>
+    <header>
+        <div class="container">
+            <h1>Abhijit's Portfolio</h1>
+            <p class="subtitle">Software Developer & Technology Enthusiast</p>
+        </div>
+    </header>
+    
+    <main class="content">
+        <div class="container">
+            <h2 class="section-title">Resources & Tools</h2>
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">Profile</div>
+                    <div class="card-body">
+                        <a href="/Profile.html" class="card-link">View Profile</a>
+                        <p class="card-description">Learn more about my background, experience, and areas of expertise.</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">Skills</div>
+                    <div class="card-body">
+                        <a href="/Story.html" class="card-link">View Skills</a>
+                        <p class="card-description">Explore my technical skills, competencies, and professional journey.</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">Counter</div>
+                    <div class="card-body">
+                        <a href="/counter.html" class="card-link">Counter Tool</a>
+                        <p class="card-description">A simple counter application for tracking and counting.</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">Bash Cheatsheet</div>
+                    <div class="card-body">
+                        <a href="/bash-cheatsheet.html" class="card-link">View Cheatsheet</a>
+                        <p class="card-description">Comprehensive guide to Bash commands and scripting techniques.</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">LLM Tools</div>
+                    <div class="card-body">
+                        <a href="/llm-tools.html" class="card-link">Explore LLM Tools</a>
+                        <p class="card-description">Collection of tools related to Large Language Models.</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">Pandas Cheatsheet</div>
+                    <div class="card-body">
+                        <a href="/pandas-eda-cheatshee.html" class="card-link">View Cheatsheet</a>
+                        <p class="card-description">Quick reference for Pandas data analysis and exploration.</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">Password Generator</div>
+                    <div class="card-body">
+                        <a href="/pasgen.html" class="card-link">Generate Password</a>
+                        <p class="card-description">Tool to create secure, random passwords for your accounts.</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">Cyber Kill Chain Quiz</div>
+                    <div class="card-body">
+                        <a href="/cyber-kill-chain-quiz.html" class="card-link">Take Quiz</a>
+                        <p class="card-description">Test your knowledge of the cyber kill chain framework.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Abhijit. All rights reserved.</p>
+            <div class="social-links">
+                <a href="https://github.com/yourusername" target="_blank">GitHub</a>
+                <a href="https://linkedin.com/in/yourusername" target="_blank">LinkedIn</a>
+                <a href="mailto:your.email@example.com">Email</a>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
