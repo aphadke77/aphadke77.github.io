@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Command Cheat Sheet</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .command {
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            color: #c0392b;
+        }
+        .description {
+            font-size: 14px;
+        }
+        .example {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f9f9f9;
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #16a085;
+            font-size: 13px;
+        }
+        .notes {
+            font-style: italic;
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 14px;
+            color: #7f8c8d;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Git Command Cheat Sheet</h1>
+    
+    <div class="section">
+        <h2>Setting Up</h2>
+        <table>
+            <tr>
+                <th>Command</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td class="command">git init</td>
+                <td class="description">Initialize a new Git repository</td>
+                <td class="example">git init</td>
+            </tr>
+            <tr>
+                <td class="command">git clone</td>
+                <td class="description">Clone a repository from a remote source</td>
+                <td class="example">git clone https://github.com/user/repo.git</td>
+            </tr>
+            <tr>
+                <td class="command">git config</td>
+                <td class="description">Configure Git settings</td>
+                <td class="example">git config --global user.name "Your Name"<br>git config --global user.email "your.email@example.com"</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Basic Commands</h2>
+        <table>
+            <tr>
+                <th>Command</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td class="command">git status</td>
+                <td class="description">Show working tree status</td>
+                <td class="example">git status</td>
+            </tr>
+            <tr>
+                <td class="command">git add</td>
+                <td class="description">Add file contents to the index</td>
+                <td class="example">git add file.txt<br>git add .<br>git add -A</td>
+            </tr>
+            <tr>
+                <td class="command">git commit</td>
+                <td class="description">Record changes to the repository</td>
+                <td class="example">git commit -m "Commit message"<br>git commit -am "Add and commit message"</td>
+            </tr>
+            <tr>
+                <td class="command">git diff</td>
+                <td class="description">Show changes between commits, commit and working tree, etc.</td>
+                <td class="example">git diff<br>git diff --staged</td>
+            </tr>
+            <tr>
+                <td class="command">git rm</td>
+                <td class="description">Remove files from the working tree and index</td>
+                <td class="example">git rm file.txt<br>git rm --cached file.txt</td>
+            </tr>
+            <tr>
+                <td class="command">git mv</td>
+                <td class="description">Move or rename a file, directory, or symlink</td>
+                <td class="example">git mv old_name.txt new_name.txt</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Branching and Merging</h2>
+        <table>
+            <tr>
+                <th>Command</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td class="command">git branch</td>
+                <td class="description">List, create, or delete branches</td>
+                <td class="example">git branch<br>git branch new-branch<br>git branch -d branch-name</td>
+            </tr>
+            <tr>
+                <td class="command">git checkout</td>
+                <td class="description">Switch branches or restore working tree files</td>
+                <td class="example">git checkout branch-name<br>git checkout -b new-branch<br>git checkout -- file.txt</td>
+            </tr>
+            <tr>
+                <td class="command">git switch</td>
+                <td class="description">Switch branches (newer alternative to checkout)</td>
+                <td class="example">git switch branch-name<br>git switch -c new-branch</td>
+            </tr>
+            <tr>
+                <td class="command">git merge</td>
+                <td class="description">Join two or more development histories together</td>
+                <td class="example">git merge branch-name</td>
+            </tr>
+            <tr>
+                <td class="command">git rebase</td>
+                <td class="description">Reapply commits on top of another base</td>
+                <td class="example">git rebase main<br>git rebase -i HEAD~3</td>
+            </tr>
+            <tr>
+                <td class="command">git cherry-pick</td>
+                <td class="description">Apply changes from specific commits</td>
+                <td class="example">git cherry-pick commit-hash</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Remote Repositories</h2>
+        <table>
+            <tr>
+                <th>Command</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td class="command">git remote</td>
+                <td class="description">Manage remote repositories</td>
+                <td class="example">git remote -v<br>git remote add origin https://github.com/user/repo.git<br>git remote remove origin</td>
+            </tr>
+            <tr>
+                <td class="command">git fetch</td>
+                <td class="description">Download objects and refs from another repository</td>
+                <td class="example">git fetch origin<br>git fetch --all</td>
+            </tr>
+            <tr>
+                <td class="command">git pull</td>
+                <td class="description">Fetch from and integrate with another repository or branch</td>
+                <td class="example">git pull origin main<br>git pull --rebase origin main</td>
+            </tr>
+            <tr>
+                <td class="command">git push</td>
+                <td class="description">Update remote refs along with associated objects</td>
+                <td class="example">git push origin main<br>git push -u origin main<br>git push --force</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Inspection & Comparison</h2>
+        <table>
+            <tr>
+                <th>Command</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td class="command">git log</td>
+                <td class="description">Show commit logs</td>
+                <td class="example">git log<br>git log --oneline<br>git log --graph --pretty=format:'%C(auto)%h%d %s %C(green)(%cr) %C(blue)<%an>'</td>
+            </tr>
+            <tr>
+                <td class="command">git show</td>
+                <td class="description">Show various types of objects</td>
+                <td class="example">git show commit-hash<br>git show HEAD</td>
+            </tr>
+            <tr>
+                <td class="command">git blame</td>
+                <td class="description">Show who changed which lines in a file and when</td>
+                <td class="example">git blame file.txt</td>
+            </tr>
+            <tr>
+                <td class="command">git tag</td>
+                <td class="description">Create, list, delete, or verify tags</td>
+                <td class="example">git tag<br>git tag -a v1.0.0 -m "Version 1.0.0"<br>git push origin --tags</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Undoing Changes</h2>
+        <table>
+            <tr>
+                <th>Command</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td class="command">git reset</td>
+                <td class="description">Reset current HEAD to the specified state</td>
+                <td class="example">git reset HEAD file.txt<br>git reset --soft HEAD~1<br>git reset --hard HEAD~1</td>
+            </tr>
+            <tr>
+                <td class="command">git restore</td>
+                <td class="description">Restore working tree files (newer alternative)</td>
+                <td class="example">git restore file.txt<br>git restore --staged file.txt</td>
+            </tr>
+            <tr>
+                <td class="command">git revert</td>
+                <td class="description">Create a commit that undoes changes from a previous commit</td>
+                <td class="example">git revert commit-hash</td>
+            </tr>
+            <tr>
+                <td class="command">git clean</td>
+                <td class="description">Remove untracked files from the working tree</td>
+                <td class="example">git clean -n<br>git clean -f</td>
+            </tr>
+            <tr>
+                <td class="command">git stash</td>
+                <td class="description">Stash changes in a dirty working directory</td>
+                <td class="example">git stash<br>git stash pop<br>git stash list<br>git stash drop</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Advanced Operations</h2>
+        <table>
+            <tr>
+                <th>Command</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td class="command">git bisect</td>
+                <td class="description">Use binary search to find a commit that introduced a bug</td>
+                <td class="example">git bisect start<br>git bisect bad<br>git bisect good commit-hash</td>
+            </tr>
+            <tr>
+                <td class="command">git reflog</td>
+                <td class="description">Manage reference logs; helpful for recovering lost commits</td>
+                <td class="example">git reflog</td>
+            </tr>
+            <tr>
+                <td class="command">git submodule</td>
+                <td class="description">Initialize, update, or inspect submodules</td>
+                <td class="example">git submodule add https://github.com/user/repo<br>git submodule update --init --recursive</td>
+            </tr>
+            <tr>
+                <td class="command">git worktree</td>
+                <td class="description">Manage multiple working trees attached to the same repository</td>
+                <td class="example">git worktree add ../new-tree branch-name</td>
+            </tr>
+            <tr>
+                <td class="command">git filter-branch</td>
+                <td class="description">Rewrite branches (use with caution)</td>
+                <td class="example">git filter-branch --tree-filter 'rm -f passwords.txt' HEAD</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Configuration & Aliases</h2>
+        <table>
+            <tr>
+                <th>Command</th>
+                <th>Description</th>
+                <th>Example</th>
+            </tr>
+            <tr>
+                <td class="command">git config --list</td>
+                <td class="description">List all configured settings</td>
+                <td class="example">git config --list</td>
+            </tr>
+            <tr>
+                <td class="command">git config --global alias</td>
+                <td class="description">Create command shortcuts</td>
+                <td class="example">git config --global alias.co checkout<br>git config --global alias.br branch<br>git config --global alias.st status</td>
+            </tr>
+            <tr>
+                <td class="command">git config core.editor</td>
+                <td class="description">Set default editor</td>
+                <td class="example">git config --global core.editor "code --wait"</td>
+            </tr>
+            <tr>
+                <td class="command">git config --global init.defaultBranch</td>
+                <td class="description">Set default branch name for new repositories</td>
+                <td class="example">git config --global init.defaultBranch main</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Common Workflows</h2>
+        
+        <h3>Making Changes and Committing</h3>
+        <div class="notes">
+            <pre>
+# Start work on a new feature
+git checkout -b feature-branch
+
+# Make changes, then stage them
+git add changed_files
+
+# Commit with a descriptive message
+git commit -m "Add feature XYZ"
+
+# Push to remote repository
+git push -u origin feature-branch
+            </pre>
+        </div>
+        
+        <h3>Merging a Feature Branch</h3>
+        <div class="notes">
+            <pre>
+# Switch to the main branch
+git checkout main
+
+# Update from remote
+git pull origin main
+
+# Merge your feature branch
+git merge feature-branch
+
+# Push the merged changes
+git push origin main
+            </pre>
+        </div>
+        
+        <h3>Resolving Merge Conflicts</h3>
+        <div class="notes">
+            <pre>
+# After a merge conflict occurs:
+# 1. Open conflicted files and resolve manually
+# 2. Stage the resolved files
+git add resolved_files
+
+# 3. Complete the merge
+git commit
+
+# 4. Push the merged changes
+git push origin main
+            </pre>
+        </div>
+        
+        <h3>Updating a Local Branch with Remote Changes</h3>
+        <div class="notes">
+            <pre>
+# Fetch remote changes
+git fetch origin
+
+# Incorporate changes into current branch
+git pull origin current-branch
+# OR (if you prefer rebasing)
+git pull --rebase origin current-branch
+            </pre>
+        </div>
+    </div>
+
+    <footer>
+        <p>Git Command Cheat Sheet | Created on April 8, 2025</p>
+    </footer>
+</body>
+</html>
