@@ -29,7 +29,7 @@ My profile and project Site
         <ul></ul>
     </div>
 </div>
+<hr>
+<p>phadke.abhijit@gmail.com</p>
+<hr>
 
-<footer>
-    <p>phadke.abhijit@gmail.com</p>
-</footer>
