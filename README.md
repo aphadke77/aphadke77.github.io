@@ -26,7 +26,7 @@ My profile and project Site
         <ul>Python</ul>
         <ul>GenAI</ul> 
         <ul>Agile  Methodology</ul>
-        <ul></ul>
+        <a href='aphadke77.github.io/bash-cheatsheet.html'>bash cheetsheet</a>
     </div>
 </div>
 <hr>
