@@ -33,6 +33,3 @@ My profile and project Site
 <footer>
     <p>phadke.abhijit@gmail.com</p>
 </footer>
-
-
-</html>
