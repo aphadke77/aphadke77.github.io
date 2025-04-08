@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pandas EDA Cheat Sheet</title>
+    <style>
+        :root {
+            --primary: #4285f4;
+            --secondary: #fbbc05;
+            --dark: #333;
+            --light: #f8f9fa;
+            --code-bg: #f1f3f4;
+            --border: #dadce0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: var(--light);
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        main {
+            padding: 20px;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        h2 {
+            font-size: 20px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--secondary);
+            color: var(--primary);
+        }
+        
+        h3 {
+            font-size: 18px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+        
+        p {
+            margin-bottom: 15px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background-color: var(--code-bg);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 15px;
+            word-break: break-word;
+        }
+        
+        pre {
+            background-color: var(--code-bg);
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            font-size: 14px;
+            white-space: pre;
+        }
+        
+        .code-block {
+            margin-bottom: 20px;
+        }
+        
+        .code-block h4 {
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: var(--code-bg);
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background-color: var(--light);
+        }
+        
+        .tip {
+            background-color: #e8f0fe;
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .tip-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+        
+        .search-box {
+            position: relative;
+            max-width: 300px;
+        }
+        
+        #search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        #search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        }
+        
+        .nav {
+            background-color: #f1f3f4;
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .nav a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            padding: 5px 0;
+            position: relative;
+        }
+        
+        .nav a:hover {
+            color: var(--primary);
+        }
+        
+        .nav a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s;
+        }
+        
+        .nav a:hover::after {
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .search-box {
+                max-width: 100%;
+                margin-top: 15px;
+            }
+            
+            .nav ul {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Pandas EDA Cheat Sheet</h1>
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search techniques...">
+            </div>
+        </header>
+        
+        <div class="nav">
+            <ul>
+                <li><a href="#importing">Importing Data</a></li>
+                <li><a href="#overview">Data Overview</a></li>
+                <li><a href="#cleaning">Data Cleaning</a></li>
+                <li><a href="#exploration">Data Exploration</a></li>
+                <li><a href="#visualization">Visualization</a></li>
+                <li><a href="#advanced">Advanced Techniques</a></li>
+            </ul>
+        </div>
+        
+        <main>
+            <section class="section" id="importing">
+                <h2>Importing Data</h2>
+                
+                <div class="code-block">
+                    <h4>Import Libraries</h4>
+                    <pre><code>import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Set visualization defaults
+plt.style.use('seaborn-whitegrid')
+sns.set_style('whitegrid')
+pd.set_option('display.max_columns', None)</code></pre>
+                </div>
+                
+                <div class="code-block">
+                    <h4>Reading Data</h4>
+                    <pre><code># CSV
+df = pd.read_csv('filename.csv')
+
+# Excel
+df = pd.read_excel('filename.xlsx', sheet_name='Sheet1')
+
+# JSON
+df = pd.read_json('filename.json')
+
+# SQL
+from sqlalchemy import create_engine
+engine = create_engine('sqlite:///database.db')
+df = pd.read_sql('SELECT * FROM table_name', engine)
+
+# Web Data
+tables = pd.read_html('https://www.website.com/table.html')
+df = tables[0]  # Get first table</code></pre>
+                </div>
+                
+                <div class="tip">
+                    <div class="tip-title">Pro Tip: Reading Large Files</div>
+                    <p>For large CSV files, use parameters like <code>nrows</code>, <code>chunksize</code> or <code>usecols</code> to load data efficiently:</p>
+                    <pre><code># Read only first 1000 rows
+df_sample = pd.read_csv('large_file.csv', nrows=1000)
+
+# Read specific columns only
+df = pd.read_csv('large_file.csv', usecols=['id', 'name', 'value'])
+
+# Process in chunks
+for chunk in pd.read_csv('large_file.csv', chunksize=10000):
+    # Process each chunk
+    process_data(chunk)</code></pre>
+                </div>
+            </section>
+            
+            <section class="section" id="overview">
+                <h2>Data Overview</h2>
+                
+                <div class="code-block">
+                    <h4>Basic Information</h4>
+                    <pre><code># First rows
+df.head(10)
+
+# Last rows
+df.tail(10)
+
+# Random sample of rows
+df.sample(5)
+
+# DataFrame shape (rows, columns)
+df.shape
+
+# Column names
+df.columns
+
+# Data types
+df.dtypes
+
+# Summary information
+df.info()
+
+# Index information
+df.index
+
+# Basic statistics
+df.describe()
+
+# Include categorical columns in statistics
+df.describe(include='all')
+
+# Count non-null values
+df.count()</code></pre>
+                </div>
+                
+                <div class="code-block">
+                    <h4>Memory Usage</h4>
+                    <pre><code># Get DataFrame memory usage
+df.info(memory_usage='deep')
+
+# Memory usage per column
+df.memory_usage(deep=True)</code></pre>
+                </div>
+            </section>
+            
+            <section class="section" id="cleaning">
+                <h2>Data Cleaning</h2>
+                
+                <div class="code-block">
+                    <h4>Missing Values</h4>
+                    <pre><code># Check for missing values
+df.isna().sum()
+
+# Visual missing values heatmap
+sns.heatmap(df.isna(), cbar=False)
+
+# Percentage of missing values per column
+(df.isna().sum() / len(df) * 100).sort_values(ascending=False)
+
+# Drop rows with any missing values
+df_clean = df.dropna()
+
+# Drop rows if all values are missing
+df_clean = df.dropna(how='all')
+
+# Drop columns with missing values
+df_clean = df.dropna(axis=1)
+
+# Fill missing values with a specific value
+df['column'].fillna(0, inplace=True)
+
+# Fill with mean, median, or mode
+df['numeric_col'].fillna(df['numeric_col'].mean(), inplace=True)
+df['numeric_col'].fillna(df['numeric_col'].median(), inplace=True)
+df['categorical_col'].fillna(df['categorical_col'].mode()[0], inplace=True)
+
+# Forward fill (use previous value)
+df.fillna(method='ffill', inplace=True)
+
+# Backward fill (use next value)
+df.fillna(method='bfill', inplace=True)</code></pre>
+                </div>
+                
+                <div class="code-block">
+                    <h4>Duplicates</h4>
+                    <pre><code># Check for duplicate rows
+duplicates = df.duplicated().sum()
+
+# Find duplicate rows
+df[df.duplicated()]
+
+# Find duplicates based on specific columns
+df[df.duplicated(subset=['col1', 'col2'])]
+
+# Drop duplicates
+df_unique = df.drop_duplicates()
+
+# Drop duplicates, keep last occurrence
+df_unique = df.drop_duplicates(keep='last')
+
+# Drop duplicates based on specific columns
+df_unique = df.drop_duplicates(subset=['col1', 'col2'])</code></pre>
+                </div>
+                
+                <div class="code-block">
+                    <h4>Data Type Conversion</h4>
+                    <pre><code># Convert column to numeric
+df['col'] = pd.to_numeric(df['col'], errors='coerce')
+
+# Convert column to datetime
+df['date_col'] = pd.to_datetime(df['date_col'], errors='coerce')
+
+# Convert column to category (memory efficient)
+df['category_col'] = df['category_col'].astype('category')
+
+# Convert all possible columns to category
+for col in df.select_dtypes(include=['object']).columns:
+    if df[col].nunique() < 0.5 * len(df):
+        df[col] = df[col].astype('category')</code></pre>
+                </div>
+                
+                <div class="code-block">
+                    <h4>Outliers Detection</h4>
+                    <pre><code># Using IQR method
+Q1 = df['col'].quantile(0.25)
+Q3 = df['col'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+# Find outliers
+outliers = df[(df['col'] < lower_bound) | (df['col'] > upper_bound)]
+
+# Remove outliers
+df_clean = df[(df['col'] >= lower_bound) & (df['col'] <= upper_bound)]
+
+# Z-score method
+from scipy import stats
+z_scores = stats.zscore(df['col'])
+outliers = df[abs(z_scores) > 3]</code></pre>
+                </div>
+            </section>
+            
+            <section class="section" id="exploration">
+                <h2>Data Exploration</h2>
+                
+                <div class="code-block">
+                    <h4>Categorical Data Analysis</h4>
+                    <pre><code># Unique values
+df['cat_col'].unique()
+
+# Count of unique values
+df['cat_col'].nunique()
+
+# Value counts
+df['cat_col'].value_counts()
+
+# Value counts with percentage
+df['cat_col'].value_counts(normalize=True) * 100
+
+# Cross tabulation
+pd.crosstab(df['cat_col1'], df['cat_col2'])
+
+# Cross tabulation with normalization
+pd.crosstab(df['cat_col1'], df['cat_col2'], normalize='index')</code></pre>
+                </div>
+                
+                <div class="code-block">
+                    <h4>Numerical Data Analysis</h4>
+                    <pre><code># Basic statistics
+df['num_col'].describe()
+
+# Custom percentiles
+df['num_col'].describe(percentiles=[.01, .05, .10, .25, .5, .75, .90, .95, .99])
+
+# Correlation matrix
+correlation = df.corr()
+
+# Correlation heatmap
+sns.heatmap(correlation, annot=True, cmap='coolwarm')
+
+# Correlation with specific column
+df.corrwith(df['target_col']).sort_values(ascending=False)</code></pre>
+                </div>
+                
+                <div class="code-block">
+                    <h4>Grouping and Aggregation</h4>
+                    <pre><code># Group by one column
+df.groupby('cat_col')['num_col'].mean()
+
+# Group by multiple columns
+df.groupby(['cat_col1', 'cat_col2'])['num_col'].mean()
+
+# Multiple aggregations
+df.groupby('cat_col').agg({
+    'num_col1': ['min', 'max', 'mean', 'median'],
+    'num_col2': ['count', 'sum', 'std']
+})
+
+# Custom aggregations
+df.groupby('cat_col').agg({
+    'num_col': lambda x: x.quantile(0.75) - x.quantile(0.25)
+})
+
+# Pivot tables
+pivot = pd.pivot_table(
+    df, 
+    values='num_col', 
+    index='cat_col1', 
+    columns='cat_col2', 
+    aggfunc='mean',
+    fill_value=0
+)</code></pre>
+                </div>
+                
+                <div class="code-block">
+                    <h4>Time Series Analysis</h4>
+                    <pre><code># Ensure datetime column
+df['date'] = pd.to_datetime(df['date'])
+
+# Set date as index
+df.set_index('date', inplace=True)
+
+# Resample by day, week, month
+daily = df.resample('D').mean()
+weekly = df.resample('W').mean()
+monthly = df.resample('M').mean()
+
+# Time-based indexing
+df['2023']  # Get all data from 2023
+df['2023-01':'2023-03']  # Get Q1 2023 data
+
+# Rolling statistics
+df['rolling_mean'] = df['num_col'].rolling(window=7).mean()
+df['rolling_std'] = df['num_col'].rolling(window=7).std()
+
+# Expanding statistics
+df['cumulative_sum'] = df['num_col'].expanding().sum()
+df['cumulative_mean'] = df['num_col'].expanding().mean()</code></pre>
+                </div>
+            </section>
+            
+            <section class="section" id="visualization">
+                <h2>Data Visualization</h2>
+                
+                <div class="code-block">
+                    <h4>Distribution Plots</h4>
+                    <pre><code># Histogram
+df['num_col'].hist(bins=30, figsize=(10, 6))
+plt.title('Distribution of Values')
+plt.xlabel('Value')
+plt.ylabel('Frequency')
+
+# KDE Plot
+sns.kdeplot(data=df, x='num_col')
+
+# Multiple KDE Plots
+sns.kdeplot(data=df, x='num_col', hue='cat_col')
+
+# Box Plot
+sns.boxplot(data=df, x='cat_col', y='num_col')
+
+# Violin Plot
+sns.violinplot(data=df, x='cat_col', y='num_col')
+
+# Distribution Plot (Histogram + KDE)
+sns.displot(data=df, x='num_col', kde=True, bins=30)
+
+# Facetted Histograms
+g = sns.FacetGrid(df, col='cat_col', col_wrap=3)
+g.map(plt.hist, 'num_col', bins=20)</code></pre>
+                </div>
+                
+                <div class="code-block">
+                    <h4>Relationship Plots</h4>
+                    <pre><code># Scatter Plot
+plt.scatter(df['x'], df['y'])
+plt.title('X vs Y')
+plt.xlabel('X Values')
+plt.ylabel('Y Values')
+
+# Scatter Plot with Seaborn
+sns.scatterplot(data=df, x='x_col', y='y_col', hue='cat_col')
+
+# Joint Plot (Scatter + Histograms)
+sns.jointplot(data=df, x='x_col', y='y_col', kind='scatter')
+
+# Hexbin Plot (for large datasets)
+sns.jointplot(data=df, x='x_col', y='y_col', kind='hex')
+
+# Pair Plot (multiple variables)
+sns.pairplot(df[['x_col', 'y_col', 'z_col', 'cat_col']], hue='cat_col')
+
+# Correlation Heatmap
+sns.heatmap(df.corr(), annot=True, cmap='coolwarm', linewidths=.5)
+
+# Regression Plot
+sns.regplot(data=df, x='x_col', y='y_col')
+
+# Residual Plot
+sns.residplot(data=df, x='x_col', y='y_col')
+
+# Categorical Scatter Plot
+sns.stripplot(data=df, x='cat_col', y='num_col', jitter=True)
+sns.swarmplot(data=df, x='cat_col', y='num_col')</code></pre>
+                </div>
+                
+                <div class="code-block">
+                    <h4>Categorical Plots</h4>
+                    <pre><code># Bar Plot
+df['cat_col'].value_counts().plot(kind='bar', figsize=(10, 6))
+
+# Horizontal Bar Plot
+df['cat_col'].value_counts().plot(kind='barh', figsize=(10, 6))
+
+# Count Plot
+sns.countplot(data=df, x='cat_col')
+
+# Count Plot with Hue
+sns.countplot(data=df, x='cat_col1', hue='cat_col2')
+
+# Bar Plot with Statistics
+sns.barplot(data=df, x='cat_col', y='num_col')
+
+# Point Plot (line connecting means)
+sns.pointplot(data=df, x='cat_col', y='num_col')
+
+# Multiple Categorical Plots
+catplot = sns.catplot(
+    data=df, kind='bar',
+    x='cat_col1', y='num_col', hue='cat_col2',
+    col='cat_col3', col_wrap=2,
+    height=4, aspect=1.5
+)</code></pre>
+                </div>
+                
+                <div class="code-block">
+                    <h4>Time Series Plots</h4>
+                    <pre><code># Line Plot
+df.set_index('date')['num_col'].plot(figsize=(12, 6))
+plt.title('Time Series of Values')
+plt.xlabel('Date')
+plt.ylabel('Value')
+
+# Multiple Line Plot
+df.set_index('date')[['col1', 'col2', 'col3']].plot(figsize=(12, 6))
+
+# Area Plot
+df.set_index('date')[['col1', 'col2', 'col3']].plot.area(figsize=(12, 6), alpha=0.5)
+
+# Plot with Resampling
+df.set_index('date')['num_col'].resample('M').mean().plot(figsize=(12, 6))
+
+# Seasonal Plot
+from pandas.plotting import autocorrelation_plot
+autocorrelation_plot(df['num_col'])
+
+# Time Series Decomposition
+from statsmodels.tsa.seasonal import seasonal_decompose
+decomposition = seasonal_decompose(df['num_col'], model='additive', period=12)
+fig = decomposition.plot()
+fig.set_size_inches(12, 8)</code></pre>
+                </div>
+            </section>
+            
+            <section class="section" id="advanced">
+                <h2>Advanced EDA Techniques</h2>
+                
+                <div class="code-block">
+                    <h4>Feature Engineering</h4>
+                    <pre><code># Create binary flags
+df['has_feature'] = np.where(df['col'] > 0, 1, 0)
+
+# Create categories from continuous variables
+df['age_group'] = pd.cut(
+    df['age'], 
+    bins=[0, 18, 35, 50, 65, 100], 
+    labels=['<18', '18-35', '36-50', '51-65', '65+']
+)
+
+# Create quantiles
+df['quantile'] = pd.qcut(df['num_col'], q=5, labels=False)
+
+# One-hot encoding
+df_encoded = pd.get_dummies(df, columns=['cat_col'], drop_first=True)
+
+# Extract features from datetime
+df['year'] = df['date'].dt.year
+df['month'] = df['date'].dt.month
+df['day'] = df['date'].dt.day
+df['weekday'] = df['date'].dt.weekday
+df['is_weekend'] = df['date'].dt.weekday >= 5
+
+# Text features
+df['text_length'] = df['text_col'].str.len()
+df['word_count'] = df['text_col'].str.split().str.len()
+df['contains_keyword'] = df['text_col'].str.contains('keyword', case=False)</code></pre>
+                </div>
+                
+                <div class="code-block">
+                    <h4>Dimensionality Reduction</h4>
+                    <pre><code># PCA
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
+# Scale the data
+scaler = StandardScaler()
+scaled_data = scaler.fit_transform(df[numeric_columns])
+
+# Apply PCA
+pca = PCA(n_components=2)
+pca_result = pca.fit_transform(scaled_data)
+
+# Create DataFrame with PCA results
+pca_df = pd.DataFrame(data=pca_result, columns=['PC1', 'PC2'])
+
+# Plot PCA result
+plt.figure(figsize=(10, 8))
+plt.scatter(pca_df['PC1'], pca_df['PC2'])
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+plt.title('PCA Result')
+
+# Variance explained ratio
+explained_variance = pca.explained_variance_ratio_
+plt.bar(range(len(explained_variance)), explained_variance)
+plt.xlabel('Principal Components')
+plt.ylabel('Explained Variance Ratio')</code></pre>
+                </div>
+                
+                <div class="code-block">
+                    <h4>Statistical Tests</h4>
+                    <pre><code># T-test
+from scipy import stats
+
+# Two sample t-test
+group1 = df[df['cat_col'] == 'A']['num_col']
+group2 = df[df['cat_col'] == 'B']['num_col']
+t_stat, p_value = stats.ttest_ind(group1, group2)
+print(f't-statistic: {t_stat}, p-value: {p_value}')
+
+# ANOVA
+from scipy.stats import f_oneway
+groups = [df[df['cat_col'] == cat]['num_col'] for cat in df['cat_col'].unique()]
+f_stat, p_value = f_oneway(*groups)
+print(f'F-statistic: {f_stat}, p-value: {p_value}')
+
+# Chi-square test for independence
+contingency_table = pd.crosstab(df['cat_col1'], df['cat_col2'])
+chi2, p, dof, expected = stats.chi2_contingency(contingency_table)
+print(f'Chi2: {chi2}, p-value: {p}')
+
+# Correlation test
+from scipy.stats import pearsonr, spearmanr
+corr, p_value = pearsonr(df['num_col1'], df['num_col2'])
+print(f'Pearson correlation: {corr}, p-value: {p_value}')
+
+corr, p_value = spearmanr(df['num_col1'], df['num_col2'])
+print(f'Spearman correlation: {corr}, p-value: {p_value}')</code></pre>
+                </div>
+                
+                <div class="code-block">
+                    <h4>Automated EDA Tools with Pandas</h4>
+                    <pre><code># ProfileReport from pandas_profiling
+from pandas_profiling import ProfileReport
+
+profile = ProfileReport(df, title='Pandas Profiling Report', explorative=True)
+profile.to_file('output.html')
+
+# Sweetviz
+import sweetviz as sv
+
+report = sv.analyze(df)
+report.show_html('sweetviz_report.html')
+
+# D-Tale
+import dtale
+
+d = dtale.show(df)
+d.open_browser()
+
+# Autoviz
+from autoviz.AutoViz_Class import AutoViz_Class
+
+AV = AutoViz_Class()
+auto_report = AV.AutoViz(
+    filename='',
+    sep=',',
+    dft=df,
+    header=0,
+    verbose=2,
+    lowess=False,
+    chart_format='png'
+)</code></pre>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script>
+        // Simple search functionality
+        const searchInput = document.getElementById('search-input');
+        
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            const codeBlocks = document.querySelectorAll('.code-block');
+            
+            if (query.length < 2) {
+                // Show all if query is too short
+                codeBlocks.forEach(block => {
+                    block.style.display = 'block';
+                });
+                return;
+            }
+            
+            codeBlocks.forEach(block => {
+                const title = block.querySelector('h4').textContent.toLowerCase();
+                const code = block.querySelector('pre').textContent.toLowerCase();
+                
+                if (title.includes(query) || code.includes(query)) {
+                    block.style.display = 'block';
+                } else {
+                    block.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
