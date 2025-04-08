@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cyber Kill Chain Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="container mx-auto p-6 bg-white shadow-lg rounded-lg max-w-2xl">
+        <h1 class="text-3xl font-bold text-center mb-6 text-blue-600">Cyber Kill Chain Quiz</h1>
+        
+        <form id="quizForm">
+            <div id="questions">
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-2">1. What is the first stage of the Cyber Kill Chain?</h3>
+                    <div class="space-y-2">
+                        <label class="block">
+                            <input type="radio" name="q1" value="A" class="mr-2">
+                            Weaponization
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q1" value="B" class="mr-2">
+                            Reconnaissance
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q1" value="C" class="mr-2">
+                            Delivery
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q1" value="D" class="mr-2">
+                            Exploitation
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-2">2. In the Cyber Kill Chain, which stage involves creating the attack method?</h3>
+                    <div class="space-y-2">
+                        <label class="block">
+                            <input type="radio" name="q2" value="A" class="mr-2">
+                            Delivery
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q2" value="B" class="mr-2">
+                            Reconnaissance
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q2" value="C" class="mr-2">
+                            Weaponization
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q2" value="D" class="mr-2">
+                            Installation
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-2">3. The "Command & Control" stage primarily involves:</h3>
+                    <div class="space-y-2">
+                        <label class="block">
+                            <input type="radio" name="q3" value="A" class="mr-2">
+                            Installing malware
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q3" value="B" class="mr-2">
+                            Establishing communication with the compromised system
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q3" value="C" class="mr-2">
+                            Initial system penetration
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q3" value="D" class="mr-2">
+                            Identifying system vulnerabilities
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-2">4. What does the Exploitation stage typically aim to do?</h3>
+                    <div class="space-y-2">
+                        <label class="block">
+                            <input type="radio" name="q4" value="A" class="mr-2">
+                            Send the malicious payload
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q4" value="B" class="mr-2">
+                            Gather initial information about the target
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q4" value="C" class="mr-2">
+                            Establish remote access
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q4" value="D" class="mr-2">
+                            Leverage a vulnerability to gain system access
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-2">5. Which stage of the Cyber Kill Chain involves sneaking past initial defenses?</h3>
+                    <div class="space-y-2">
+                        <label class="block">
+                            <input type="radio" name="q5" value="A" class="mr-2">
+                            Reconnaissance
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q5" value="B" class="mr-2">
+                            Weaponization
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q5" value="C" class="mr-2">
+                            Delivery
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q5" value="D" class="mr-2">
+                            Exploitation
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-2">6. The final stage of the Cyber Kill Chain is:</h3>
+                    <div class="space-y-2">
+                        <label class="block">
+                            <input type="radio" name="q6" value="A" class="mr-2">
+                            Command & Control
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q6" value="B" class="mr-2">
+                            Installation
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q6" value="C" class="mr-2">
+                            Actions on Objectives
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q6" value="D" class="mr-2">
+                            Exploitation
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-2">7. In which stage would an attacker typically research and gather information about the target?</h3>
+                    <div class="space-y-2">
+                        <label class="block">
+                            <input type="radio" name="q7" value="A" class="mr-2">
+                            Weaponization
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q7" value="B" class="mr-2">
+                            Reconnaissance
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q7" value="C" class="mr-2">
+                            Delivery
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q7" value="D" class="mr-2">
+                            Installation
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-2">8. The "Installation" stage primarily involves:</h3>
+                    <div class="space-y-2">
+                        <label class="block">
+                            <input type="radio" name="q8" value="A" class="mr-2">
+                            Establishing communication channels
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q8" value="B" class="mr-2">
+                            Installing malicious software on the target system
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q8" value="C" class="mr-2">
+                            Identifying system vulnerabilities
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q8" value="D" class="mr-2">
+                            Delivering the initial payload
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-2">9. Which stage follows the Delivery stage in the Cyber Kill Chain?</h3>
+                    <div class="space-y-2">
+                        <label class="block">
+                            <input type="radio" name="q9" value="A" class="mr-2">
+                            Reconnaissance
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q9" value="B" class="mr-2">
+                            Weaponization
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q9" value="C" class="mr-2">
+                            Exploitation
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q9" value="D" class="mr-2">
+                            Installation
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="font-semibold mb-2">10. The Cyber Kill Chain model was originally developed by:</h3>
+                    <div class="space-y-2">
+                        <label class="block">
+                            <input type="radio" name="q10" value="A" class="mr-2">
+                            Google
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q10" value="B" class="mr-2">
+                            Lockheed Martin
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q10" value="C" class="mr-2">
+                            Microsoft
+                        </label>
+                        <label class="block">
+                            <input type="radio" name="q10" value="D" class="mr-2">
+                            IBM
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition duration-300">
+                Submit Quiz
+            </button>
+        </form>
+
+        <div id="results" class="mt-6 hidden">
+            <h2 class="text-2xl font-bold text-center mb-4" id="resultTitle"></h2>
+            <p class="text-center text-lg" id="resultDescription"></p>
+            <div id="detailedResults" class="mt-4"></div>
+        </div>
+    </div>
+
+    <script>
+        const correctAnswers = {
+            q1: 'B',
+            q2: 'C',
+            q3: 'B',
+            q4: 'D',
+            q5: 'C',
+            q6: 'C',
+            q7: 'B',
+            q8: 'B',
+            q9: 'C',
+            q10: 'B'
+        };
+
+        const scoreTiers = [
+            { min: 9, max: 10, title: 'Cyber Security Expert 🏆', description: 'Outstanding performance!' },
+            { min: 7, max: 8, title: 'Advanced Security Professional 🥇', description: 'Impressive knowledge!' },
+            { min: 5, max: 6, title: 'Solid Understanding 🥈', description: 'Good grasp of concepts.' },
+            { min: 0, max: 4, title: 'Need More Study 📚', description: 'Keep learning!' }
+        ];
+
+        document.getElementById('quizForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            let score = 0;
+            let detailedResults = '';
+
+            for (let i = 1; i <= 10; i++) {
+                const selectedAnswer = document.querySelector(`input[name="q${i}"]:checked`);
+                
+                if (selectedAnswer) {
+                    const isCorrect = selectedAnswer.value === correctAnswers[`q${i}`];
+                    if (isCorrect) score++;
+
+                    detailedResults += `
+                        <div class="flex justify-between mb-2">
+                            <span>Question ${i}</span>
+                            <span class="${isCorrect ? 'text-green-600' : 'text-red-600'}">
+                                ${isCorrect ? '✓ Correct' : '✗ Incorrect'}
+                            </span>
+                        </div>
+                    `;
+                }
+            }
+
+            const resultTier = scoreTiers.find(tier => score >= tier.min && score <= tier.max);
+
+            document.getElementById('resultTitle').textContent = `Score: ${score}/10 - ${resultTier.title}`;
+            document.getElementById('resultDescription').textContent = resultTier.description;
+            document.getElementById('detailedResults').innerHTML = detailedResults;
+
+            document.getElementById('results').classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
