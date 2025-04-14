@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agile & Scrum Guide</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2ecc71;
+            --dark: #34495e;
+            --light: #ecf0f1;
+            --accent: #e74c3c;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 1.5rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+        
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 5rem 0;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        main {
+            padding: 3rem 0;
+        }
+        
+        section {
+            margin-bottom: 3rem;
+            scroll-margin-top: 5rem;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--dark);
+        }
+        
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .card h3 {
+            margin-top: 0;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .role-card {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .role-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .value-item {
+            display: flex;
+            margin-bottom: 2rem;
+        }
+        
+        .value-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--secondary);
+            margin-right: 1rem;
+            flex-shrink: 0;
+            width: 40px;
+        }
+        
+        .value-content h3 {
+            margin-top: 0;
+        }
+        
+        .principle-card {
+            height: 100%;
+        }
+        
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        .button {
+            display: inline-block;
+            background-color: var(--secondary);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        .button:hover {
+            background-color: #27ae60;
+        }
+        
+        .tab-container {
+            margin-bottom: 2rem;
+        }
+        
+        .tabs {
+            display: flex;
+            list-style: none;
+            margin: 0 0 1rem 0;
+            padding: 0;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-radius: 4px 4px 0 0;
+            background-color: #ddd;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 1.5rem;
+            background-color: white;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">Agile & Scrum Guide</div>
+                <ul class="nav-links">
+                    <li><a href="#agile">Agile Manifesto</a></li>
+                    <li><a href="#scrum">Scrum Process</a></li>
+                    <li><a href="#resources">Resources</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Agile & Scrum Guide</h1>
+            <p>A comprehensive guide to understanding the Agile methodology and the Scrum framework for effective project management and software development.</p>
+        </div>
+    </section>
+
+    <main class="container">
+        <section id="agile">
+            <h2>The Agile Manifesto</h2>
+            <p>The Agile Manifesto was created in February 2001 by 17 software developers who met to discuss lightweight development methods. It outlines values and principles that guide an iterative approach to software development.</p>
+            
+            <div class="card">
+                <h3>The Four Values</h3>
+                <p>The Agile Manifesto states a preference for:</p>
+                
+                <div class="value-item">
+                    <div class="value-number">1</div>
+                    <div class="value-content">
+                        <h3>Individuals and interactions over processes and tools</h3>
+                        <p>While processes and tools are important, the Agile approach values the people doing the work and how they work together as the primary driver of success.</p>
+                    </div>
+                </div>
+                
+                <div class="value-item">
+                    <div class="value-number">2</div>
+                    <div class="value-content">
+                        <h3>Working software over comprehensive documentation</h3>
+                        <p>While documentation has its place, the primary measure of progress in Agile is working software that delivers value to the customer.</p>
+                    </div>
+                </div>
+                
+                <div class="value-item">
+                    <div class="value-number">3</div>
+                    <div class="value-content">
+                        <h3>Customer collaboration over contract negotiation</h3>
+                        <p>Agile emphasizes working closely with customers throughout the development process rather than negotiating detailed contracts upfront.</p>
+                    </div>
+                </div>
+                
+                <div class="value-item">
+                    <div class="value-number">4</div>
+                    <div class="value-content">
+                        <h3>Responding to change over following a plan</h3>
+                        <p>Agile teams value the ability to respond to change even late in development, recognizing that plans become less useful as projects progress.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>The Twelve Principles of Agile Software</h3>
+            <p>The Agile Manifesto is supported by twelve principles:</p>
+            
+            <div class="grid">
+                <div class="card principle-card">
+                    <h3>Customer Satisfaction</h3>
+                    <p>Our highest priority is to satisfy the customer through early and continuous delivery of valuable software.</p>
+                </div>
+                
+                <div class="card principle-card">
+                    <h3>Welcome Change</h3>
+                    <p>Welcome changing requirements, even late in development. Agile processes harness change for the customer's competitive advantage.</p>
+                </div>
+                
+                <div class="card principle-card">
+                    <h3>Frequent Delivery</h3>
+                    <p>Deliver working software frequently, from a couple of weeks to a couple of months, with a preference to the shorter timescale.</p>
+                </div>
+                
+                <div class="card principle-card">
+                    <h3>Cross-functional Collaboration</h3>
+                    <p>Business people and developers must work together daily throughout the project.</p>
+                </div>
+                
+                <div class="card principle-card">
+                    <h3>Motivated Individuals</h3>
+                    <p>Build projects around motivated individuals. Give them the environment and support they need, and trust them to get the job done.</p>
+                </div>
+                
+                <div class="card principle-card">
+                    <h3>Face-to-Face Communication</h3>
+                    <p>The most efficient and effective method of conveying information to and within a development team is face-to-face conversation.</p>
+                </div>
+                
+                <div class="card principle-card">
+                    <h3>Working Software</h3>
+                    <p>Working software is the primary measure of progress.</p>
+                </div>
+                
+                <div class="card principle-card">
+                    <h3>Sustainable Development</h3>
+                    <p>Agile processes promote sustainable development. The sponsors, developers, and users should be able to maintain a constant pace indefinitely.</p>
+                </div>
+                
+                <div class="card principle-card">
+                    <h3>Technical Excellence</h3>
+                    <p>Continuous attention to technical excellence and good design enhances agility.</p>
+                </div>
+                
+                <div class="card principle-card">
+                    <h3>Simplicity</h3>
+                    <p>The art of maximizing the amount of work not done is essential.</p>
+                </div>
+                
+                <div class="card principle-card">
+                    <h3>Self-organizing Teams</h3>
+                    <p>The best architectures, requirements, and designs emerge from self-organizing teams.</p>
+                </div>
+                
+                <div class="card principle-card">
+                    <h3>Regular Reflection</h3>
+                    <p>At regular intervals, the team reflects on how to become more effective, then tunes and adjusts its behavior accordingly.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="scrum">
+            <h2>The Scrum Process</h2>
+            <p>Scrum is an agile framework for developing, delivering, and sustaining complex products. It is designed for teams of ten or fewer members who break their work into goals that can be completed within timeboxed iterations, called sprints.</p>
+            
+            <div class="tab-container">
+                <ul class="tabs">
+                    <li class="tab active" onclick="openTab(event, 'overview')">Overview</li>
+                    <li class="tab" onclick="openTab(event, 'roles')">Roles</li>
+                    <li class="tab" onclick="openTab(event, 'events')">Events</li>
+                    <li class="tab" onclick="openTab(event, 'artifacts')">Artifacts</li>
+                </ul>
+                
+                <div id="overview" class="tab-content active">
+                    <h3>What is Scrum?</h3>
+                    <p>Scrum is a lightweight framework that helps people, teams and organizations generate value through adaptive solutions for complex problems. It relies on empiricism and lean thinking to deal with uncertainty and solve problems creatively and productively.</p>
+                    
+                    <h3>The Scrum Framework</h3>
+                    <p>Scrum defines three roles, five events, and three artifacts, all managed within iterations called Sprints. Sprints are fixed-length events of one month or less to create consistency.</p>
+                    
+                    <h3>Scrum Values</h3>
+                    <ul>
+                        <li><strong>Commitment:</strong> Team members personally commit to achieving the goals of the Scrum Team.</li>
+                        <li><strong>Courage:</strong> Team members have courage to do the right thing and work on tough problems.</li>
+                        <li><strong>Focus:</strong> Everyone focuses on the work of the Sprint and the goals of the Scrum Team.</li>
+                        <li><strong>Openness:</strong> The Scrum Team and its stakeholders agree to be open about all the work and the challenges with performing the work.</li>
+                        <li><strong>Respect:</strong> Scrum Team members respect each other to be capable, independent people.</li>
+                    </ul>
+                </div>
+                
+                <div id="roles" class="tab-content">
+                    <h3>Scrum Roles</h3>
+                    <p>Scrum defines three specific roles:</p>
+                    
+                    <div class="grid">
+                        <div class="card role-card">
+                            <div class="role-icon">👑</div>
+                            <h3>Product Owner</h3>
+                            <p>Responsible for maximizing the value of the product resulting from the work of the Scrum Team. Key responsibilities include:</p>
+                            <ul>
+                                <li>Developing and explicitly communicating the Product Goal</li>
+                                <li>Creating and communicating Product Backlog items</li>
+                                <li>Ordering Product Backlog items</li>
+                                <li>Ensuring the Product Backlog is transparent, visible, and understood</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card role-card">
+                            <div class="role-icon">🛡️</div>
+                            <h3>Scrum Master</h3>
+                            <p>Responsible for establishing Scrum as defined in the Scrum Guide. Key responsibilities include:</p>
+                            <ul>
+                                <li>Coaching team members in self-management and cross-functionality</li>
+                                <li>Helping the Scrum Team focus on creating high-value increments</li>
+                                <li>Removing impediments to the team's progress</li>
+                                <li>Facilitating Scrum events as requested or needed</li>
+                                <li>Helping the organization adopt Scrum</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card role-card">
+                            <div class="role-icon">👥</div>
+                            <h3>Developers</h3>
+                            <p>The professionals who do the work of delivering a usable Increment of product at the end of each Sprint. Key responsibilities include:</p>
+                            <ul>
+                                <li>Creating a plan for the Sprint, the Sprint Backlog</li>
+                                <li>Adhering to the Definition of Done</li>
+                                <li>Adapting their plan each day toward the Sprint Goal</li>
+                                <li>Holding each other accountable as professionals</li>
+                                <li>Turning selected Product Backlog items into valuable Increments</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="events" class="tab-content">
+                    <h3>Scrum Events</h3>
+                    <p>Scrum prescribes five events to create regularity and minimize the need for meetings not defined in Scrum:</p>
+                    
+                    <div class="card">
+                        <h3>The Sprint</h3>
+                        <p>The heartbeat of Scrum where ideas are turned into value. Fixed length events of one month or less. A new Sprint starts immediately after the conclusion of the previous Sprint.</p>
+                        <p>During the Sprint:</p>
+                        <ul>
+                            <li>No changes are made that would endanger the Sprint Goal</li>
+                            <li>Quality does not decrease</li>
+                            <li>The Product Backlog is refined as needed</li>
+                            <li>Scope may be clarified and renegotiated with the Product Owner as more is learned</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Sprint Planning</h3>
+                        <p>Initiates the Sprint by laying out the work to be performed. Addresses three topics:</p>
+                        <ol>
+                            <li><strong>Why is this Sprint valuable?</strong> - The Product Owner proposes how the product could increase its value.</li>
+                            <li><strong>What can be Done this Sprint?</strong> - Developers select items from the Product Backlog to include in the current Sprint.</li>
+                            <li><strong>How will the chosen work get done?</strong> - For each selected Product Backlog item, the Developers plan the work necessary to create an Increment that meets the Definition of Done.</li>
+                        </ol>
+                        <p>Timeboxed to a maximum of eight hours for a one-month Sprint. For shorter Sprints, the event is usually shorter.</p>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Daily Scrum</h3>
+                        <p>15-minute event for the Developers to synchronize activities and create a plan for the next 24 hours. Held at the same time and place every working day of the Sprint.</p>
+                        <p>Developers can select whatever structure and techniques they want, as long as their Daily Scrum focuses on progress toward the Sprint Goal and produces an actionable plan for the next day of work.</p>
+                        <p>Common questions include:</p>
+                        <ul>
+                            <li>What did I do yesterday that helped the Scrum Team meet the Sprint Goal?</li>
+                            <li>What will I do today to help the Scrum Team meet the Sprint Goal?</li>
+                            <li>Do I see any impediment that prevents me or the Scrum Team from meeting the Sprint Goal?</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Sprint Review</h3>
+                        <p>The purpose is to inspect the outcome of the Sprint and determine future adaptations. The Scrum Team presents the results of their work to key stakeholders and progress toward the Product Goal is discussed.</p>
+                        <p>During the event, the Scrum Team and stakeholders review what was accomplished in the Sprint and what has changed in their environment. Based on this information, attendees collaborate on what to do next.</p>
+                        <p>The Sprint Review is a working session and should be timeboxed to a maximum of four hours for a one-month Sprint. For shorter Sprints, the event is usually shorter.</p>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Sprint Retrospective</h3>
+                        <p>The purpose is to plan ways to increase quality and effectiveness. The Scrum Team inspects how the last Sprint went with regards to individuals, interactions, processes, tools, and their Definition of Done.</p>
+                        <p>The Scrum Team discusses:</p>
+                        <ul>
+                            <li>What went well during the Sprint</li>
+                            <li>What problems it encountered</li>
+                            <li>How those problems were (or were not) solved</li>
+                        </ul>
+                        <p>The Scrum Team identifies the most helpful changes to improve its effectiveness. The most impactful improvements are addressed as soon as possible, and may even be added to the Sprint Backlog for the next Sprint.</p>
+                        <p>Timeboxed to a maximum of three hours for a one-month Sprint. For shorter Sprints, the event is usually shorter.</p>
+                    </div>
+                </div>
+                
+                <div id="artifacts" class="tab-content">
+                    <h3>Scrum Artifacts</h3>
+                    <p>Scrum's artifacts represent work or value. They are designed to maximize transparency of key information. Each artifact contains a commitment to ensure it provides information that enhances transparency and focus.</p>
+                    
+                    <div class="card">
+                        <h3>Product Backlog</h3>
+                        <p>An emergent, ordered list of what is needed to improve the product. It is the single source of work undertaken by the Scrum Team.</p>
+                        <p><strong>Commitment: Product Goal</strong> - The Product Goal describes a future state of the product which can serve as a target for the Scrum Team to plan against. The Product Goal is in the Product Backlog.</p>
+                        <p>Product Backlog refinement is the act of breaking down and further defining Product Backlog items into smaller more precise items. This is an ongoing activity to add details, such as a description, order, and size.</p>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Sprint Backlog</h3>
+                        <p>Composed of the Sprint Goal (why), the set of Product Backlog items selected for the Sprint (what), and an actionable plan for delivering the Increment (how).</p>
+                        <p><strong>Commitment: Sprint Goal</strong> - The Sprint Goal is the single objective for the Sprint. It provides flexibility in terms of the exact work needed to achieve it. The Sprint Goal also creates coherence and focus, encouraging the Scrum Team to work together rather than on separate initiatives.</p>
+                        <p>The Sprint Backlog is a highly visible, real-time picture of the work that the Developers plan to accomplish during the Sprint in order to achieve the Sprint Goal.</p>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Increment</h3>
+                        <p>An Increment is a concrete stepping stone toward the Product Goal. Each Increment is additive to all prior Increments and thoroughly verified, ensuring that all Increments work together.</p>
+                        <p><strong>Commitment: Definition of Done</strong> - The Definition of Done is a formal description of the state of the Increment when it meets the quality measures required for the product. When a Product Backlog item meets the Definition of Done, an Increment is born.</p>
+                        <p>The Definition of Done creates transparency by providing everyone a shared understanding of what work was completed as part of the Increment. If a Product Backlog item does not meet the Definition of Done, it cannot be released or even presented at the Sprint Review.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="resources">
+            <h2>Additional Resources</h2>
+            <p>Continue your learning journey with these valuable resources:</p>
+            
+            <div class="grid">
+                <div class="card">
+                    <h3>Official Guides</h3>
+                    <ul>
+                        <li>Agile Manifesto: <a href="#">agilemanifesto.org</a></li>
+                        <li>Scrum Guide: <a href="#">scrumguides.org</a></li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <h3>Recommended Books</h3>
+                    <ul>
+                        <li>Scrum: The Art of Doing Twice the Work in Half the Time by Jeff Sutherland</li>
+                        <li>Agile Project Management with Scrum by Ken Schwaber</li>
+                        <li>Essential Scrum by Kenneth S. Rubin</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <h3>Certifications</h3>
+                    <ul>
+                        <li>Certified ScrumMaster (CSM)</li>
+                        <li>Professional Scrum Master (PSM)</li>
+                        <li>Certified Product Owner (CSPO)</li>
+                        <li>PMI Agile Certified Practitioner (PMI-ACP)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Agile & Scrum Guide | Created as an educational resource</p>
+        </div>
+    </footer>
+
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            
+            // Hide all tab content
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].className = tabcontent[i].className.replace(" active", "");
+            }
+            
+            // Remove active class from all tabs
+            tablinks = document.getElementsByClassName("tab");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            
+            // Show the current tab and add an "active" class to the button that opened the tab
+            document.getElementById(tabName).className += " active";
+            evt.currentTarget.className += " active";
+        }
+    </script>
+</body>
+</html>
