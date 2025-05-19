@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VirtualBox CLI Commands Reference</title>
+    <style>
+        :root {
+            --primary-color: #2b5797;
+            --secondary-color: #1e88e5;
+            --accent-color: #00adef;
+            --light-bg: #f5f9fc;
+            --dark-text: #333;
+            --light-text: #fff;
+            --code-bg: #2d2d2d;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-text);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 0;
+        }
+        
+        header {
+            background: var(--primary-color);
+            color: var(--light-text);
+            text-align: center;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            margin-top: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent-color);
+        }
+        
+        h3 {
+            color: var(--secondary-color);
+            margin-top: 1.5rem;
+        }
+        
+        .logo {
+            width: 80px;
+            margin-bottom: 1rem;
+        }
+        
+        .search-container {
+            margin: 1.5rem 0;
+        }
+        
+        #searchInput {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        .command-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .category-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .category-header {
+            background: var(--secondary-color);
+            color: white;
+            padding: 1rem;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .command-list {
+            padding: 1rem;
+        }
+        
+        .command-item {
+            margin-bottom: 1.5rem;
+        }
+        
+        .command-name {
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .command-description {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        pre {
+            background-color: var(--code-bg);
+            border-radius: 4px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+            position: relative;
+        }
+        
+        code {
+            color: #f8f8f2;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #555;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        
+        .copy-btn:hover {
+            opacity: 1;
+        }
+        
+        .section-nav {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .nav-links a {
+            background: var(--secondary-color);
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            background: var(--primary-color);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            background: var(--primary-color);
+            color: white;
+            margin-top: 3rem;
+        }
+        
+        @media (max-width: 768px) {
+            .command-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBmaWxsPSIjZmZmIiBkPSJNOTQuMSw1MGMwLDI0LjQtMTkuNyw0NC4xLTQ0LjEsNDQuMVM1LjksNzQuNCw1LjksNTBTMjUuNiw1LjksNTAsNS45Uzk0LjEsMjUuNiw5NC4xLDUweiIvPjxwYXRoIGZpbGw9IiMwMGFkZWYiIGQ9Ik04NS4zLDM2LjJINjcuOFYyMi4zYzAtMS41LTEuMi0yLjctMi43LTIuN0gzNC45Yy0xLjUsMC0yLjcsMS4yLTIuNywyLjd2MTMuOUgxNC43Yy0xLjUsMC0yLjcsMS4yLTIuNywyLjd2MjYuMWMwLDEuNSwxLjIsMi43LDIuNywyLjdoMTcuNnYxMy44YzAsMS41LDEuMiwyLjcsMi43LDIuN2gzMC4zYzEuNSwwLDIuNy0xLjIsMi43LTIuN1Y2Ny43aDE3LjRjMS41LDAsMi43LTEuMiwyLjctMi43VjM4LjlDODgsMzcuNSw4Ni44LDM2LjIsODUuMywzNi4yeiBNNjcuOCw2NC41SDM0LjlWMzcuNmgzMi45VjY0LjV6Ii8+PC9zdmc+" alt="VirtualBox Logo" class="logo">
+            <h1>VirtualBox CLI Commands Reference</h1>
+            <p>A comprehensive guide to VirtualBox command-line interface (VBoxManage)</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search for commands..." onkeyup="searchCommands()">
+        </div>
+        
+        <div class="section-nav">
+            <h3>Quick Navigation</h3>
+            <div class="nav-links">
+                <a href="#vm-management">VM Management</a>
+                <a href="#vm-control">VM Control</a>
+                <a href="#vm-info">VM Information</a>
+                <a href="#snapshots">Snapshots</a>
+                <a href="#storage">Storage</a>
+                <a href="#networking">Networking</a>
+                <a href="#advanced">Advanced</a>
+            </div>
+        </div>
+        
+        <section id="vm-management">
+            <h2>VM Management</h2>
+            <p>Commands for creating, modifying, and managing virtual machines.</p>
+            
+            <div class="command-grid">
+                <div class="category-card">
+                    <div class="category-header">Creating VMs</div>
+                    <div class="command-list">
+                        <div class="command-item">
+                            <div class="command-name">Create a new VM</div>
+                            <div class="command-description">Creates a new virtual machine with a given name</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage createvm --name "VM_NAME" --ostype "OS_TYPE" --register</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Clone a VM</div>
+                            <div class="command-description">Creates a full or linked clone of an existing VM</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage clonevm "SOURCE_VM" --name "CLONE_NAME" --register</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Import appliance</div>
+                            <div class="command-description">Imports a virtual appliance in OVA/OVF format</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage import "/path/to/appliance.ova" --vsys 0 --vmname "NEW_VM_NAME"</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="category-card">
+                    <div class="category-header">Modifying VMs</div>
+                    <div class="command-list">
+                        <div class="command-item">
+                            <div class="command-name">Rename a VM</div>
+                            <div class="command-description">Changes the name of an existing VM (must be powered off)</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage modifyvm "OLD_VM_NAME" --name "NEW_VM_NAME"</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Set memory</div>
+                            <div class="command-description">Adjusts the amount of RAM allocated to a VM (in MB)</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage modifyvm "VM_NAME" --memory 4096</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Set CPU count</div>
+                            <div class="command-description">Changes the number of virtual CPUs assigned to a VM</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage modifyvm "VM_NAME" --cpus 2</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="category-card">
+                    <div class="category-header">Removing VMs</div>
+                    <div class="command-list">
+                        <div class="command-item">
+                            <div class="command-name">Unregister a VM</div>
+                            <div class="command-description">Removes a VM from the VirtualBox registry without deleting files</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage unregistervm "VM_NAME"</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Delete a VM</div>
+                            <div class="command-description">Completely removes a VM and all its files</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage unregistervm "VM_NAME" --delete</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Export a VM</div>
+                            <div class="command-description">Exports a VM to OVA/OVF format</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage export "VM_NAME" --output "/path/to/export.ova"</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="vm-control">
+            <h2>VM Control</h2>
+            <p>Commands for starting, stopping, and controlling virtual machines.</p>
+            
+            <div class="command-grid">
+                <div class="category-card">
+                    <div class="category-header">Starting VMs</div>
+                    <div class="command-list">
+                        <div class="command-item">
+                            <div class="command-name">Start a VM (normal mode)</div>
+                            <div class="command-description">Starts a VM with the GUI console</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage startvm "VM_NAME"</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Start a VM (headless)</div>
+                            <div class="command-description">Starts a VM without displaying a window (good for servers)</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage startvm "VM_NAME" --type headless</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Start a VM (detachable)</div>
+                            <div class="command-description">Starts a VM in detachable mode (can reconnect later)</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage startvm "VM_NAME" --type separate</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="category-card">
+                    <div class="category-header">Stopping VMs</div>
+                    <div class="command-list">
+                        <div class="command-item">
+                            <div class="command-name">Graceful shutdown</div>
+                            <div class="command-description">Sends ACPI shutdown signal (like pressing power button)</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage controlvm "VM_NAME" acpipowerbutton</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Force power off</div>
+                            <div class="command-description">Immediately powers off the VM (like unplugging)</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage controlvm "VM_NAME" poweroff</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Save VM state</div>
+                            <div class="command-description">Saves the VM state and stops execution (like suspend)</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage controlvm "VM_NAME" savestate</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="category-card">
+                    <div class="category-header">VM Control</div>
+                    <div class="command-list">
+                        <div class="command-item">
+                            <div class="command-name">Pause/Resume a VM</div>
+                            <div class="command-description">Temporarily pauses or resumes execution</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage controlvm "VM_NAME" pause
+VBoxManage controlvm "VM_NAME" resume</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Reset a VM</div>
+                            <div class="command-description">Resets the virtual machine (hard reset)</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage controlvm "VM_NAME" reset</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Send keyboard keys</div>
+                            <div class="command-description">Sends keystrokes to the VM</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage controlvm "VM_NAME" keyboardputscancode 1C</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="vm-info">
+            <h2>VM Information</h2>
+            <p>Commands for getting information about virtual machines.</p>
+            
+            <div class="command-grid">
+                <div class="category-card">
+                    <div class="category-header">Listing VMs</div>
+                    <div class="command-list">
+                        <div class="command-item">
+                            <div class="command-name">List all VMs</div>
+                            <div class="command-description">Shows all registered virtual machines</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage list vms</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">List running VMs</div>
+                            <div class="command-description">Shows only currently running virtual machines</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage list runningvms</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">List detailed VM info</div>
+                            <div class="command-description">Shows complete information about all VMs</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage list vms --long</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="category-card">
+                    <div class="category-header">VM Details</div>
+                    <div class="command-list">
+                        <div class="command-item">
+                            <div class="command-name">Show VM info</div>
+                            <div class="command-description">Displays detailed information about a specific VM</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage showvminfo "VM_NAME"</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Show VM status</div>
+                            <div class="command-description">Shows the current running state of a VM</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage showvminfo "VM_NAME" | grep "State:"</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Show VM settings</div>
+                            <div class="command-description">Outputs VM settings in machine-readable format</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage showvminfo "VM_NAME" --machinereadable</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="category-card">
+                    <div class="category-header">System Information</div>
+                    <div class="command-list">
+                        <div class="command-item">
+                            <div class="command-name">List OS types</div>
+                            <div class="command-description">Shows all supported guest OS types</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage list ostypes</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">List host info</div>
+                            <div class="command-description">Shows information about the host system</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage list hostinfo</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Check VirtualBox version</div>
+                            <div class="command-description">Displays the installed VirtualBox version</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage --version</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="snapshots">
+            <h2>Snapshots</h2>
+            <p>Commands for managing VM snapshots and restore points.</p>
+            
+            <div class="command-grid">
+                <div class="category-card">
+                    <div class="category-header">Creating Snapshots</div>
+                    <div class="command-list">
+                        <div class="command-item">
+                            <div class="command-name">Take a snapshot</div>
+                            <div class="command-description">Creates a snapshot of the current VM state</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage snapshot "VM_NAME" take "SNAPSHOT_NAME" --description "Description"</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Take a live snapshot</div>
+                            <div class="command-description">Creates a snapshot while the VM is running</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage snapshot "VM_NAME" take "SNAPSHOT_NAME" --live</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="category-card">
+                    <div class="category-header">Managing Snapshots</div>
+                    <div class="command-list">
+                        <div class="command-item">
+                            <div class="command-name">List all snapshots</div>
+                            <div class="command-description">Displays all snapshots for a VM</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage snapshot "VM_NAME" list</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Delete a snapshot</div>
+                            <div class="command-description">Removes a specific snapshot</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage snapshot "VM_NAME" delete "SNAPSHOT_NAME"</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Restore a snapshot</div>
+                            <div class="command-description">Restores VM to a previous snapshot state</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage snapshot "VM_NAME" restore "SNAPSHOT_NAME"</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="storage">
+            <h2>Storage Management</h2>
+            <p>Commands for managing virtual disks and storage controllers.</p>
+            
+            <div class="command-grid">
+                <div class="category-card">
+                    <div class="category-header">Virtual Disks</div>
+                    <div class="command-list">
+                        <div class="command-item">
+                            <div class="command-name">Create virtual disk</div>
+                            <div class="command-description">Creates a new virtual hard disk file</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage createmedium disk --filename "/path/to/disk.vdi" --size 10240 --format VDI</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Clone virtual disk</div>
+                            <div class="command-description">Creates a copy of an existing virtual disk</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage clonemedium disk "/path/to/source.vdi" "/path/to/clone.vdi"</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Resize virtual disk</div>
+                            <div class="command-description">Changes the size of an existing virtual disk (MB)</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage modifymedium disk "/path/to/disk.vdi" --resize 20480</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="category-card">
+                    <div class="category-header">Storage Controllers</div>
+                    <div class="command-list">
+                        <div class="command-item">
+                            <div class="command-name">Add storage controller</div>
+                            <div class="command-description">Adds a new storage controller to a VM</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage storagectl "VM_NAME" --name "SATA Controller" --add sata --controller IntelAHCI</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Attach disk to VM</div>
+                            <div class="command-description">Attaches a virtual disk to a VM's storage controller</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage storageattach "VM_NAME" --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium "/path/to/disk.vdi"</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Attach ISO image</div>
+                            <div class="command-description">Mounts an ISO file as a virtual DVD drive</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage storageattach "VM_NAME" --storagectl "IDE Controller" --port 1 --device 0 --type dvddrive --medium "/path/to/image.iso"</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="networking">
+            <h2>Networking</h2>
+            <p>Commands for configuring VM network settings.</p>
+            
+            <div class="command-grid">
+                <div class="category-card">
+                    <div class="category-header">Network Adapters</div>
+                    <div class="command-list">
+                        <div class="command-item">
+                            <div class="command-name">Enable network adapter</div>
+                            <div class="command-description">Enables a network adapter for a VM</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage modifyvm "VM_NAME" --nic1 nat</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Set bridge adapter</div>
+                            <div class="command-description">Configures bridged networking with a physical adapter</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage modifyvm "VM_NAME" --nic1 bridged --bridgeadapter1 "ADAPTER_NAME"</code></pre>
+                        </div>
+                        <div class="command-item">
+                            <div class="command-name">Configure host-only adapter</div>
+                            <div class="command-description">Sets up a host-only network</div>
+                            <pre><button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><code>VBoxManage modifyvm
