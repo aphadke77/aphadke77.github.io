@@ -5,120 +5,196 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional Resume</title>
     <style>
+        :root {
+            --primary: #1a365d;
+            --secondary: #2c5282;
+            --accent: #3182ce;
+            --text: #2d3748;
+            --text-light: #718096;
+            --bg: #f7fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+        }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 900px;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            max-width: 850px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #f9f9f9;
+            padding: 40px 20px;
+            background-color: var(--bg);
         }
         header {
-            background-color: #f1f1f1;
-            color: black;
-            padding: 30px;
-            border-radius: 5px 5px 0 0;
-            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(26, 54, 93, 0.15);
         }
         h1 {
-            margin: 0;
-            font-size: 36px;
+            margin: 0 0 10px 0;
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
         }
         .contact-info {
-            margin: 15px 0;
+            margin: 20px 0 0 0;
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 20px;
+            font-size: 14px;
         }
         .contact-item {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
+        }
+        .contact-item a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .contact-item a:hover {
+            color: white;
+            text-decoration: underline;
         }
         .summary {
-            background-color: #f1f1f1;
-            padding: 20px;
-            border-left: 5px solid #2c3e50;
-            margin-bottom: 20px;
+            background-color: var(--card-bg);
+            padding: 28px 32px;
+            border-left: 4px solid var(--accent);
+            margin-bottom: 30px;
+            border-radius: 0 6px 6px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
         section {
-            margin-bottom: 30px;
-            padding: 20px;
-            background-color: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 28px;
+            padding: 28px 32px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid var(--border);
         }
         h2 {
-            color: #2c3e50;
-            border-bottom: 2px solid #3c94e7a2;
-            padding-bottom: 10px;
+            color: var(--primary);
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 12px;
             margin-top: 0;
+            margin-bottom: 20px;
         }
         h3 {
-            color: #2c3e50;
-            margin-bottom: 5px;
+            color: var(--primary);
+            margin-bottom: 4px;
+            font-size: 17px;
+            font-weight: 600;
+        }
+        h4 {
+            color: var(--secondary);
+            font-size: 14px;
+            font-weight: 500;
+            margin: 16px 0 8px 0;
+            font-style: italic;
         }
         .job-title {
-            font-weight: bold;
-            color: #3c94e7a2;
+            font-weight: 500;
+            color: var(--accent);
+            font-size: 15px;
+            margin-bottom: 4px;
         }
         .job-details {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
+            align-items: baseline;
+            margin-bottom: 12px;
         }
         .job-period {
-            color: #7f8c8d;
-            font-style: italic;
+            color: var(--text-light);
+            font-size: 13px;
+            font-weight: 500;
         }
         ul {
             padding-left: 20px;
+            margin: 0;
         }
         li {
             margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text);
+        }
+        li::marker {
+            color: var(--accent);
         }
         .skills-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
         }
         .skill-category {
-            margin-bottom: 15px;
+            margin-bottom: 0;
+        }
+        .skill-category h3 {
+            font-size: 14px;
+            color: var(--secondary);
+            margin-bottom: 10px;
+            font-weight: 600;
         }
         .skill-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
         }
         .skill-item {
-            background-color: #3c94e7a2;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 14px;
+            background-color: #ebf8ff;
+            color: var(--secondary);
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid #bee3f8;
         }
         .achievements {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-left: 3px solid #3c94e7a2;
+            background-color: #f0fff4;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 3px solid #48bb78;
+        }
+        .achievements li {
+            color: #276749;
         }
         .nav-button {
             padding: 10px 20px;
-            background-color: #007bff;
+            background-color: var(--primary);
             color: white;
             text-decoration: none;
             border-radius: 5px;
             font-weight: 500;
             transition: background-color 0.3s;
             margin: 0 10px;
+            font-size: 14px;
+        }
+        .nav-button:hover {
+            background-color: var(--secondary);
         }
         .nav-buttons {
             display: flex;
             justify-content: space-between;
             margin-top: 40px;
             padding-top: 20px;
-            border-top: 1px solid #ddd;
+            border-top: 1px solid var(--border);
+        }
+        .job {
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .job:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
     </style>
 </head>
@@ -132,23 +208,19 @@
                 <a href="mailto:phadke.abhijit@gmail.com">phadke.abhijit@gmail.com</a>
             </div>
             <div class="contact-item">
-                <span>Phone:</span>
-                <span>(437)-607-0419)</span>
-            </div>
-            <div class="contact-item">
                 <span>LinkedIn:</span>
                 <a href="https://www.linkedin.com/in/abhijit-phadke" target="_blank">linkedin.com/in/abhijit-phadke</a>
             </div>
             <div class="contact-item">
                 <span>Website:</span>
-                <a href="https://sites.google.com/view/my-proj-portfolio/home">Portfolio</a>
+                <a href="https://sites.google.com/view/abhijitphadke/home">Portfolio</a>
             </div>
         </div>
     </header>
 
     <section class="summary">
         <h2>Professional Summary</h2>
-        <p>Versatile technology leader with over 20 years of experience, including 12 years in Information Management and Project Management. Proven track record of driving efficiency through digital transformation, having delivered measurable improvements including 80% effort reduction and 25% productivity enhancements through automation and process optimization. Experienced in implementing Digital Twin solutions, Engineering Data Warehouses, and automation tools using agile methodologies. Skilled in stakeholder management across global enterprise environments, with expertise in cloud technologies, machine learning, and data visualization. Demonstrated success in leading cross-functional teams to deliver scalable enterprise solutions that bridge business needs with technical capabilities.</p>
+        <p>Senior Information Management and Program leader with 22+ years across global enterprise environments. Recognized for translating business needs into scalable technical solutions — Digital Twins, automation, and data platforms — achieving 30% efficiency gains. Skilled in stakeholder leadership, cloud technologies, and data-driven decision-making across full project life cycles.</p>
     </section>
 
     <section>
