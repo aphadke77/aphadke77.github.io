@@ -4,22 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>India's Champions Trophy Performance Analysis</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Recharts dependencies -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.5.0/Recharts.min.js"></script>
+  <style>
+    .nav-button { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: 500; margin: 10px; }
+  </style>
 </head>
 <body class="bg-gray-100 p-4">
+    <a href="index.html" class="nav-button">&larr; Return to Index</a>
   <div id="root" class="container mx-auto max-w-6xl"></div>
 
   <script>
-    const {
-      BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-      LineChart, Line, PieChart, Pie, Cell
-    } = Recharts;
+    const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } = Recharts;
     const { useState, useEffect } = React;
 
     const App = () => {
@@ -53,7 +52,6 @@
       return React.createElement('div', { className: "p-4 space-y-8 bg-gray-50 rounded-lg" }, [
         React.createElement('div', { className: "bg-white p-4 rounded-lg shadow", key: "win-loss-section" }, [
           React.createElement('h2', { className: "text-xl font-bold text-center mb-4" }, "India's Performance in ICC Champions Trophy (1998-2017)"),
-          
           React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-6" }, [
             React.createElement('div', { className: "bg-blue-50 p-4 rounded-lg", key: "bar-chart" }, [
               React.createElement('h3', { className: "font-semibold text-center mb-2" }, "Win-Loss Record Over Tournaments"),
@@ -70,7 +68,6 @@
                 ])
               )
             ]),
-            
             React.createElement('div', { className: "bg-blue-50 p-4 rounded-lg", key: "line-chart" }, [
               React.createElement('h3', { className: "font-semibold text-center mb-2" }, "Win Percentage by Tournament"),
               React.createElement(ResponsiveContainer, { width: "100%", height: 300 }, 
@@ -86,62 +83,25 @@
             ])
           ])
         ]),
-        
         React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-6", key: "stats-section" }, [
           React.createElement('div', { className: "bg-white p-4 rounded-lg shadow", key: "pie-chart" }, [
             React.createElement('h3', { className: "font-semibold text-center mb-4" }, "Overall Tournament Results"),
             React.createElement(ResponsiveContainer, { width: "100%", height: 250 }, 
               React.createElement(PieChart, {}, [
-                React.createElement(Pie, {
-                  data: tournamentResults,
-                  cx: "50%",
-                  cy: "50%",
-                  innerRadius: 60,
-                  outerRadius: 90,
-                  fill: "#8884d8",
-                  paddingAngle: 2,
-                  dataKey: "value",
-                  key: "pie",
-                  label: ({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`
-                }, tournamentResults.map((entry, index) => 
-                  React.createElement(Cell, { key: `cell-${index}`, fill: COLORS[index % COLORS.length] })
+                React.createElement(Pie, { data: tournamentResults, cx: "50%", cy: "50%", innerRadius: 60, outerRadius: 90, fill: "#8884d8", paddingAngle: 2, dataKey: "value", key: "pie", label: ({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%` }, 
+                  tournamentResults.map((entry, index) => React.createElement(Cell, { key: `cell-${index}`, fill: COLORS[index % COLORS.length] })
                 )),
-                React.createElement(Tooltip, { 
-                  formatter: (value) => [`${value} tournaments`, 'Count'],
-                  key: "tooltip" 
-                })
+                React.createElement(Tooltip, { formatter: (value) => [`${value} tournaments`, 'Count'], key: "tooltip" })
               ])
             )
           ]),
-          
           React.createElement('div', { className: "bg-white p-4 rounded-lg shadow", key: "stats" }, [
             React.createElement('h3', { className: "font-semibold text-center mb-4" }, "Overall Statistics"),
             React.createElement('div', { className: "grid grid-cols-2 gap-4" }, [
-              React.createElement('div', { className: "bg-blue-50 p-4 rounded-lg text-center", key: "matches" }, [
-                React.createElement('div', { className: "text-3xl font-bold text-blue-700" }, totalStats.matches),
-                React.createElement('div', { className: "text-sm mt-1" }, "Total Matches")
-              ]),
-              React.createElement('div', { className: "bg-green-50 p-4 rounded-lg text-center", key: "wins" }, [
-                React.createElement('div', { className: "text-3xl font-bold text-green-700" }, totalStats.wins),
-                React.createElement('div', { className: "text-sm mt-1" }, "Total Wins")
-              ]),
-              React.createElement('div', { className: "bg-red-50 p-4 rounded-lg text-center", key: "losses" }, [
-                React.createElement('div', { className: "text-3xl font-bold text-red-700" }, totalStats.losses),
-                React.createElement('div', { className: "text-sm mt-1" }, "Total Losses")
-              ]),
-              React.createElement('div', { className: "bg-purple-50 p-4 rounded-lg text-center", key: "win-rate" }, [
-                React.createElement('div', { className: "text-3xl font-bold text-purple-700" }, `${((totalStats.wins/totalStats.matches)*100).toFixed(1)}%`),
-                React.createElement('div', { className: "text-sm mt-1" }, "Overall Win Rate")
-              ])
-            ]),
-            
-            React.createElement('div', { className: "mt-4 p-4 bg-yellow-50 rounded-lg" }, [
-              React.createElement('h4', { className: "font-medium text-center mb-2" }, "Performance Timeline"),
-              React.createElement('ul', { className: "text-sm space-y-1" }, [
-                React.createElement('li', { key: "period1" }, "1998-2009: Mixed performance with a joint trophy in 2002"),
-                React.createElement('li', { key: "period2" }, "2004-2009: Poor performance (0 wins in 3 consecutive tournaments)"),
-                React.createElement('li', { key: "period3" }, "2013-2017: Golden period (9 wins from 10 matches)")
-              ])
+              React.createElement('div', { className: "bg-blue-50 p-4 rounded-lg text-center", key: "matches" }, [React.createElement('div', { className: "text-3xl font-bold text-blue-700" }, totalStats.matches), React.createElement('div', { className: "text-sm mt-1" }, "Total Matches")]),
+              React.createElement('div', { className: "bg-green-50 p-4 rounded-lg text-center", key: "wins" }, [React.createElement('div', { className: "text-3xl font-bold text-green-700" }, totalStats.wins), React.createElement('div', { className: "text-sm mt-1" }, "Total Wins")]),
+              React.createElement('div', { className: "bg-red-50 p-4 rounded-lg text-center", key: "losses" }, [React.createElement('div', { className: "text-3xl font-bold text-red-700" }, totalStats.losses), React.createElement('div', { className: "text-sm mt-1" }, "Total Losses")]),
+              React.createElement('div', { className: "bg-purple-50 p-4 rounded-lg text-center", key: "win-rate" }, [React.createElement('div', { className: "text-3xl font-bold text-purple-700" }, `${((totalStats.wins/totalStats.matches)*100).toFixed(1)}%`), React.createElement('div', { className: "text-sm mt-1" }, "Overall Win Rate")])
             ])
           ])
         ])
@@ -151,10 +111,8 @@
     ReactDOM.render(React.createElement(App), document.getElementById('root'));
   </script>
   
-  <!-- Additional analysis section -->
   <div class="container mx-auto max-w-6xl mt-8 bg-white p-6 rounded-lg shadow">
     <h2 class="text-xl font-bold mb-4">Analysis of India's Champions Trophy Performance (1998-2017)</h2>
-    
     <div class="space-y-4">
       <div>
         <h3 class="text-lg font-semibold">Overall Performance</h3>
@@ -163,47 +121,8 @@
           <li><strong>Total Matches</strong>: 29 matches</li>
           <li><strong>Record</strong>: 13 wins, 14 losses, 2 ties/no results</li>
           <li><strong>Overall Win Rate</strong>: 44.8%</li>
-          <li><strong>Tournament Results</strong>:
-            <ul class="list-circle pl-5">
-              <li>Champions: Once (2013)</li>
-              <li>Joint Winners: Once (2002, with Sri Lanka)</li>
-              <li>Runners-up: Twice (2000, 2017)</li>
-              <li>Failed to qualify for semifinals: Four times (1998, 2004, 2006, 2009)</li>
-            </ul>
-          </li>
         </ul>
       </div>
-      
-      <div>
-        <h3 class="text-lg font-semibold">Performance Trends</h3>
-        <ol class="list-decimal pl-5 mt-2">
-          <li>
-            <strong>Three Distinct Periods</strong>:
-            <ul class="list-disc pl-5">
-              <li><strong>Early Period (1998-2002)</strong>: Moderate success with a joint trophy in 2002</li>
-              <li><strong>Middle Period (2004-2009)</strong>: Poor performance with 0 wins in 3 consecutive tournaments</li>
-              <li><strong>Late Period (2013-2017)</strong>: Exceptional performance (9 wins from 10 matches)</li>
-            </ul>
-          </li>
-          <li>
-            <strong>Dramatic Improvement</strong>:
-            <ul class="list-disc pl-5">
-              <li>After failing to win a single match in 2004, 2006, and 2009, India transformed into a dominant team</li>
-              <li>2013 tournament: Perfect record (5-0), winning the championship</li>
-              <li>2017 tournament: 4-1 record, finishing as runners-up</li>
-            </ul>
-          </li>
-          <li>
-            <strong>Win Percentage Trend</strong>:
-            <ul class="list-disc pl-5">
-              <li>Started at 33.3% (1998)</li>
-              <li>Peaked at 100% (2013)</li>
-              <li>Maintained high performance at 80% (2017)</li>
-            </ul>
-          </li>
-        </ol>
-      </div>
-      
       <div class="bg-blue-50 p-4 rounded-lg">
         <p class="text-center font-medium">The most striking aspect is the remarkable turnaround between 2009 and 2013, where India went from zero wins to becoming undefeated champions.</p>
       </div>

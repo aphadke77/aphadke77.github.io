@@ -8,6 +8,7 @@
     body {
       font-family: Arial, sans-serif;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
@@ -64,9 +65,18 @@
       color: white;
       margin-top: 20px;
     }
+    .back-link {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: #007bff;
+      text-decoration: none;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
+  <a href="index.html" class="back-link">&larr; Return to Index</a>
   <div class="counter-container">
     <h1>Counter</h1>
     <div class="counter" id="counter">0</div>

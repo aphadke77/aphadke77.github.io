@@ -4,14 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Abhijit's Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #1a365d;
-            --secondary-color: #1e40af;
-            --text-color: #1f2937;
-            --light-bg: #f9fafb;
-            --card-bg: #ffffff;
-            --border-color: #e5e7eb;
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #2ecc71;
+            --accent: #9b59b6;
+            --dark: #2c3e50;
+            --gray-900: #1a1a2e;
+            --gray-800: #16213e;
+            --gray-700: #0f3460;
+            --light: #ecf0f1;
+            --white: #ffffff;
+            --text-dark: #333;
+            --text-light: #666;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.12);
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -21,246 +32,445 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
-            color: var(--text-color);
-            background-color: var(--light-bg);
-            padding: 0;
+            color: var(--text-dark);
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            min-height: 100vh;
         }
 
+        /* Header */
         header {
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 50%, var(--gray-700) 100%);
             color: white;
-            padding: 3rem 0;
+            padding: 5rem 2rem;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
         }
 
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+        header > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.4);
+        }
+
+        header h1 {
+            font-size: 2.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff 0%, #e0e0e0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .subtitle {
             font-size: 1.25rem;
             font-weight: 300;
-            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
         }
 
-        .content {
-            padding: 3rem 0;
+        .social-header {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-header {
-            background-color: var(--primary-color);
+        .social-header a {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            padding: 1rem;
-            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+        }
+
+        .social-header a:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .section-header p {
+            color: var(--text-light);
             font-size: 1.1rem;
         }
 
-        .card-body {
+        /* Cards Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-icon.blue { background: linear-gradient(135deg, #3498db, #2980b9); color: white; }
+        .card-icon.green { background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; }
+        .card-icon.purple { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; }
+        .card-icon.orange { background: linear-gradient(135deg, #e67e22, #d35400); color: white; }
+        .card-icon.red { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
+        .card-icon.teal { background: linear-gradient(135deg, #1abc9c, #16a085); color: white; }
+        .card-icon.yellow { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; }
+        .card-icon.pink { background: linear-gradient(135deg, #fd79a8, #e84393); color: white; }
+
+        .card-content {
             padding: 1.5rem;
         }
 
-        .card-link {
-            display: inline-block;
-            text-decoration: none;
-            color: var(--text-color);
-            font-weight: 500;
-            transition: color 0.2s ease;
+        .card h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
         }
 
-        .card-link:hover {
-            color: var(--primary-color);
-        }
-
-        .card-description {
-            margin-top: 0.5rem;
+        .card p {
             font-size: 0.9rem;
-            color: #6b7280;
+            color: var(--text-light);
+            line-height: 1.5;
         }
 
-        .section-title {
-            font-size: 1.75rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--primary-color);
-            display: inline-block;
+        .card-arrow {
+            position: absolute;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
         }
 
+        .card:hover .card-arrow {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Tools Grid */
+        .tools-section {
+            margin-top: 4rem;
+        }
+
+        /* Footer */
         footer {
-            background-color: #1f2937;
+            background: var(--dark);
             color: white;
-            padding: 2rem 0;
+            padding: 3rem 0;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
             text-align: center;
-            margin-top: 3rem;
         }
 
-        .social-links {
-            margin-top: 1rem;
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
         }
 
-        .social-links a {
-            color: white;
-            margin: 0 10px;
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            transition: var(--transition);
+            font-size: 0.9rem;
         }
 
-        .social-links a:hover {
-            text-decoration: underline;
+        .footer-links a:hover {
+            background: var(--primary);
+            color: white;
         }
 
+        .copyright {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
+            header {
+                padding: 3rem 1.5rem;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
             .grid {
                 grid-template-columns: 1fr;
             }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .section-title {
-                font-size: 1.5rem;
+
+            .container {
+                padding: 2rem 1rem;
             }
         }
     </style>
 </head>
 <body>
     <header>
-        <div class="container">
-            <h1>Abhijit's Portfolio</h1>
-            <p class="subtitle">Software Developer & Technology Enthusiast</p>
+        <div class="avatar">AP</div>
+        <h1>Abhijit Phadke</h1>
+        <p class="subtitle">Software Developer & Technology Enthusiast</p>
+        <div class="social-header">
+            <a href="https://github.com/yourusername" target="_blank" title="GitHub">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+            <a href="https://linkedin.com/in/yourusername" target="_blank" title="LinkedIn">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+            <a href="mailto:phadke.abhijit@gmail.com" title="Email">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M0 3v18h24v-18h-24zm21.518 2l-9.518 7.713-9.518-7.713h19.036zm-19.518 14v-11.817l10 8.104 10-8.104v11.817h-20z"/></svg>
+            </a>
         </div>
     </header>
     
-    <main class="content">
-        <div class="container">
-            <h2 class="section-title">Resources & Tools</h2>
-            <div class="grid">
-                <div class="card">
-                    <div class="card-header">Profile</div>
-                    <div class="card-body">
-                        <a href="/Profile.html" class="card-link">View Profile</a>
-                        <p class="card-description">Learn more about my background, experience, and areas of expertise.</p>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">Skills</div>
-                    <div class="card-body">
-                        <a href="/Story.html" class="card-link">View Skills</a>
-                        <p class="card-description">Explore my technical skills, competencies, and professional journey.</p>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">Counter</div>
-                    <div class="card-body">
-                        <a href="/counter.html" class="card-link">Counter Tool</a>
-                        <p class="card-description">A simple counter application for tracking and counting.</p>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">Bash Cheatsheet</div>
-                    <div class="card-body">
-                        <a href="/bash-cheatsheet.html" class="card-link">View Cheatsheet</a>
-                        <p class="card-description">Comprehensive guide to Bash commands and scripting techniques.</p>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">LLM Tools</div>
-                    <div class="card-body">
-                        <a href="/llm-tools.html" class="card-link">Explore LLM Tools</a>
-                        <p class="card-description">Collection of tools related to Large Language Models.</p>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">Pandas Cheatsheet</div>
-                    <div class="card-body">
-                        <a href="/pandas-eda-cheatsheet.html" class="card-link">View Cheatsheet</a>
-                        <p class="card-description">Quick reference for Pandas data analysis and exploration.</p>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">Password Generator</div>
-                    <div class="card-body">
-                        <a href="/pasgen.html" class="card-link">Generate Password</a>
-                        <p class="card-description">Tool to create secure, random passwords for your accounts.</p>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">Cyber Kill Chain Quiz</div>
-                    <div class="card-body">
-                        <a href="/cyber-kill-chain-quiz.html" class="card-link">Take Quiz</a>
-                        <p class="card-description">Test your knowledge of the cyber kill chain framework.</p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">Analysis</div>
-                    <div class="card-body">
-                        <a href="/india-cricket.html" class="card-link">Cricket Performance</a>
-                        <p class="card-description">Analayse performance of Indian Cricket Team</p>
-                    </div>
-                <div class="card">
-                    <div class="card-header">Git Commands</div>
-                    <div class="card-body">
-                        <a href="/git-cheatsheet.html" class="card-link">Git Commands</a>
-                        <p class="card-description">Explore Git Commands</p>
-                    </div>
-                <div class="card">
-                    <div class="card-header">RAG Solution Workflow</div>
-                    <div class="card-body">
-                        <a href="/rag-workflow.html" class="card-link">RAG WF</a>
-                        <p class="card-description">Explore Retrieval Augmented Generation</p>
-                    </div>
-            </div>
+    <main class="container">
+        <div class="section-header">
+            <h2>About Me</h2>
+            <p>Versatile technology leader with expertise in data engineering, cloud technologies, and project management.</p>
         </div>
+
+        <div class="grid">
+            <a href="Profile.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon blue">👤</div>
+                    <h3>Profile</h3>
+                    <p>Learn more about my background, experience, and areas of expertise.</p>
+                </div>
+            </a>
+            
+            <a href="Story.html" class="card">
+                <div class="card-content">
+                    <div class="card-icon green">📖</div>
+                    <h3>Skills & Stories</h3>
+                    <p>Explore my technical skills, competencies, and professional journey.</p>
+                </div>
+            </a>
+        </div>
+
+        <section class="tools-section">
+            <div class="section-header">
+                <h2>Tools & Resources</h2>
+                <p>Handy tools and comprehensive guides for developers</p>
+            </div>
+
+            <div class="grid">
+                <a href="counter.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon teal">🔢</div>
+                        <h3>Counter</h3>
+                        <p>A simple counter application for tracking and counting.</p>
+                    </div>
+                </a>
+                
+                <a href="bash-cheatsheet.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon purple">💻</div>
+                        <h3>Bash Cheatsheet</h3>
+                        <p>Comprehensive guide to Bash commands and scripting techniques.</p>
+                    </div>
+                </a>
+                
+                <a href="git-cheatsheet.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon orange">📦</div>
+                        <h3>Git Commands</h3>
+                        <p>Essential Git commands and workflows for version control.</p>
+                    </div>
+                </a>
+                
+                <a href="llm-tools.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon pink">🤖</div>
+                        <h3>LLM Tools</h3>
+                        <p>Collection of tools related to Large Language Models.</p>
+                    </div>
+                </a>
+                
+                <a href="pandas-eda-cheatsheet.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon blue">📊</div>
+                        <h3>Pandas Cheatsheet</h3>
+                        <p>Quick reference for Pandas data analysis and exploration.</p>
+                    </div>
+                </a>
+                
+                <a href="pasgen.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon green">🔐</div>
+                        <h3>Password Generator</h3>
+                        <p>Tool to create secure, random passwords for your accounts.</p>
+                    </div>
+                </a>
+                
+                <a href="password-strength-checker.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon red">🛡️</div>
+                        <h3>Password Strength</h3>
+                        <p>Check the strength of your passwords with detailed feedback.</p>
+                    </div>
+                </a>
+                
+                <a href="cyber-kill-chain-quiz.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon yellow">🎯</div>
+                        <h3>Cyber Kill Chain Quiz</h3>
+                        <p>Test your knowledge of the cyber kill chain framework.</p>
+                    </div>
+                </a>
+                
+                <a href="india-cricket.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon orange">🏏</div>
+                        <h3>Cricket Analysis</h3>
+                        <p>Analyse performance of Indian Cricket Team.</p>
+                    </div>
+                </a>
+                
+                <a href="rag-workflow.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon purple">🔍</div>
+                        <h3>RAG Workflow</h3>
+                        <p>Explore Retrieval Augmented Generation concepts.</p>
+                    </div>
+                </a>
+                
+                <a href="agile-scrum-website.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon teal">📋</div>
+                        <h3>Agile & Scrum</h3>
+                        <p>Comprehensive guide to Agile methodology and Scrum framework.</p>
+                    </div>
+                </a>
+                
+                <a href="morse-code-translator.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon green">📡</div>
+                        <h3>Morse Code</h3>
+                        <p>Translate text to Morse code and vice versa.</p>
+                    </div>
+                </a>
+                
+                <a href="todo-list.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon blue">✅</div>
+                        <h3>To-Do List</h3>
+                        <p>Interactive task manager with local storage.</p>
+                    </div>
+                </a>
+                
+                <a href="virtualbox-cli.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon pink">🖥️</div>
+                        <h3>VirtualBox CLI</h3>
+                        <p>Complete reference for VirtualBox command-line interface.</p>
+                    </div>
+                </a>
+            </div>
+        </section>
     </main>
     
     <footer>
-        <div class="container">
-            <p>&copy; 2025 Abhijit. All rights reserved.</p>
-            <div class="social-links">
+        <div class="footer-content">
+            <p>&copy; 2025 Abhijit Phadke. All rights reserved.</p>
+            <div class="footer-links">
                 <a href="https://github.com/yourusername" target="_blank">GitHub</a>
                 <a href="https://linkedin.com/in/yourusername" target="_blank">LinkedIn</a>
-                <a href="mailto:your.email@example.com">Email</a>
-                <a href="/agile-scrum-website.html" target="Agile & Scrum">Agile/Scrum</a>
-                <a href="/morse-code-translator.html" target="Morse Code">Morse Code</a>
-                <a href="/todo-list.html" target="To Do List">To Do List</a>
-                <a href="/virtualbox-cli.html" target="VirtualBox CLI">VirtualBox Cheatsheet</a>
-                <a href="/password-strength-checker.html" target="Password">Password Strength Checker</a>
+                <a href="mailto:phadke.abhijit@gmail.com">Email</a>
+                <a href="Profile.html">Profile</a>
+                <a href="Story.html">Skills</a>
             </div>
         </div>
     </footer>
