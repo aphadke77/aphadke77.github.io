@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Builder</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #f0f2f5; 
+            padding: 20px; 
+            min-height: 100vh;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+        }
+        h1 { 
+            color: #1a1a2e; 
+            text-align: center; 
+            margin-bottom: 10px; 
+            font-size: 32px; 
+        }
+        .subtitle { 
+            text-align: center; 
+            color: #666; 
+            margin-bottom: 30px; 
+        }
+        .form-card { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 30px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+        }
+        .form-card h2 { 
+            color: #333; 
+            margin-bottom: 20px; 
+            padding-bottom: 10px; 
+            border-bottom: 2px solid #4f46e5; 
+        }
+        .form-row { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+            margin-bottom: 15px; 
+        }
+        .form-group { margin-bottom: 15px; }
+        label { 
+            display: block; 
+            margin-bottom: 6px; 
+            font-weight: 600; 
+            color: #333; 
+            font-size: 14px; 
+        }
+        input, textarea, select { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            font-size: 15px; 
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        input:focus, textarea:focus, select:focus { 
+            outline: none; 
+            border-color: #4f46e5; 
+        }
+        textarea { resize: vertical; min-height: 80px; }
+        .entry-group { 
+            background: #f9fafb; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin-bottom: 15px; 
+            position: relative; 
+        }
+        .remove-btn { 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            background: #fee2e2; 
+            color: #dc2626; 
+            border: none; 
+            padding: 5px 12px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 13px; 
+        }
+        .remove-btn:hover { background: #fecaca; }
+        .add-btn { 
+            background: #e0e7ff; 
+            color: #4f46e5; 
+            border: 2px dashed #4f46e5; 
+            padding: 12px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            text-align: center; 
+            font-weight: 600; 
+            width: 100%; 
+            transition: background 0.3s;
+        }
+        .add-btn:hover { background: #c7d2fe; }
+        .action-buttons { 
+            display: flex; 
+            gap: 15px; 
+            justify-content: center; 
+            margin-top: 20px; 
+        }
+        .btn { 
+            padding: 14px 30px; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s;
+        }
+        .btn-preview { background: #4f46e5; color: white; }
+        .btn-preview:hover { background: #4338ca; }
+        .btn-word { background: #2e7d32; color: white; }
+        .btn-word:hover { background: #1b5e20; }
+        .btn-pdf { background: #d32f2f; color: white; }
+        .btn-pdf:hover { background: #b71c1c; }
+        .btn-reset { background: #666; color: white; }
+        .btn-reset:hover { background: #444; }
+        
+        @media print {
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="nav-button" style="display: inline-block; padding: 10px 20px; background-color: #4f46e5; color: white; text-decoration: none; border-radius: 8px; font-weight: 500; margin-bottom: 20px; position: fixed; top: 20px; left: 20px;">&larr; Return to Index</a>
+    <div class="container">
+        <h1>Resume Builder</h1>
+        <p class="subtitle">Fill in your details and generate a professional resume</p>
+
+        <form id="resumeForm">
+            <div class="form-card">
+                <h2>Personal Information</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First Name *</label>
+                        <input type="text" id="firstName" required placeholder="John">
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name *</label>
+                        <input type="text" id="lastName" required placeholder="Doe">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="email" required placeholder="john.doe@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" id="phone" placeholder="+1 234 567 8900">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>LinkedIn</label>
+                        <input type="url" id="linkedin" placeholder="linkedin.com/in/johndoe">
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" id="location" placeholder="New York, NY">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Professional Summary</label>
+                    <textarea id="summary" placeholder="A brief summary of your professional background and career goals..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <h2>Work Experience</h2>
+                <div id="experienceContainer"></div>
+                <button type="button" class="add-btn" onclick="addExperience()">+ Add Work Experience</button>
+            </div>
+
+            <div class="form-card">
+                <h2>Education</h2>
+                <div id="educationContainer"></div>
+                <button type="button" class="add-btn" onclick="addEducation()">+ Add Education</button>
+            </div>
+
+            <div class="form-card">
+                <h2>Skills</h2>
+                <div class="form-group">
+                    <label>Technical Skills (comma separated)</label>
+                    <textarea id="techSkills" placeholder="JavaScript, Python, React, Node.js, SQL..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Soft Skills (comma separated)</label>
+                    <textarea id="softSkills" placeholder="Leadership, Communication, Problem Solving..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Certifications</label>
+                    <textarea id="certifications" placeholder="AWS Solutions Architect, PMP..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <h2>Projects</h2>
+                <div id="projectsContainer"></div>
+                <button type="button" class="add-btn" onclick="addProject()">+ Add Project</button>
+            </div>
+
+            <div class="action-buttons no-print">
+                <button type="button" class="btn btn-preview" onclick="previewResume()">Preview</button>
+                <button type="button" class="btn btn-word" onclick="downloadWord()">Download Word</button>
+                <button type="button" class="btn btn-pdf" onclick="downloadPDF()">Download PDF</button>
+                <button type="button" class="btn btn-reset" onclick="resetForm()">Reset</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Hidden Resume Preview -->
+    <div id="resumePreview" style="display: none; background: white; padding: 40px; max-width: 800px; margin: 20px auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div id="previewContent"></div>
+    </div>
+
+    <script>
+        let experienceCount = 0;
+        let educationCount = 0;
+        let projectCount = 0;
+
+        function addExperience() {
+            experienceCount++;
+            const container = document.getElementById('experienceContainer');
+            const div = document.createElement('div');
+            div.className = 'entry-group';
+            div.id = `experience-${experienceCount}`;
+            div.innerHTML = `
+                <button type="button" class="remove-btn" onclick="removeEntry('experience-${experienceCount}')">Remove</button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Job Title</label>
+                        <input type="text" class="exp-title" placeholder="Software Engineer">
+                    </div>
+                    <div class="form-group">
+                        <label>Company</label>
+                        <input type="text" class="exp-company" placeholder="Tech Company Inc.">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="month" class="exp-start">
+                    </div>
+                    <div class="form-group">
+                        <label>End Date</label>
+                        <input type="text" class="exp-end" placeholder="Present">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="exp-desc" placeholder="Describe your responsibilities and achievements..."></textarea>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addEducation() {
+            educationCount++;
+            const container = document.getElementById('educationContainer');
+            const div = document.createElement('div');
+            div.className = 'entry-group';
+            div.id = `education-${educationCount}`;
+            div.innerHTML = `
+                <button type="button" class="remove-btn" onclick="removeEntry('education-${educationCount}')">Remove</button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Degree</label>
+                        <input type="text" class="edu-degree" placeholder="Bachelor of Science">
+                    </div>
+                    <div class="form-group">
+                        <label>Institution</label>
+                        <input type="text" class="edu-institution" placeholder="University Name">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Graduation Date</label>
+                        <input type="month" class="edu-graduation">
+                    </div>
+                    <div class="form-group">
+                        <label>GPA</label>
+                        <input type="text" class="edu-gpa" placeholder="3.8/4.0">
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function addProject() {
+            projectCount++;
+            const container = document.getElementById('projectsContainer');
+            const div = document.createElement('div');
+            div.className = 'entry-group';
+            div.id = `project-${projectCount}`;
+            div.innerHTML = `
+                <button type="button" class="remove-btn" onclick="removeEntry('project-${projectCount}')">Remove</button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Project Name</label>
+                        <input type="text" class="proj-name" placeholder="Project Name">
+                    </div>
+                    <div class="form-group">
+                        <label>Technologies Used</label>
+                        <input type="text" class="proj-tech" placeholder="React, Node.js, MongoDB">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="proj-desc" placeholder="Describe the project and your role..."></textarea>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeEntry(id) {
+            document.getElementById(id).remove();
+        }
+
+        function getFormData() {
+            const data = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                linkedin: document.getElementById('linkedin').value,
+                location: document.getElementById('location').value,
+                summary: document.getElementById('summary').value,
+                techSkills: document.getElementById('techSkills').value,
+                softSkills: document.getElementById('softSkills').value,
+                certifications: document.getElementById('certifications').value,
+                experience: [],
+                education: [],
+                projects: []
+            };
+
+            document.querySelectorAll('#experienceContainer .entry-group').forEach(group => {
+                data.experience.push({
+                    title: group.querySelector('.exp-title').value,
+                    company: group.querySelector('.exp-company').value,
+                    start: group.querySelector('.exp-start').value,
+                    end: group.querySelector('.exp-end').value,
+                    description: group.querySelector('.exp-desc').value
+                });
+            });
+
+            document.querySelectorAll('#educationContainer .entry-group').forEach(group => {
+                data.education.push({
+                    degree: group.querySelector('.edu-degree').value,
+                    institution: group.querySelector('.edu-institution').value,
+                    graduation: group.querySelector('.edu-graduation').value,
+                    gpa: group.querySelector('.edu-gpa').value
+                });
+            });
+
+            document.querySelectorAll('#projectsContainer .entry-group').forEach(group => {
+                data.projects.push({
+                    name: group.querySelector('.proj-name').value,
+                    tech: group.querySelector('.proj-tech').value,
+                    description: group.querySelector('.proj-desc').value
+                });
+            });
+
+            return data;
+        }
+
+        function generateResumeHTML(data) {
+            const formatDate = (monthStr) => {
+                if (!monthStr || typeof monthStr !== 'string') return '';
+                const parts = monthStr.split('-');
+                if (parts.length !== 2) return monthStr;
+                const [year, month] = parts;
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const monthIndex = parseInt(month) - 1;
+                if (monthIndex < 0 || monthIndex > 11) return monthStr;
+                return `${months[monthIndex]} ${year}`;
+            };
+
+            let html = `
+                <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+                    <div style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px;">
+                        <h1 style="font-size: 28px; color: #1a1a2e; margin-bottom: 5px;">${data.firstName} ${data.lastName}</h1>
+                        <p style="color: #666; font-size: 14px;">
+                            ${data.email}${data.phone ? ' | ' + data.phone : ''}${data.location ? ' | ' + data.location : ''}
+                        </p>
+                        ${data.linkedin ? `<p style="color: #4f46e5; font-size: 14px;">${data.linkedin}</p>` : ''}
+                    </div>
+            `;
+
+            if (data.summary) {
+                html += `<div style="margin-bottom: 20px;"><h3 style="color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 10px;">Summary</h3><p style="color: #555; font-size: 14px; line-height: 1.6;">${data.summary}</p></div>`;
+            }
+
+            if (data.experience.length > 0 && data.experience[0].title) {
+                html += `<div style="margin-bottom: 20px;"><h3 style="color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 10px;">Experience</h3>`;
+                data.experience.forEach(exp => {
+                    if (exp.title) {
+                        html += `
+                            <div style="margin-bottom: 15px;">
+                                <p style="font-weight: bold; color: #333; font-size: 15px;">${exp.title}${exp.company ? ' at ' + exp.company : ''}</p>
+                                <p style="color: #666; font-size: 13px;">${exp.start ? formatDate(exp.start) : ''}${exp.end ? ' - ' + exp.end : ''}</p>
+                                <p style="color: #555; font-size: 14px; line-height: 1.6; margin-top: 5px;">${exp.description}</p>
+                            </div>
+                        `;
+                    }
+                });
+                html += `</div>`;
+            }
+
+            if (data.education.length > 0 && data.education[0].degree) {
+                html += `<div style="margin-bottom: 20px;"><h3 style="color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 10px;">Education</h3>`;
+                data.education.forEach(edu => {
+                    if (edu.degree) {
+                        html += `
+                            <div style="margin-bottom: 10px;">
+                                <p style="font-weight: bold; color: #333; font-size: 15px;">${edu.degree}${edu.institution ? ' - ' + edu.institution : ''}</p>
+                                <p style="color: #666; font-size: 13px;">${edu.graduation ? formatDate(edu.graduation) : ''}${edu.gpa ? ' | GPA: ' + edu.gpa : ''}</p>
+                            </div>
+                        `;
+                    }
+                });
+                html += `</div>`;
+            }
+
+            if (data.projects.length > 0 && data.projects[0].name) {
+                html += `<div style="margin-bottom: 20px;"><h3 style="color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 10px;">Projects</h3>`;
+                data.projects.forEach(proj => {
+                    if (proj.name) {
+                        html += `
+                            <div style="margin-bottom: 10px;">
+                                <p style="font-weight: bold; color: #333; font-size: 15px;">${proj.name}${proj.tech ? ' (' + proj.tech + ')' : ''}</p>
+                                <p style="color: #555; font-size: 14px; line-height: 1.6;">${proj.description}</p>
+                            </div>
+                        `;
+                    }
+                });
+                html += `</div>`;
+            }
+
+            if (data.techSkills || data.softSkills) {
+                html += `<div style="margin-bottom: 20px;"><h3 style="color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 10px;">Skills</h3>`;
+                if (data.techSkills) {
+                    html += `<p style="color: #333; font-size: 14px; margin-bottom: 5px;"><strong>Technical:</strong> ${data.techSkills}</p>`;
+                }
+                if (data.softSkills) {
+                    html += `<p style="color: #333; font-size: 14px;"><strong>Soft:</strong> ${data.softSkills}</p>`;
+                }
+                html += `</div>`;
+            }
+
+            if (data.certifications) {
+                html += `<div style="margin-bottom: 20px;"><h3 style="color: #333; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-bottom: 10px;">Certifications</h3><p style="color: #555; font-size: 14px;">${data.certifications}</p></div>`;
+            }
+
+            html += `</div>`;
+            return html;
+        }
+
+        function previewResume() {
+            const data = getFormData();
+            if (!data.firstName || !data.lastName) {
+                alert('Please fill in your name');
+                return;
+            }
+            const preview = document.getElementById('resumePreview');
+            const content = document.getElementById('previewContent');
+            content.innerHTML = generateResumeHTML(data);
+            preview.style.display = 'block';
+            preview.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function downloadWord() {
+            const data = getFormData();
+            if (!data.firstName || !data.lastName) {
+                alert('Please fill in your name');
+                return;
+            }
+
+            try {
+                const wordContent = generateResumeHTML(data);
+                const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Resume - ${data.firstName} ${data.lastName}</title></head><body>`;
+                const footer = '</body></html>';
+                const fullHTML = header + wordContent + footer;
+
+                const blob = new Blob([fullHTML], { type: 'application/vnd.ms-word' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${data.firstName}_${data.lastName}_Resume.doc`;
+                link.click();
+            } catch (e) {
+                alert('Error generating Word document: ' + e.message);
+            }
+        }
+
+        function downloadPDF() {
+            const data = getFormData();
+            if (!data.firstName || !data.lastName) {
+                alert('Please fill in your name');
+                return;
+            }
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                doc.setFontSize(20);
+                doc.text(data.firstName + ' ' + data.lastName, 20, 20);
+                
+                doc.setFontSize(12);
+                let y = 35;
+                
+                if (data.email) {
+                    doc.text('Email: ' + data.email, 20, y);
+                    y += 7;
+                }
+                if (data.phone) {
+                    doc.text('Phone: ' + data.phone, 20, y);
+                    y += 7;
+                }
+                if (data.location) {
+                    doc.text('Location: ' + data.location, 20, y);
+                    y += 7;
+                }
+                
+                y += 10;
+                
+                if (data.summary) {
+                    doc.setFontSize(14);
+                    doc.text('Summary', 20, y);
+                    y += 7;
+                    doc.setFontSize(10);
+                    const summaryLines = doc.splitTextToSize(data.summary, 170);
+                    doc.text(summaryLines, 20, y);
+                    y += summaryLines.length * 5 + 10;
+                }
+                
+                if (data.experience.length > 0 && data.experience[0].title) {
+                    doc.setFontSize(14);
+                    doc.text('Experience', 20, y);
+                    y += 7;
+                    doc.setFontSize(10);
+                    data.experience.forEach(exp => {
+                        if (exp.title) {
+                            doc.setFont('helvetica', 'bold');
+                            doc.text(exp.title + (exp.company ? ' at ' + exp.company : ''), 20, y);
+                            y += 5;
+                            doc.setFont('helvetica', 'normal');
+                            doc.text(exp.start + (exp.end ? ' - ' + exp.end : ''), 20, y);
+                            y += 5;
+                            if (exp.description) {
+                                const descLines = doc.splitTextToSize(exp.description, 170);
+                                doc.text(descLines, 20, y);
+                                y += descLines.length * 5;
+                            }
+                            y += 5;
+                        }
+                    });
+                }
+                
+                if (data.education.length > 0 && data.education[0].degree) {
+                    doc.setFontSize(14);
+                    doc.text('Education', 20, y);
+                    y += 7;
+                    doc.setFontSize(10);
+                    data.education.forEach(edu => {
+                        if (edu.degree) {
+                            doc.setFont('helvetica', 'bold');
+                            doc.text(edu.degree + (edu.institution ? ' - ' + edu.institution : ''), 20, y);
+                            y += 5;
+                            doc.setFont('helvetica', 'normal');
+                            doc.text(edu.graduation + (edu.gpa ? ' | GPA: ' + edu.gpa : ''), 20, y);
+                            y += 5;
+                        }
+                    });
+                }
+                
+                if (data.techSkills || data.softSkills) {
+                    doc.setFontSize(14);
+                    doc.text('Skills', 20, y);
+                    y += 7;
+                    doc.setFontSize(10);
+                    if (data.techSkills) {
+                        doc.text('Technical: ' + data.techSkills, 20, y);
+                        y += 5;
+                    }
+                    if (data.softSkills) {
+                        doc.text('Soft: ' + data.softSkills, 20, y);
+                    }
+                }
+                
+                doc.save(data.firstName + '_' + data.lastName + '_Resume.pdf');
+            } catch (e) {
+                alert('Error generating PDF: ' + e.message);
+            }
+        }
+
+        function resetForm() {
+            if (confirm('Are you sure you want to clear all data?')) {
+                document.getElementById('resumeForm').reset();
+                document.getElementById('experienceContainer').innerHTML = '';
+                document.getElementById('educationContainer').innerHTML = '';
+                document.getElementById('projectsContainer').innerHTML = '';
+                document.getElementById('resumePreview').style.display = 'none';
+                experienceCount = 0;
+                educationCount = 0;
+                projectCount = 0;
+            }
+        }
+    </script>
+</body>
+</html>
