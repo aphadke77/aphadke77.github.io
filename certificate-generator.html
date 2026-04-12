@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate of Completion Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #1e40af;
+            --text-color: #1f2937;
+            --light-bg: #f9fafb;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light-bg);
+            color: var(--text-color);
+        }
+
+        header {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        header p { font-size: 1rem; opacity: 0.85; }
+
+        .back-link {
+            display: inline-block;
+            margin: 1rem 2rem;
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 2rem;
+            max-width: 1300px;
+            margin: 1rem auto 3rem;
+            padding: 0 1.5rem;
+        }
+
+        /* ---- FORM PANEL ---- */
+        .form-panel {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.8rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            height: fit-content;
+            position: sticky;
+            top: 1rem;
+        }
+
+        .form-panel h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1.4rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.6rem;
+        }
+
+        .form-group { margin-bottom: 1.2rem; }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text-color);
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(30,64,175,0.1);
+        }
+
+        .form-group textarea { resize: vertical; min-height: 70px; }
+
+        /* ---- TEMPLATE PICKER ---- */
+        .template-section h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: var(--text-color);
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.6rem;
+            margin-bottom: 1.4rem;
+        }
+
+        .template-thumb {
+            border: 3px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: border-color 0.2s, transform 0.15s;
+        }
+
+        .template-thumb:hover { transform: scale(1.04); }
+        .template-thumb.active { border-color: var(--secondary-color); }
+
+        .template-thumb canvas {
+            width: 100%;
+            display: block;
+        }
+
+        .template-thumb .tname {
+            text-align: center;
+            font-size: 0.7rem;
+            padding: 3px 0;
+            background: #f3f4f6;
+            font-weight: 600;
+        }
+
+        /* ---- DATE / SIGNATURE ---- */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+        }
+
+        /* ---- BUTTONS ---- */
+        .btn-group { display: flex; gap: 0.8rem; margin-top: 1.5rem; }
+
+        .btn {
+            flex: 1;
+            padding: 0.7rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+        .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+        .btn-preview {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        /* ---- PREVIEW AREA ---- */
+        .preview-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .preview-panel h2 {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        #preview-container {
+            background: #d1d5db;
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 460px;
+        }
+
+        #cert-canvas {
+            max-width: 100%;
+            border-radius: 4px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+        }
+
+        .placeholder-msg {
+            color: #6b7280;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        @media (max-width: 900px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .form-panel { position: static; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Certificate of Completion Generator</h1>
+    <p>Fill in the details, pick a template, and download your certificate as PDF</p>
+</header>
+
+<a href="/index.html" class="back-link">← Back to Home</a>
+
+<div class="main-layout">
+
+    <!-- LEFT: FORM -->
+    <div class="form-panel">
+        <h2>Certificate Details</h2>
+
+        <div class="form-group">
+            <label>Recipient Name *</label>
+            <input type="text" id="recipient" placeholder="e.g. Jane Smith" />
+        </div>
+
+        <div class="form-group">
+            <label>Course / Program Name *</label>
+            <input type="text" id="course" placeholder="e.g. Advanced Python Programming" />
+        </div>
+
+        <div class="form-group">
+            <label>Authorizing Authority *</label>
+            <input type="text" id="authority" placeholder="e.g. Dr. John Doe / Coursera" />
+        </div>
+
+        <div class="form-group">
+            <label>Organization / Institution</label>
+            <input type="text" id="org" placeholder="e.g. Stanford Online" />
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Completion Date</label>
+                <input type="date" id="cert-date" />
+            </div>
+            <div class="form-group">
+                <label>Certificate ID</label>
+                <input type="text" id="cert-id" placeholder="Auto-generated" readonly style="background:#f3f4f6; cursor:not-allowed;" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Additional Note (optional)</label>
+            <textarea id="note" placeholder="e.g. with distinction, with honors..."></textarea>
+        </div>
+
+        <div class="template-section">
+            <h3>Choose Template</h3>
+            <div class="template-grid" id="template-grid"></div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-preview" onclick="renderPreview()">Preview</button>
+            <button class="btn btn-download" onclick="downloadPDF()">Download PDF</button>
+        </div>
+    </div>
+
+    <!-- RIGHT: PREVIEW -->
+    <div class="preview-panel">
+        <h2>Live Preview</h2>
+        <div id="preview-container">
+            <p class="placeholder-msg">Fill in the details and click <strong>Preview</strong> to see your certificate here.</p>
+        </div>
+    </div>
+
+</div>
+
+<canvas id="cert-canvas" style="display:none;"></canvas>
+
+<script>
+// ─── TEMPLATES DEFINITION ────────────────────────────────────────────────────
+const TEMPLATES = [
+    {
+        id: 'classic',
+        name: 'Classic Blue',
+        bg: '#0f2d6e',
+        border: '#c9a84c',
+        innerBg: '#ffffff',
+        accent: '#c9a84c',
+        titleColor: '#0f2d6e',
+        textColor: '#1a1a1a',
+        nameColor: '#0f2d6e',
+        font: 'serif',
+        pattern: 'border-double'
+    },
+    {
+        id: 'elegant',
+        name: 'Elegant Dark',
+        bg: '#1a1a2e',
+        border: '#e2c270',
+        innerBg: '#16213e',
+        accent: '#e2c270',
+        titleColor: '#e2c270',
+        textColor: '#e8e8e8',
+        nameColor: '#e2c270',
+        font: 'serif',
+        pattern: 'dark'
+    },
+    {
+        id: 'modern',
+        name: 'Modern Green',
+        bg: '#f0fdf4',
+        border: '#16a34a',
+        innerBg: '#ffffff',
+        accent: '#16a34a',
+        titleColor: '#14532d',
+        textColor: '#1f2937',
+        nameColor: '#15803d',
+        font: 'sans-serif',
+        pattern: 'clean'
+    },
+    {
+        id: 'royal',
+        name: 'Royal Purple',
+        bg: '#3b0764',
+        border: '#d4a017',
+        innerBg: '#4c1d95',
+        accent: '#d4a017',
+        titleColor: '#fde68a',
+        textColor: '#f5f3ff',
+        nameColor: '#fde68a',
+        font: 'serif',
+        pattern: 'royal'
+    },
+    {
+        id: 'minimal',
+        name: 'Minimal',
+        bg: '#ffffff',
+        border: '#e5e7eb',
+        innerBg: '#ffffff',
+        accent: '#374151',
+        titleColor: '#111827',
+        textColor: '#374151',
+        nameColor: '#111827',
+        font: 'sans-serif',
+        pattern: 'minimal'
+    },
+    {
+        id: 'corporate',
+        name: 'Corporate Red',
+        bg: '#7f1d1d',
+        border: '#fbbf24',
+        innerBg: '#fee2e2',
+        accent: '#991b1b',
+        titleColor: '#7f1d1d',
+        textColor: '#1c1917',
+        nameColor: '#7f1d1d',
+        font: 'serif',
+        pattern: 'corporate'
+    }
+];
+
+let selectedTemplate = 'classic';
+
+// ─── GENERATE CERT ID ─────────────────────────────────────────────────────────
+function generateID() {
+    return 'CERT-' + Math.random().toString(36).substring(2,7).toUpperCase() + '-' + Date.now().toString().slice(-4);
+}
+
+document.getElementById('cert-id').value = generateID();
+document.getElementById('cert-date').value = new Date().toISOString().split('T')[0];
+
+// ─── DRAW THUMBNAIL ───────────────────────────────────────────────────────────
+function drawThumb(canvas, tpl) {
+    const W = canvas.width, H = canvas.height;
+    const ctx = canvas.getContext('2d');
+    drawCertificate(ctx, W, H, tpl, {
+        recipient: 'Jane Smith',
+        course: 'Sample Course',
+        authority: 'Authority',
+        org: '',
+        date: '',
+        certId: '',
+        note: ''
+    }, true);
+}
+
+// ─── MAIN DRAW FUNCTION ───────────────────────────────────────────────────────
+function drawCertificate(ctx, W, H, tpl, data, thumb = false) {
+    ctx.clearRect(0, 0, W, H);
+
+    // Outer background
+    ctx.fillStyle = tpl.bg;
+    ctx.fillRect(0, 0, W, H);
+
+    const pad = thumb ? 6 : 28;
+    const innerX = pad, innerY = pad, innerW = W - pad*2, innerH = H - pad*2;
+
+    // Decorative pattern in corners
+    drawPatternAccents(ctx, W, H, tpl, thumb);
+
+    // Inner card background
+    ctx.fillStyle = tpl.innerBg;
+    ctx.fillRect(innerX, innerY, innerW, innerH);
+
+    // Border lines
+    ctx.strokeStyle = tpl.border;
+    ctx.lineWidth = thumb ? 2 : 5;
+    ctx.strokeRect(innerX, innerY, innerW, innerH);
+
+    // Inner thin border
+    ctx.lineWidth = thumb ? 1 : 2;
+    ctx.strokeStyle = tpl.border;
+    const ip = thumb ? 3 : 12;
+    ctx.strokeRect(innerX + ip, innerY + ip, innerW - ip*2, innerH - ip*2);
+
+    if (thumb) {
+        // Simplified thumb content
+        ctx.fillStyle = tpl.titleColor;
+        ctx.font = `bold ${H * 0.12}px ${tpl.font}`;
+        ctx.textAlign = 'center';
+        ctx.fillText('Certificate', W/2, H * 0.38);
+        ctx.font = `${H * 0.08}px ${tpl.font}`;
+        ctx.fillStyle = tpl.textColor;
+        ctx.fillText('of Completion', W/2, H * 0.52);
+        ctx.fillStyle = tpl.accent;
+        ctx.fillRect(W*0.3, H*0.58, W*0.4, thumb ? 1 : 2);
+        return;
+    }
+
+    const cx = W / 2;
+    let y = innerY + 50;
+
+    // Stars / decorative top
+    ctx.fillStyle = tpl.accent;
+    ctx.font = `24px serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText('★  ✦  ★', cx, y);
+    y += 36;
+
+    // Title
+    ctx.fillStyle = tpl.titleColor;
+    ctx.font = `bold 44px ${tpl.font}`;
+    ctx.textAlign = 'center';
+    ctx.fillText('Certificate of Completion', cx, y);
+    y += 16;
+
+    // Accent line under title
+    ctx.strokeStyle = tpl.accent;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(cx - 180, y); ctx.lineTo(cx + 180, y);
+    ctx.stroke();
+    y += 30;
+
+    // Presented to
+    ctx.fillStyle = tpl.textColor;
+    ctx.font = `italic 18px ${tpl.font}`;
+    ctx.fillText('This is to certify that', cx, y);
+    y += 46;
+
+    // Recipient name
+    ctx.fillStyle = tpl.nameColor;
+    ctx.font = `bold 52px ${tpl.font}`;
+    ctx.fillText(data.recipient || '___________________', cx, y);
+    y += 16;
+
+    // Underline name
+    ctx.strokeStyle = tpl.accent;
+    ctx.lineWidth = 2;
+    const nameW = ctx.measureText(data.recipient || '___________________').width;
+    ctx.beginPath();
+    ctx.moveTo(cx - nameW/2, y); ctx.lineTo(cx + nameW/2, y);
+    ctx.stroke();
+    y += 30;
+
+    // Body text
+    ctx.fillStyle = tpl.textColor;
+    ctx.font = `18px ${tpl.font}`;
+    ctx.fillText('has successfully completed the course', cx, y);
+    y += 44;
+
+    // Course name
+    ctx.fillStyle = tpl.titleColor;
+    ctx.font = `bold 28px ${tpl.font}`;
+    wrapText(ctx, `"${data.course || '___________________'}"`, cx, y, W - innerX*2 - 80, 36);
+    const courseLines = measureLines(data.course ? `"${data.course}"` : '"___________________"', ctx, W - innerX*2 - 80);
+    y += courseLines * 36 + 16;
+
+    // Note (with distinction etc.)
+    if (data.note) {
+        ctx.fillStyle = tpl.accent;
+        ctx.font = `italic 18px ${tpl.font}`;
+        ctx.fillText(data.note, cx, y);
+        y += 32;
+    }
+
+    // Divider
+    ctx.strokeStyle = tpl.border;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(innerX + 60, y); ctx.lineTo(W - innerX - 60, y);
+    ctx.stroke();
+    y += 30;
+
+    // Organization
+    if (data.org) {
+        ctx.fillStyle = tpl.textColor;
+        ctx.font = `16px ${tpl.font}`;
+        ctx.fillText(data.org, cx, y);
+        y += 28;
+    }
+
+    // Date & Cert ID row
+    const dateStr = data.date ? new Date(data.date + 'T00:00:00').toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) : '';
+    const bottomY = innerY + innerH - 70;
+
+    // Left: signature line
+    ctx.strokeStyle = tpl.textColor;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(innerX + 60, bottomY); ctx.lineTo(innerX + 200, bottomY);
+    ctx.stroke();
+    ctx.fillStyle = tpl.textColor;
+    ctx.font = `13px ${tpl.font}`;
+    ctx.textAlign = 'center';
+    ctx.fillText(data.authority || 'Authorized Signatory', innerX + 130, bottomY + 18);
+    ctx.font = `11px ${tpl.font}`;
+    ctx.fillStyle = tpl.accent;
+    ctx.fillText('Authorizing Authority', innerX + 130, bottomY + 33);
+
+    // Center: seal placeholder
+    ctx.strokeStyle = tpl.accent;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(cx, bottomY, 26, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx, bottomY, 22, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.fillStyle = tpl.accent;
+    ctx.font = `bold 10px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText('OFFICIAL', cx, bottomY - 4);
+    ctx.fillText('SEAL', cx, bottomY + 9);
+
+    // Right: date & cert ID
+    ctx.strokeStyle = tpl.textColor;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(W - innerX - 200, bottomY); ctx.lineTo(W - innerX - 60, bottomY);
+    ctx.stroke();
+    ctx.fillStyle = tpl.textColor;
+    ctx.font = `13px ${tpl.font}`;
+    ctx.fillText(dateStr, W - innerX - 130, bottomY + 18);
+    ctx.font = `11px ${tpl.font}`;
+    ctx.fillStyle = tpl.accent;
+    ctx.fillText('Date of Completion', W - innerX - 130, bottomY + 33);
+
+    // Cert ID bottom center
+    if (data.certId) {
+        ctx.fillStyle = tpl.textColor;
+        ctx.font = `10px monospace`;
+        ctx.globalAlpha = 0.5;
+        ctx.fillText(`ID: ${data.certId}`, cx, innerY + innerH - 14);
+        ctx.globalAlpha = 1;
+    }
+}
+
+// ─── CORNER DECORATION ────────────────────────────────────────────────────────
+function drawPatternAccents(ctx, W, H, tpl, thumb) {
+    const size = thumb ? 10 : 40;
+    const positions = [[0,0], [W,0], [0,H], [W,H]];
+    ctx.fillStyle = tpl.accent;
+    positions.forEach(([x, y]) => {
+        ctx.save();
+        ctx.translate(x, y);
+        // Simple corner diamond
+        ctx.beginPath();
+        ctx.arc(0, 0, size, 0, Math.PI * 2);
+        ctx.globalAlpha = 0.25;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.restore();
+    });
+
+    if (!thumb && tpl.pattern === 'royal') {
+        // extra decorative dots
+        for (let i = 0; i < 8; i++) {
+            ctx.fillStyle = tpl.accent;
+            ctx.globalAlpha = 0.3;
+            ctx.beginPath();
+            ctx.arc(60 + i * (W-120)/7, 14, 3, 0, Math.PI*2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(60 + i * (W-120)/7, H-14, 3, 0, Math.PI*2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+    }
+}
+
+// ─── TEXT WRAP HELPER ─────────────────────────────────────────────────────────
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+    const words = text.split(' ');
+    let line = '';
+    let currentY = y;
+    for (let w of words) {
+        const test = line + w + ' ';
+        if (ctx.measureText(test).width > maxWidth && line) {
+            ctx.fillText(line.trim(), x, currentY);
+            line = w + ' ';
+            currentY += lineHeight;
+        } else { line = test; }
+    }
+    ctx.fillText(line.trim(), x, currentY);
+}
+
+function measureLines(text, ctx, maxWidth) {
+    const words = text.split(' ');
+    let line = '', lines = 1;
+    for (let w of words) {
+        const test = line + w + ' ';
+        if (ctx.measureText(test).width > maxWidth && line) { lines++; line = w + ' '; }
+        else { line = test; }
+    }
+    return lines;
+}
+
+// ─── BUILD THUMBNAILS ─────────────────────────────────────────────────────────
+function buildTemplatePicker() {
+    const grid = document.getElementById('template-grid');
+    grid.innerHTML = '';
+    TEMPLATES.forEach(tpl => {
+        const div = document.createElement('div');
+        div.className = 'template-thumb' + (tpl.id === selectedTemplate ? ' active' : '');
+        div.dataset.id = tpl.id;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 120; canvas.height = 85;
+        drawThumb(canvas, tpl);
+
+        const label = document.createElement('div');
+        label.className = 'tname';
+        label.textContent = tpl.name;
+
+        div.appendChild(canvas);
+        div.appendChild(label);
+        div.addEventListener('click', () => {
+            document.querySelectorAll('.template-thumb').forEach(el => el.classList.remove('active'));
+            div.classList.add('active');
+            selectedTemplate = tpl.id;
+            renderPreview();
+        });
+        grid.appendChild(div);
+    });
+}
+
+// ─── COLLECT FORM DATA ────────────────────────────────────────────────────────
+function getFormData() {
+    return {
+        recipient: document.getElementById('recipient').value.trim(),
+        course: document.getElementById('course').value.trim(),
+        authority: document.getElementById('authority').value.trim(),
+        org: document.getElementById('org').value.trim(),
+        date: document.getElementById('cert-date').value,
+        certId: document.getElementById('cert-id').value,
+        note: document.getElementById('note').value.trim()
+    };
+}
+
+// ─── RENDER PREVIEW ───────────────────────────────────────────────────────────
+function renderPreview() {
+    const data = getFormData();
+    const tpl = TEMPLATES.find(t => t.id === selectedTemplate);
+    const container = document.getElementById('preview-container');
+
+    const W = 900, H = 636; // A4 landscape ratio
+    let canvas = document.getElementById('cert-canvas');
+    canvas.width = W; canvas.height = H;
+    canvas.style.display = 'none';
+
+    const ctx = canvas.getContext('2d');
+    drawCertificate(ctx, W, H, tpl, data, false);
+
+    // Show in preview as an img
+    const img = new Image();
+    img.src = canvas.toDataURL('image/png');
+    img.id = 'cert-canvas';
+    img.style.maxWidth = '100%';
+    img.style.borderRadius = '4px';
+    img.style.boxShadow = '0 8px 30px rgba(0,0,0,0.25)';
+    container.innerHTML = '';
+    container.appendChild(img);
+}
+
+// ─── DOWNLOAD PDF ─────────────────────────────────────────────────────────────
+function downloadPDF() {
+    const data = getFormData();
+    if (!data.recipient || !data.course || !data.authority) {
+        alert('Please fill in Recipient Name, Course Name, and Authorizing Authority before downloading.');
+        return;
+    }
+
+    const tpl = TEMPLATES.find(t => t.id === selectedTemplate);
+    const W = 1122, H = 794; // A4 landscape at 96dpi
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    drawCertificate(ctx, W, H, tpl, data, false);
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.97);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [W, H] });
+    pdf.addImage(imgData, 'JPEG', 0, 0, W, H);
+
+    const safeName = (data.recipient || 'certificate').replace(/[^a-z0-9]/gi, '_');
+    pdf.save(`Certificate_${safeName}.pdf`);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+buildTemplatePicker();
+</script>
+</body>
+</html>
