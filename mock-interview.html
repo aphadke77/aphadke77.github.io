@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Interview Agent</title>
+    <style>
+        :root {
+            --primary: #1a365d;
+            --secondary: #1e40af;
+            --accent: #3b82f6;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --interviewer-bg: #eff6ff;
+            --candidate-bg: #f0fdf4;
+            --system-bg: #fefce8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.2rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .header-left { display: flex; align-items: center; gap: 1rem; }
+        .header-icon { font-size: 2rem; }
+        .header-title { font-size: 1.5rem; font-weight: 700; }
+        .header-subtitle { font-size: 0.85rem; opacity: 0.85; }
+
+        .back-link {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            opacity: 0.85;
+            transition: opacity 0.2s;
+        }
+        .back-link:hover { opacity: 1; text-decoration: underline; }
+
+        .app-wrapper {
+            max-width: 960px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Setup Panel */
+        #setup-panel {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        .setup-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.4rem;
+        }
+        .setup-desc {
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        .form-group.full { grid-column: 1 / -1; }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        input, select, textarea {
+            padding: 0.65rem 0.9rem;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: var(--text);
+            background: white;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 0.3rem;
+        }
+        .mode-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: white;
+            color: var(--muted);
+            transition: all 0.2s;
+        }
+        .mode-btn.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: white;
+        }
+        .mode-btn:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+        .start-btn {
+            margin-top: 1.5rem;
+            padding: 0.85rem 2.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        .start-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(30,64,175,0.3); }
+        .start-btn:active { transform: translateY(0); }
+
+        /* Interview Panel */
+        #interview-panel { display: none; flex-direction: column; gap: 1rem; }
+
+        .interview-header {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .interview-meta { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .meta-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: var(--interviewer-bg);
+            color: var(--secondary);
+            border: 1px solid #bfdbfe;
+        }
+
+        .progress-section { display: flex; align-items: center; gap: 0.75rem; }
+        .progress-label { font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+        .progress-bar-wrap {
+            width: 120px;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* Chat Window */
+        .chat-window {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 520px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            scroll-behavior: smooth;
+        }
+
+        .chat-messages::-webkit-scrollbar { width: 6px; }
+        .chat-messages::-webkit-scrollbar-track { background: transparent; }
+        .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+        .message {
+            max-width: 82%;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .message.interviewer { align-self: flex-start; }
+        .message.candidate { align-self: flex-end; }
+        .message.system { align-self: center; max-width: 100%; }
+
+        .message-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .message.interviewer .message-label { color: var(--secondary); }
+        .message.candidate .message-label { color: var(--success); justify-content: flex-end; }
+        .message.system .message-label { color: var(--warning); justify-content: center; }
+
+        .message-bubble {
+            padding: 0.85rem 1.1rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        .message.interviewer .message-bubble {
+            background: var(--interviewer-bg);
+            border: 1px solid #bfdbfe;
+            border-bottom-left-radius: 4px;
+        }
+        .message.candidate .message-bubble {
+            background: var(--candidate-bg);
+            border: 1px solid #bbf7d0;
+            border-bottom-right-radius: 4px;
+        }
+        .message.system .message-bubble {
+            background: var(--system-bg);
+            border: 1px solid #fde68a;
+            text-align: center;
+            font-size: 0.88rem;
+            color: #92400e;
+            border-radius: 20px;
+            padding: 0.5rem 1.2rem;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            max-width: 82%;
+        }
+        .typing-indicator.visible { display: block; }
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+            padding: 0.85rem 1.1rem;
+            background: var(--interviewer-bg);
+            border: 1px solid #bfdbfe;
+            border-radius: 12px;
+            border-bottom-left-radius: 4px;
+            width: fit-content;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--secondary);
+            border-radius: 50%;
+            animation: bounce 1.2s infinite;
+        }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+
+        /* Input Area */
+        .chat-input-area {
+            border-top: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            background: white;
+        }
+
+        .hint-text {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            resize: none;
+            font-family: inherit;
+            min-height: 48px;
+            max-height: 140px;
+            overflow-y: auto;
+        }
+        #user-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); outline: none; }
+
+        .send-btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            white-space: nowrap;
+            align-self: flex-end;
+        }
+        .send-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(30,64,175,0.3); }
+        .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Controls */
+        .controls-row {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .ctrl-btn {
+            padding: 0.5rem 1.1rem;
+            border-radius: 6px;
+            border: 1.5px solid;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .ctrl-btn.end {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: white;
+        }
+        .ctrl-btn.end:hover { background: #fef2f2; }
+        .ctrl-btn.hint {
+            border-color: var(--warning);
+            color: var(--warning);
+            background: white;
+        }
+        .ctrl-btn.hint:hover { background: #fffbeb; }
+        .ctrl-btn.skip {
+            border-color: var(--muted);
+            color: var(--muted);
+            background: white;
+        }
+        .ctrl-btn.skip:hover { background: var(--bg); }
+
+        /* Report Panel */
+        #report-panel {
+            display: none;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .report-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.75rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .report-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.6rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .score-row {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .score-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .score-num { font-size: 2rem; line-height: 1; }
+        .score-denom { font-size: 0.8rem; opacity: 0.75; }
+
+        .score-details { flex: 1; }
+        .score-label { font-size: 1rem; font-weight: 600; color: var(--text); }
+        .score-desc { font-size: 0.9rem; color: var(--muted); margin-top: 0.25rem; }
+
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+        .sub-section { margin-bottom: 1rem; }
+        .sub-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .bullet-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+        .bullet-list li {
+            font-size: 0.9rem;
+            color: var(--text);
+            padding-left: 1.2rem;
+            position: relative;
+        }
+        .bullet-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .qa-item {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 0.75rem;
+        }
+        .qa-header {
+            padding: 0.75rem 1rem;
+            background: var(--bg);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .qa-header:hover { background: #e8edf3; }
+        .qa-body {
+            padding: 1rem;
+            display: none;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .qa-body.open { display: block; }
+        .qa-row { margin-bottom: 0.6rem; }
+        .qa-row-label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.2rem;
+        }
+        .good { color: var(--success); }
+        .improve { color: var(--danger); }
+        .ideal { color: var(--secondary); }
+
+        .score-pill {
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .rec-tag {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 16px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            margin: 0.2rem;
+        }
+
+        .restart-btn {
+            padding: 0.85rem 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 0.5rem;
+            transition: transform 0.2s;
+        }
+        .restart-btn:hover { transform: translateY(-1px); }
+
+        @media (max-width: 640px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .two-col { grid-template-columns: 1fr; }
+            .interview-header { flex-direction: column; align-items: flex-start; }
+            .chat-window { height: 420px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <div class="header-icon">🎤</div>
+        <div>
+            <div class="header-title">Mock Interview Agent</div>
+            <div class="header-subtitle">AI-Powered Interview Simulation & Coaching</div>
+        </div>
+    </div>
+    <a href="index.html" class="back-link">← Back to Portfolio</a>
+</header>
+
+<div class="app-wrapper">
+
+    <!-- SETUP PANEL -->
+    <div id="setup-panel">
+        <div class="setup-title">Set Up Your Interview</div>
+        <div class="setup-desc">Configure your mock interview session. The agent will tailor questions to your role, experience, and preferred interview type.</div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="target-role">Target Role *</label>
+                <input type="text" id="target-role" placeholder="e.g., Software Engineer, Data Analyst, PM" />
+            </div>
+            <div class="form-group">
+                <label for="years-exp">Years of Experience *</label>
+                <select id="years-exp">
+                    <option value="">Select...</option>
+                    <option value="0-1">0–1 years (Entry Level)</option>
+                    <option value="2-4">2–4 years (Mid Level)</option>
+                    <option value="5-7">5–7 years (Senior Level)</option>
+                    <option value="8+">8+ years (Lead / Principal)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="industry">Industry (optional)</label>
+                <input type="text" id="industry" placeholder="e.g., FinTech, HealthTech, E-commerce" />
+            </div>
+            <div class="form-group">
+                <label for="company">Target Company (optional)</label>
+                <input type="text" id="company" placeholder="e.g., Google, Amazon, Startup" />
+            </div>
+            <div class="form-group full">
+                <label>Interview Type *</label>
+                <div class="mode-selector" id="interview-type-selector">
+                    <div class="mode-btn" data-value="behavioral">Behavioral</div>
+                    <div class="mode-btn" data-value="technical">Technical</div>
+                    <div class="mode-btn" data-value="system_design">System Design</div>
+                    <div class="mode-btn" data-value="case_study">Case Study</div>
+                    <div class="mode-btn" data-value="mixed">Mixed</div>
+                </div>
+            </div>
+            <div class="form-group full">
+                <label>Mode</label>
+                <div class="mode-selector" id="interview-mode-selector">
+                    <div class="mode-btn active" data-value="standard">Standard</div>
+                    <div class="mode-btn" data-value="strict">Strict Mode</div>
+                    <div class="mode-btn" data-value="coaching">Coaching Mode</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="start-btn" onclick="startInterview()">Begin Interview Session</button>
+    </div>
+
+    <!-- INTERVIEW PANEL -->
+    <div id="interview-panel">
+        <div class="interview-header">
+            <div class="interview-meta">
+                <span class="meta-badge" id="badge-role"></span>
+                <span class="meta-badge" id="badge-exp"></span>
+                <span class="meta-badge" id="badge-type"></span>
+                <span class="meta-badge" id="badge-mode"></span>
+            </div>
+            <div class="progress-section">
+                <span class="progress-label" id="progress-label">Q 0 / 7</span>
+                <div class="progress-bar-wrap">
+                    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-window">
+            <div class="chat-messages" id="chat-messages">
+                <div class="typing-indicator" id="typing">
+                    <div class="typing-dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <div class="hint-text">
+                    <span>💡</span>
+                    <span id="hint-label">Type your answer and press Send (or Shift+Enter for new line)</span>
+                </div>
+                <div class="input-row">
+                    <textarea id="user-input" placeholder="Type your answer here..." rows="2"></textarea>
+                    <button class="send-btn" id="send-btn" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls-row">
+            <button class="ctrl-btn hint" onclick="requestHint()">Request Hint</button>
+            <button class="ctrl-btn skip" onclick="skipQuestion()">Skip Question</button>
+            <button class="ctrl-btn end" onclick="endInterview()">End & Get Report</button>
+        </div>
+    </div>
+
+    <!-- REPORT PANEL -->
+    <div id="report-panel">
+        <div class="report-card" id="report-summary"></div>
+        <div class="report-card" id="report-qa"></div>
+        <div class="report-card" id="report-recs"></div>
+        <button class="restart-btn" onclick="restartInterview()">Start New Interview Session</button>
+    </div>
+
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+const state = {
+    role: '', exp: '', industry: '', company: '',
+    interviewType: '', mode: 'standard',
+    questionIndex: 0,
+    maxQuestions: 7,
+    questions: [],
+    responses: [],   // { question, answer, followUp, followUpAnswer }
+    currentPhase: 'main', // 'main' | 'followup' | 'hint'
+    currentQuestion: null,
+    followUpCount: 0,
+    waitingForResponse: false,
+    hintUsed: false,
+    scores: [],
+};
+
+// ─── Question Banks ───────────────────────────────────────────────────────────
+const questionBanks = {
+    behavioral: {
+        entry: [
+            "Tell me about a time you had to learn a new skill quickly to complete a task. What was your approach?",
+            "Describe a situation where you disagreed with a team member. How did you handle it?",
+            "Tell me about a project you're proud of. What was your role and what did you accomplish?",
+            "Describe a time when you made a mistake. How did you handle it and what did you learn?",
+            "Tell me about a time you had competing priorities. How did you decide what to focus on?",
+            "Give an example of when you showed initiative beyond your assigned responsibilities.",
+            "Describe a time you received critical feedback. How did you respond?",
+            "Tell me about a time you worked as part of a team to achieve a difficult goal.",
+        ],
+        mid: [
+            "Tell me about a time you led a project or initiative. What challenges did you face and how did you overcome them?",
+            "Describe a situation where you had to influence stakeholders without direct authority. What was your approach?",
+            "Tell me about a time you had to make a difficult decision with incomplete information.",
+            "Describe a situation where you improved a process or system. What was the impact?",
+            "Tell me about a time you managed a conflict between two team members.",
+            "Give an example of when you had to deliver bad news to a client or executive.",
+            "Describe a time you had to adapt your communication style for different audiences.",
+            "Tell me about a time you identified a risk before it became a problem.",
+        ],
+        senior: [
+            "Describe a situation where you had to transform how your team works. How did you drive the change?",
+            "Tell me about a time you had to make a high-stakes decision that significantly impacted your team or organization.",
+            "Describe a time when you had to influence executive leadership to change direction. What was your strategy?",
+            "Tell me about a time you built a team from scratch or significantly scaled one.",
+            "Describe your most complex stakeholder management challenge. How did you navigate it?",
+            "Tell me about a time you had to recover a failing project. What steps did you take?",
+            "Describe a situation where you set the technical or strategic vision for your area.",
+            "Tell me about a time you made a call that went against popular opinion but turned out to be right.",
+        ]
+    },
+    technical: {
+        'software_engineer': {
+            entry: [
+                "Explain the difference between a stack and a queue. When would you use each?",
+                "What is time and space complexity? Analyze the complexity of a binary search.",
+                "Explain the difference between SQL and NoSQL databases. When would you choose one over the other?",
+                "What is REST? What are the key principles of RESTful API design?",
+                "Write a function to reverse a string without using built-in reverse methods. Walk me through your approach.",
+                "What is the difference between synchronous and asynchronous programming?",
+                "Explain what a closure is in JavaScript (or your preferred language).",
+                "What are the SOLID principles in object-oriented design? Explain one in detail.",
+            ],
+            mid: [
+                "Design a function to find the two numbers in an array that sum to a target value. What is the optimal approach?",
+                "Explain database indexing. When would adding an index hurt performance?",
+                "What is the difference between horizontal and vertical scaling? When would you use each?",
+                "Explain the concept of database transactions and ACID properties.",
+                "How does garbage collection work? What are potential pitfalls?",
+                "Explain the difference between process and thread. When would you use multi-threading?",
+                "What are common caching strategies? What are the trade-offs?",
+                "Describe how you would design a rate limiter for an API.",
+            ],
+            senior: [
+                "Design a distributed task queue that can handle 1 million tasks per hour. What are the key components and trade-offs?",
+                "How would you approach migrating a monolith to microservices? What risks would you mitigate?",
+                "Describe how you would design a fault-tolerant data pipeline.",
+                "How do you ensure consistency in a distributed system? Explain CAP theorem.",
+                "What strategies would you use to optimize a slow database query in production?",
+                "How would you design the backend for a real-time collaborative editing application?",
+                "Explain event-driven architecture. What are its advantages and challenges?",
+                "How do you approach technical debt? When is it acceptable?",
+            ]
+        },
+        'data_analyst': {
+            entry: [
+                "What is the difference between mean, median, and mode? When would you use each?",
+                "Explain the difference between a left join and an inner join with an example.",
+                "What is a normal distribution? Why is it important in statistics?",
+                "How would you handle missing data in a dataset?",
+                "Explain what a p-value represents in hypothesis testing.",
+                "What is the difference between correlation and causation?",
+                "Write a SQL query to find the top 5 customers by total revenue.",
+                "What is A/B testing? Walk me through how you would design one.",
+            ],
+            mid: [
+                "Explain the difference between supervised and unsupervised machine learning.",
+                "How would you detect and handle outliers in a dataset?",
+                "What is overfitting? How do you prevent it?",
+                "Explain the concept of data normalization and when you'd use it.",
+                "How would you validate the results of an A/B test?",
+                "What is a confusion matrix? Explain precision and recall.",
+                "How would you approach building a customer churn prediction model?",
+                "Describe your process for exploring a new dataset you've never seen before.",
+            ],
+            senior: [
+                "How would you design a metrics framework for a new product launch?",
+                "Explain how you would build a recommendation engine. What algorithms would you consider?",
+                "How do you ensure data quality in a large-scale pipeline?",
+                "Describe how you would approach attribution modeling for marketing channels.",
+                "How would you communicate a complex analysis finding to a non-technical executive?",
+                "Explain time series forecasting. What are the main approaches?",
+                "How would you design an experimentation platform for a large tech company?",
+                "Describe a situation where the data told a surprising story. How did you validate it?",
+            ]
+        },
+        'default': {
+            entry: [
+                "Walk me through your understanding of the core technical skills required for this role.",
+                "What tools and technologies are you most proficient in? How have you applied them?",
+                "Describe a technical challenge you've solved recently. What was your approach?",
+                "How do you stay current with industry trends and new technologies?",
+                "Explain a technical concept from your domain to a non-technical person.",
+                "What debugging methodology do you follow when you encounter an issue?",
+                "Describe your approach to testing and quality assurance.",
+                "How do you prioritize technical work when multiple things are urgent?",
+            ],
+            mid: [
+                "Describe a technical decision you made that had significant business impact.",
+                "How do you approach code or process reviews? What do you look for?",
+                "Tell me about a time you improved performance or efficiency in a system.",
+                "How do you evaluate new technologies before adopting them?",
+                "Describe your approach to documentation.",
+                "How have you mentored junior team members technically?",
+                "Tell me about a production incident you handled. What was your process?",
+                "How do you balance technical excellence with delivery speed?",
+            ],
+            senior: [
+                "How do you set the technical direction for your team?",
+                "Describe how you've evolved your team's engineering practices.",
+                "How do you make build-vs-buy decisions?",
+                "Tell me about a time you drove a significant architectural change.",
+                "How do you manage technical risk in large projects?",
+                "Describe your approach to hiring and growing technical talent.",
+                "How do you align technical strategy with business goals?",
+                "Tell me about a time you had to sunset or migrate legacy systems.",
+            ]
+        }
+    },
+    system_design: {
+        entry: [
+            "Design a URL shortener (like bit.ly). What are the key components?",
+            "How would you design a simple to-do list application that syncs across devices?",
+            "Design a basic notification system. How would you ensure messages are delivered?",
+            "How would you design a file storage system like Dropbox at a high level?",
+        ],
+        mid: [
+            "Design Twitter's news feed. How would you handle scale and real-time updates?",
+            "Design a ride-sharing service like Uber. What are the key components and challenges?",
+            "How would you design a distributed cache? What eviction strategies would you support?",
+            "Design a real-time chat application that scales to 10 million users.",
+            "How would you design YouTube's video upload and streaming infrastructure?",
+            "Design a search autocomplete system. How would you handle performance at scale?",
+        ],
+        senior: [
+            "Design a global content delivery network (CDN). How do you handle consistency and availability?",
+            "How would you design a payment processing system? What reliability guarantees do you need?",
+            "Design a multi-region database replication strategy. How do you handle conflicts?",
+            "How would you architect a system that ingests and processes 1 billion events per day?",
+            "Design a fraud detection system for a financial platform. What are the real-time requirements?",
+            "How would you redesign a monolith into microservices? What would you migrate first?",
+        ]
+    },
+    case_study: {
+        entry: [
+            "Our mobile app's daily active users dropped 15% last month with no known cause. How would you investigate?",
+            "A client wants to know if they should invest in a new product feature. How would you advise them?",
+            "Our customer support tickets increased 40% after a recent update. How would you approach this?",
+            "How would you measure the success of a newly launched feature?",
+        ],
+        mid: [
+            "Our e-commerce platform conversion rate dropped from 4% to 2.5% after a redesign. Walk me through your investigation.",
+            "A major client is threatening to churn. What steps would you take to retain them?",
+            "You're asked to estimate the market size for a new B2B software product. How do you approach it?",
+            "The engineering team says a key feature will take 6 months; business wants it in 6 weeks. How do you navigate this?",
+            "Our app has strong engagement but poor monetization. What would you do?",
+        ],
+        senior: [
+            "You're the head of product at a startup. Growth has plateaued after 2 years. How do you diagnose and address this?",
+            "A Fortune 500 client wants to integrate your SaaS product into their on-premise infrastructure. How do you evaluate this?",
+            "Your team has three high-priority initiatives but resources for one. How do you decide what to build?",
+            "A competitor just launched a product that directly undercuts yours on price. How do you respond?",
+            "How would you structure a team reorganization to align with a new company strategy?",
+        ]
+    }
+};
+
+const followUpQuestions = {
+    behavioral: [
+        "Can you tell me more specifically about your role in that situation?",
+        "What was the measurable outcome or result of your actions?",
+        "What would you do differently if you faced this situation again?",
+        "How did that experience shape how you approach similar situations today?",
+        "What was the biggest challenge within that situation, and how did you specifically address it?",
+    ],
+    technical: [
+        "What are the trade-offs of that approach versus alternatives you considered?",
+        "How would this solution scale to 100x the current load?",
+        "What edge cases should we be aware of in this solution?",
+        "How would you test this implementation?",
+        "What would you change if you had more time to optimize this?",
+    ],
+    system_design: [
+        "How would you handle failure in that component?",
+        "What are the consistency vs. availability trade-offs in your design?",
+        "How would you monitor and alert on this system in production?",
+        "How does your design change if the scale is 10x larger?",
+        "What would you prioritize building first if you had limited resources?",
+    ],
+    case_study: [
+        "What data would you need to validate that hypothesis?",
+        "How would you prioritize which solution to implement first?",
+        "What risks do you see with this approach?",
+        "How would you measure the success of your proposed solution?",
+        "What assumptions are you making that might not hold true?",
+    ]
+};
+
+const companyContext = {
+    google: "Google values: scalability, clean system design, data-driven decisions, 'Think Big'. Expect algorithmic rigor and distributed systems knowledge.",
+    amazon: "Amazon values: Leadership Principles (Customer Obsession, Ownership, Invent & Simplify), data-driven decisions, and operational excellence.",
+    meta: "Meta values: moving fast, data-driven decisions, cross-functional collaboration, and large-scale system design.",
+    microsoft: "Microsoft values: growth mindset, customer empathy, cloud-first thinking, and inclusive design.",
+    apple: "Apple values: extreme attention to detail, user experience, privacy, and integration across hardware/software.",
+    startup: "Startups typically value: autonomy, speed, broad skill sets, entrepreneurial thinking, and impact-focused work.",
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function getExpLevel() {
+    const e = state.exp;
+    if (e === '0-1') return 'entry';
+    if (e === '2-4') return 'mid';
+    return 'senior';
+}
+
+function getRoleLower() { return state.role.toLowerCase(); }
+
+function getQuestionPool() {
+    const type = state.interviewType;
+    const level = getExpLevel();
+    const role = getRoleLower();
+
+    if (type === 'behavioral') return questionBanks.behavioral[level];
+    if (type === 'system_design') {
+        const pool = questionBanks.system_design;
+        if (level === 'entry') return pool.entry;
+        if (level === 'mid') return pool.mid;
+        return pool.senior;
+    }
+    if (type === 'case_study') {
+        const pool = questionBanks.case_study;
+        if (level === 'entry') return pool.entry;
+        if (level === 'mid') return pool.mid;
+        return pool.senior;
+    }
+    if (type === 'technical') {
+        let roleBank;
+        if (role.includes('software') || role.includes('engineer') || role.includes('developer')) {
+            roleBank = questionBanks.technical.software_engineer;
+        } else if (role.includes('data analyst') || role.includes('analyst')) {
+            roleBank = questionBanks.technical.data_analyst;
+        } else {
+            roleBank = questionBanks.technical.default;
+        }
+        return roleBank[level];
+    }
+    // mixed
+    const beh = questionBanks.behavioral[level];
+    let tech;
+    if (role.includes('software') || role.includes('engineer') || role.includes('developer')) {
+        tech = questionBanks.technical.software_engineer[level];
+    } else if (role.includes('data') || role.includes('analyst')) {
+        tech = questionBanks.technical.data_analyst[level];
+    } else {
+        tech = questionBanks.technical.default[level];
+    }
+    const mixed = [];
+    for (let i = 0; i < 4; i++) mixed.push(beh[i]);
+    for (let i = 0; i < 4; i++) mixed.push(tech[i]);
+    return mixed;
+}
+
+function buildQuestionList() {
+    const pool = getQuestionPool();
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, state.maxQuestions);
+}
+
+function getFollowUps() {
+    const type = state.interviewType;
+    if (type === 'behavioral') return followUpQuestions.behavioral;
+    if (type === 'system_design') return followUpQuestions.system_design;
+    if (type === 'case_study') return followUpQuestions.case_study;
+    return followUpQuestions.technical;
+}
+
+function scoreBadgeHtml(score) {
+    let bg, color;
+    if (score >= 8) { bg = '#d1fae5'; color = '#065f46'; }
+    else if (score >= 6) { bg = '#dbeafe'; color = '#1e40af'; }
+    else if (score >= 4) { bg = '#fef3c7'; color = '#92400e'; }
+    else { bg = '#fee2e2'; color = '#991b1b'; }
+    return `<span class="score-pill" style="background:${bg};color:${color}">${score}/10</span>`;
+}
+
+function getOverallColor(score) {
+    if (score >= 8) return { bg: '#d1fae5', color: '#065f46', label: 'Excellent' };
+    if (score >= 6) return { bg: '#dbeafe', color: '#1e40af', label: 'Good' };
+    if (score >= 4) return { bg: '#fef3c7', color: '#92400e', label: 'Needs Work' };
+    return { bg: '#fee2e2', color: '#991b1b', label: 'Keep Practicing' };
+}
+
+// ─── UI Helpers ───────────────────────────────────────────────────────────────
+function appendMessage(role, text) {
+    const container = document.getElementById('chat-messages');
+    const typing = document.getElementById('typing');
+
+    const div = document.createElement('div');
+    div.className = `message ${role}`;
+
+    const labels = { interviewer: '🎙 Interviewer', candidate: '👤 You', system: '⚙ System' };
+    div.innerHTML = `
+        <div class="message-label">${labels[role]}</div>
+        <div class="message-bubble">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}</div>
+    `;
+
+    container.insertBefore(div, typing);
+    container.scrollTop = container.scrollHeight;
+}
+
+async function showTyping(ms) {
+    const t = document.getElementById('typing');
+    t.classList.add('visible');
+    document.getElementById('chat-messages').scrollTop = 99999;
+    await sleep(ms);
+    t.classList.remove('visible');
+}
+
+function setInputEnabled(val) {
+    document.getElementById('user-input').disabled = !val;
+    document.getElementById('send-btn').disabled = !val;
+    if (val) document.getElementById('user-input').focus();
+}
+
+function updateProgress() {
+    const done = state.questionIndex;
+    const total = state.maxQuestions;
+    document.getElementById('progress-label').textContent = `Q ${done} / ${total}`;
+    document.getElementById('progress-fill').style.width = `${(done / total) * 100}%`;
+}
+
+// ─── Evaluation ───────────────────────────────────────────────────────────────
+function evaluateResponse(question, answer, type) {
+    const words = answer.trim().split(/\s+/).length;
+    let score = 5;
+    const good = [], improve = [], ideal = '';
+
+    // Length heuristic
+    if (words < 20) { score -= 2; improve.push('Response was very brief — elaborate with context, actions, and results.'); }
+    else if (words > 30) { score += 1; good.push('Good level of detail provided.'); }
+
+    // STAR for behavioral
+    if (type === 'behavioral' || type === 'mixed') {
+        const lower = answer.toLowerCase();
+        const hasSituation = lower.includes('when') || lower.includes('situation') || lower.includes('was working') || lower.includes('project') || lower.includes('team');
+        const hasAction = lower.includes('i ') || lower.includes('decided') || lower.includes('did') || lower.includes('implemented') || lower.includes('approached');
+        const hasResult = lower.includes('result') || lower.includes('outcome') || lower.includes('led to') || lower.includes('improved') || lower.includes('successfully') || lower.includes('%') || lower.includes('reduced') || lower.includes('increased');
+        if (hasSituation) { score += 1; good.push('Provided relevant situational context.'); }
+        else { improve.push('Set the scene more clearly — describe the specific situation or project.'); }
+        if (hasAction) { score += 1; good.push('Described personal actions taken.'); }
+        else { improve.push('Focus more on what YOU specifically did, not the team.'); }
+        if (hasResult) { score += 1; good.push('Mentioned outcomes or results.'); }
+        else { improve.push('Quantify results where possible (e.g., reduced time by 30%, increased NPS by 10 points).'); }
+    }
+
+    // Technical depth signals
+    if (type === 'technical' || type === 'system_design') {
+        const lower = answer.toLowerCase();
+        const hasTechTerms = lower.includes('complexity') || lower.includes('trade-off') || lower.includes('scale') || lower.includes('algorithm') || lower.includes('database') || lower.includes('cache') || lower.includes('api') || lower.includes('async') || lower.includes('index') || lower.includes('optimize');
+        if (hasTechTerms) { score += 1; good.push('Demonstrated technical vocabulary and domain knowledge.'); }
+        else { improve.push('Use precise technical terminology to demonstrate depth of knowledge.'); }
+        const hasTradeoffs = lower.includes('trade') || lower.includes('however') || lower.includes('alternative') || lower.includes('instead') || lower.includes('consider') || lower.includes('downside') || lower.includes('benefit');
+        if (hasTradeoffs) { score += 1; good.push('Addressed trade-offs, which shows structured thinking.'); }
+        else { improve.push('Always discuss trade-offs — what are the pros and cons of your approach?'); }
+    }
+
+    // Structure
+    const sentences = answer.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+    if (sentences >= 3) { score += 0.5; good.push('Well-structured, multi-sentence response.'); }
+
+    // Cap & floor
+    score = Math.min(10, Math.max(1, Math.round(score)));
+
+    // Default ideal hint
+    const idealMap = {
+        behavioral: 'Use the STAR format: Situation → Task → Action (your specific contribution) → Result (measurable impact). Keep it focused and concrete.',
+        technical: 'State your approach clearly, walk through the logic step by step, discuss time/space complexity, and proactively address edge cases and trade-offs.',
+        system_design: 'Clarify requirements first, then define the high-level architecture. Discuss components, data flow, scaling strategies, failure modes, and monitoring.',
+        case_study: 'Define the problem clearly, form hypotheses, decide what data you need, analyze options, recommend with rationale, and outline how you\'d measure success.',
+        mixed: 'For behavioral questions use STAR; for technical questions walk through logic, complexity, and trade-offs.',
+    };
+
+    return {
+        score,
+        good: good.length ? good : ['Provided a relevant response addressing the question.'],
+        improve: improve.length ? improve : ['Practice making responses more specific and quantified.'],
+        ideal: idealMap[type] || idealMap.mixed,
+    };
+}
+
+// ─── Interview Flow ───────────────────────────────────────────────────────────
+async function startInterview() {
+    const role = document.getElementById('target-role').value.trim();
+    const exp = document.getElementById('years-exp').value;
+    const interviewType = document.querySelector('#interview-type-selector .mode-btn.active')?.dataset.value;
+    const mode = document.querySelector('#interview-mode-selector .mode-btn.active')?.dataset.value || 'standard';
+
+    if (!role) { alert('Please enter your target role.'); return; }
+    if (!exp) { alert('Please select your years of experience.'); return; }
+    if (!interviewType) { alert('Please select an interview type.'); return; }
+
+    state.role = role;
+    state.exp = exp;
+    state.industry = document.getElementById('industry').value.trim();
+    state.company = document.getElementById('company').value.trim();
+    state.interviewType = interviewType;
+    state.mode = mode;
+    state.questionIndex = 0;
+    state.responses = [];
+    state.scores = [];
+    state.questions = buildQuestionList();
+    state.currentPhase = 'main';
+
+    // Set badges
+    const typeLabels = { behavioral: 'Behavioral', technical: 'Technical', system_design: 'System Design', case_study: 'Case Study', mixed: 'Mixed' };
+    const modeLabels = { standard: 'Standard', strict: 'Strict Mode', coaching: 'Coaching Mode' };
+    document.getElementById('badge-role').textContent = role;
+    document.getElementById('badge-exp').textContent = exp + ' yrs';
+    document.getElementById('badge-type').textContent = typeLabels[interviewType];
+    document.getElementById('badge-mode').textContent = modeLabels[mode];
+
+    // Show interview panel
+    document.getElementById('setup-panel').style.display = 'none';
+    const ip = document.getElementById('interview-panel');
+    ip.style.display = 'flex';
+
+    updateProgress();
+    setInputEnabled(false);
+
+    await showTyping(1800);
+
+    let intro = `Hello! I'm your interview panel today. Thank you for taking the time to meet with us.\n\nI'll be conducting a ${typeLabels[interviewType].toLowerCase()} interview for the ${role} role`;
+    if (state.company) intro += ` at ${state.company}`;
+    intro += `. We have ${state.maxQuestions} questions lined up for you today.`;
+
+    if (state.mode === 'strict') {
+        intro += `\n\nA quick note: this is a structured interview. I'll be listening carefully to the specifics of your answers, so please be precise and detailed.`;
+    } else if (state.mode === 'coaching') {
+        intro += `\n\nI'm here not just to evaluate but also to help you improve. I'll offer guidance along the way.`;
+    }
+
+    if (state.company) {
+        const companyKey = Object.keys(companyContext).find(k => state.company.toLowerCase().includes(k));
+        if (companyKey) {
+            intro += `\n\n📌 Company Context: ${companyContext[companyKey]}`;
+        }
+    }
+
+    intro += `\n\nLet's get started. Feel free to take a moment to gather your thoughts before answering each question.`;
+
+    appendMessage('interviewer', intro);
+    await sleep(600);
+    await showTyping(1200);
+    appendMessage('system', `Interview started — Question 1 of ${state.maxQuestions}`);
+    await sleep(300);
+    await askNextQuestion();
+}
+
+async function askNextQuestion() {
+    if (state.questionIndex >= state.maxQuestions) {
+        await endInterview();
+        return;
+    }
+
+    state.currentQuestion = state.questions[state.questionIndex];
+    state.currentPhase = 'main';
+    state.followUpCount = 0;
+    state.hintUsed = false;
+
+    await showTyping(state.mode === 'strict' ? 900 : 1400);
+
+    const qNum = state.questionIndex + 1;
+    let questionText = `Question ${qNum} of ${state.maxQuestions}:\n\n${state.currentQuestion}`;
+
+    if (state.mode === 'coaching' && state.interviewType === 'behavioral') {
+        questionText += `\n\n💡 Coaching tip: Structure your answer using STAR (Situation, Task, Action, Result).`;
+    }
+
+    appendMessage('interviewer', questionText);
+    state.responses.push({ question: state.currentQuestion, answer: '', followUp: '', followUpAnswer: '', score: null, feedback: null });
+    setInputEnabled(true);
+
+    document.getElementById('hint-label').textContent = state.mode === 'strict'
+        ? 'Strict mode active — hints limited'
+        : 'Shift+Enter for new line. Use "Request Hint" if you need guidance.';
+}
+
+async function sendMessage() {
+    const input = document.getElementById('user-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+    input.style.height = '';
+    setInputEnabled(false);
+    appendMessage('candidate', text);
+
+    const current = state.responses[state.responses.length - 1];
+
+    if (state.currentPhase === 'main') {
+        current.answer = text;
+        const feedback = evaluateResponse(state.currentQuestion, text, state.interviewType);
+        current.score = feedback.score;
+        current.feedback = feedback;
+        state.scores.push(feedback.score);
+
+        // Decide if follow-up
+        const shouldFollowUp = state.mode !== 'coaching' || feedback.score < 7;
+        const followUpPool = getFollowUps();
+        const followUpQ = pickRandom(followUpPool);
+
+        await showTyping(1400);
+
+        if (state.mode === 'coaching' && feedback.score < 5) {
+            appendMessage('interviewer', `Thank you. Let me give you a small nudge: think about whether you've addressed the specific outcome or result of that situation.\n\nFollow-up: ${followUpQ}`);
+        } else if (shouldFollowUp) {
+            const acks = ["Thank you.", "I see.", "Interesting.", "Good.", "I appreciate that."];
+            appendMessage('interviewer', `${pickRandom(acks)}\n\nFollow-up: ${followUpQ}`);
+        } else {
+            appendMessage('interviewer', `Thank you for that answer. Let me follow up: ${followUpQ}`);
+        }
+
+        current.followUp = followUpQ;
+        state.currentPhase = 'followup';
+        setInputEnabled(true);
+
+    } else if (state.currentPhase === 'followup') {
+        current.followUpAnswer = text;
+        state.questionIndex++;
+        updateProgress();
+
+        await showTyping(1000);
+
+        if (state.questionIndex < state.maxQuestions) {
+            const transitions = [
+                "Got it. Let's move on to the next question.",
+                "Thank you. Moving on.",
+                "Understood. Next question.",
+                "Alright. Let's continue.",
+            ];
+            appendMessage('interviewer', pickRandom(transitions));
+            await sleep(400);
+            await askNextQuestion();
+        } else {
+            appendMessage('system', 'All questions completed');
+            await sleep(500);
+            await endInterview();
+        }
+    }
+}
+
+async function requestHint() {
+    if (state.mode === 'strict') {
+        appendMessage('system', 'Hints are not available in Strict Mode.');
+        return;
+    }
+    if (state.hintUsed) {
+        appendMessage('system', 'Hint already provided for this question.');
+        return;
+    }
+    state.hintUsed = true;
+
+    await showTyping(900);
+
+    const hints = {
+        behavioral: `Hint: Structure your answer with STAR — describe the Situation briefly, your specific Task or role, the Actions you took (focus on "I", not "we"), and quantify the Result.`,
+        technical: `Hint: Start with clarifying assumptions, then describe your approach before code. Think about: time complexity, space complexity, and edge cases.`,
+        system_design: `Hint: Start by clarifying requirements (scale, read/write ratio, latency needs). Then sketch high-level components, discuss the data model, and address failure scenarios.`,
+        case_study: `Hint: Define the problem clearly first. Form 2–3 hypotheses, identify what data would confirm or rule each out, then recommend a course of action with success metrics.`,
+        mixed: `Hint: For behavioral questions use STAR. For technical questions, think aloud through your approach and address trade-offs.`,
+    };
+
+    appendMessage('interviewer', hints[state.interviewType] || hints.mixed);
+}
+
+async function skipQuestion() {
+    const current = state.responses[state.responses.length - 1];
+    if (current) {
+        current.answer = current.answer || '[Skipped]';
+        current.score = 3;
+        current.feedback = {
+            score: 3,
+            good: [],
+            improve: ['Question was skipped — practice this type of question before your real interview.'],
+            ideal: 'Practice answering fully rather than skipping.',
+        };
+        if (!state.scores.includes(current.score) || current.answer === '[Skipped]') state.scores.push(3);
+    }
+
+    state.questionIndex++;
+    updateProgress();
+
+    appendMessage('system', 'Question skipped');
+    await sleep(400);
+
+    if (state.questionIndex < state.maxQuestions) {
+        await askNextQuestion();
+    } else {
+        await endInterview();
+    }
+}
+
+async function endInterview() {
+    setInputEnabled(false);
+    document.getElementById('interview-panel').style.display = 'none';
+    generateReport();
+    document.getElementById('report-panel').style.display = 'flex';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── Report Generation ────────────────────────────────────────────────────────
+function generateReport() {
+    const scores = state.scores.filter(s => s != null && !isNaN(s));
+    const overall = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length * 10) / 10 : 5;
+    const overallColor = getOverallColor(overall);
+
+    // ── Summary ──
+    const strengths = [];
+    const weaknesses = [];
+    scores.forEach((s, i) => {
+        if (s >= 7) strengths.push(`Q${i + 1}: Strong response (${s}/10)`);
+        else if (s <= 4) weaknesses.push(`Q${i + 1}: Needs more depth and specificity (${s}/10)`);
+    });
+
+    if (state.interviewType === 'behavioral' || state.interviewType === 'mixed') {
+        if (overall >= 7) strengths.push('Good use of structured storytelling in responses');
+        else weaknesses.push('STAR framework could be applied more consistently');
+    }
+    if (state.interviewType === 'technical' || state.interviewType === 'system_design') {
+        if (overall >= 7) strengths.push('Demonstrated solid technical reasoning');
+        else weaknesses.push('More technical depth and trade-off analysis needed');
+    }
+    if (overall >= 7) strengths.push('Maintained clear and professional communication throughout');
+    if (scores.length > 0 && Math.max(...scores) - Math.min(...scores) > 3) {
+        weaknesses.push('Performance varied significantly across questions — consistency is key');
+    }
+
+    document.getElementById('report-summary').innerHTML = `
+        <div class="report-title">Performance Summary</div>
+        <div class="score-row">
+            <div class="score-circle" style="background:${overallColor.bg};color:${overallColor.color};border:3px solid ${overallColor.color}">
+                <span class="score-num">${overall}</span>
+                <span class="score-denom">/10</span>
+            </div>
+            <div class="score-details">
+                <div class="score-label">${overallColor.label}</div>
+                <div class="score-desc">${state.role} · ${state.exp} yrs · ${state.interviewType.replace('_', ' ')} interview${state.company ? ' · ' + state.company : ''}</div>
+                <div style="margin-top:0.5rem;font-size:0.85rem;color:var(--muted)">${state.responses.length} questions answered · Mode: ${state.mode}</div>
+            </div>
+        </div>
+        <div class="two-col">
+            <div class="sub-section">
+                <div class="sub-title good">Strengths</div>
+                <ul class="bullet-list">${(strengths.length ? strengths : ['Completed the interview session']).map(s => `<li>${s}</li>`).join('')}</ul>
+            </div>
+            <div class="sub-section">
+                <div class="sub-title improve">Areas for Improvement</div>
+                <ul class="bullet-list">${(weaknesses.length ? weaknesses : ['Continue practicing for more polished responses']).map(w => `<li>${w}</li>`).join('')}</ul>
+            </div>
+        </div>
+    `;
+
+    // ── Q&A Feedback ──
+    const qaHtml = state.responses.map((r, i) => {
+        const f = r.feedback || { score: 5, good: ['Attempted the question.'], improve: ['Provide more detail.'], ideal: 'N/A' };
+        const badge = scoreBadgeHtml(f.score);
+        return `
+            <div class="qa-item">
+                <div class="qa-header" onclick="toggleQA(${i})">
+                    <span>Q${i + 1}: ${r.question.substring(0, 80)}${r.question.length > 80 ? '...' : ''}</span>
+                    <span>${badge} <span style="font-size:1rem" id="qa-chevron-${i}">▼</span></span>
+                </div>
+                <div class="qa-body" id="qa-body-${i}">
+                    <div class="qa-row">
+                        <div class="qa-row-label good">Your Answer</div>
+                        <div style="color:var(--text);font-style:italic;padding:0.5rem;background:var(--candidate-bg);border-radius:6px;border:1px solid #bbf7d0">${(r.answer || '[Not answered]').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>
+                    </div>
+                    <div class="qa-row">
+                        <div class="qa-row-label good">What Was Good</div>
+                        <ul class="bullet-list">${f.good.map(g => `<li>${g}</li>`).join('')}</ul>
+                    </div>
+                    <div class="qa-row">
+                        <div class="qa-row-label improve">What Could Be Improved</div>
+                        <ul class="bullet-list">${f.improve.map(x => `<li>${x}</li>`).join('')}</ul>
+                    </div>
+                    <div class="qa-row">
+                        <div class="qa-row-label ideal">Ideal Answer Approach</div>
+                        <div style="padding:0.5rem;background:var(--interviewer-bg);border-radius:6px;border:1px solid #bfdbfe;color:var(--text)">${f.ideal}</div>
+                    </div>
+                    ${r.followUp ? `<div class="qa-row"><div class="qa-row-label" style="color:var(--muted)">Follow-up Asked</div><div style="color:var(--muted);font-style:italic">${r.followUp}</div></div>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    document.getElementById('report-qa').innerHTML = `
+        <div class="report-title">Question-by-Question Feedback</div>
+        <div style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem">Click any question to expand the detailed feedback.</div>
+        ${qaHtml}
+    `;
+
+    // ── Recommendations ──
+    const skills = [];
+    const topics = [];
+    const tips = [];
+
+    if (overall < 6) {
+        skills.push('Practice structured communication — clarity and conciseness');
+        tips.push('Record yourself answering questions out loud to improve delivery');
+    }
+    if (state.interviewType === 'behavioral' || state.interviewType === 'mixed') {
+        if (overall < 7) {
+            skills.push('STAR method storytelling');
+            topics.push('Prepare 5–8 strong STAR stories covering: leadership, conflict, failure, success, initiative');
+        }
+        tips.push('Quantify every result: use numbers, percentages, time saved, revenue impact');
+    }
+    if (state.interviewType === 'technical') {
+        skills.push('Algorithm and data structure problem-solving');
+        topics.push('LeetCode (arrays, trees, graphs, dynamic programming)');
+        topics.push('System fundamentals: databases, caching, networking, OS');
+        tips.push('Practice thinking aloud — interviewers value your reasoning process');
+    }
+    if (state.interviewType === 'system_design') {
+        skills.push('Distributed systems architecture');
+        topics.push('Study: CAP theorem, consistent hashing, load balancing, message queues, CDNs');
+        topics.push('Practice designing: URL shortener, Twitter, Uber, YouTube, Dropbox');
+        tips.push('Always start by clarifying requirements and scale before designing');
+    }
+    if (state.interviewType === 'case_study') {
+        skills.push('Structured analytical frameworks');
+        topics.push('Case frameworks: issue tree, MECE, metrics trees, 5 Whys');
+        tips.push('State your assumptions explicitly and check if the interviewer agrees');
+    }
+
+    const companyTips = [];
+    if (state.company) {
+        const cKey = Object.keys(companyContext).find(k => state.company.toLowerCase().includes(k));
+        if (cKey) companyTips.push(companyContext[cKey]);
+    }
+
+    const skillTags = [...new Set([...skills, ...topics])];
+    const tagColors = ['#dbeafe', '#d1fae5', '#fce7f3', '#ede9fe', '#fef3c7', '#e0f2fe'];
+
+    document.getElementById('report-recs').innerHTML = `
+        <div class="report-title">Recommendations</div>
+        <div class="two-col">
+            <div class="sub-section">
+                <div class="sub-title">Skills & Topics to Practice</div>
+                <div style="line-height:2.2">
+                    ${skillTags.map((t, i) => `<span class="rec-tag" style="background:${tagColors[i % tagColors.length]};color:var(--text)">${t}</span>`).join('')}
+                </div>
+            </div>
+            <div class="sub-section">
+                <div class="sub-title">Interview Strategy Tips</div>
+                <ul class="bullet-list">${tips.map(t => `<li>${t}</li>`).join('')}
+                    <li>Research the company's values and tailor examples to their culture</li>
+                    <li>Prepare 2–3 thoughtful questions to ask your interviewer</li>
+                    <li>Practice mock interviews weekly to build muscle memory</li>
+                </ul>
+            </div>
+        </div>
+        ${companyTips.length ? `
+            <div class="sub-section" style="margin-top:1rem;padding:1rem;background:var(--interviewer-bg);border-radius:8px;border:1px solid #bfdbfe">
+                <div class="sub-title">Company-Specific Notes</div>
+                <p style="font-size:0.9rem;color:var(--text)">${companyTips[0]}</p>
+            </div>` : ''}
+    `;
+}
+
+function toggleQA(i) {
+    const body = document.getElementById(`qa-body-${i}`);
+    const chevron = document.getElementById(`qa-chevron-${i}`);
+    body.classList.toggle('open');
+    chevron.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+function restartInterview() {
+    // Reset state
+    Object.assign(state, {
+        role:'', exp:'', industry:'', company:'',
+        interviewType:'', mode:'standard',
+        questionIndex:0, maxQuestions:7,
+        questions:[], responses:[], scores:[],
+        currentPhase:'main', currentQuestion:null,
+        followUpCount:0, waitingForResponse:false, hintUsed:false,
+    });
+
+    // Clear chat
+    const msgs = document.getElementById('chat-messages');
+    const typing = document.getElementById('typing');
+    msgs.innerHTML = '';
+    msgs.appendChild(typing);
+
+    // Reset form
+    document.getElementById('target-role').value = '';
+    document.getElementById('years-exp').value = '';
+    document.getElementById('industry').value = '';
+    document.getElementById('company').value = '';
+    document.querySelectorAll('#interview-type-selector .mode-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#interview-mode-selector .mode-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('#interview-mode-selector [data-value="standard"]').classList.add('active');
+
+    document.getElementById('report-panel').style.display = 'none';
+    document.getElementById('interview-panel').style.display = 'none';
+    document.getElementById('setup-panel').style.display = 'block';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── UI Event Setup ───────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    // Mode selectors
+    document.querySelectorAll('.mode-selector').forEach(selector => {
+        selector.addEventListener('click', e => {
+            const btn = e.target.closest('.mode-btn');
+            if (!btn) return;
+            selector.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+
+    // Textarea: Enter sends, Shift+Enter newline
+    document.getElementById('user-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // Auto-resize textarea
+    document.getElementById('user-input').addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 140) + 'px';
+    });
+});
+</script>
+
+</body>
+</html>
