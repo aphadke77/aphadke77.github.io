@@ -3,26 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abhijit's Portfolio</title>
+    <title>Abhijit Phadke | Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #3498db;
-            --primary-dark: #2980b9;
-            --secondary: #2ecc71;
-            --accent: #9b59b6;
-            --dark: #2c3e50;
-            --gray-900: #1a1a2e;
-            --gray-800: #16213e;
-            --gray-700: #0f3460;
-            --light: #ecf0f1;
-            --white: #ffffff;
-            --text-dark: #333;
-            --text-light: #666;
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
-            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.12);
-            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.15);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --primary: #0f172a;
+            --secondary: #1e3a5f;
+            --accent: #3b82f6;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
         }
 
         * {
@@ -32,18 +25,17 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
             line-height: 1.6;
-            color: var(--text-dark);
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
-            min-height: 100vh;
         }
 
-        /* Header */
+        /* ── Header ── */
         header {
-            background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 50%, var(--gray-700) 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1e40af 100%);
             color: white;
-            padding: 5rem 2rem;
+            padding: 4rem 2rem 3rem;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -52,483 +44,486 @@
         header::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.5;
+            top: -60px; left: -60px;
+            width: 220px; height: 220px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.04);
         }
 
-        header > * {
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -80px; right: -40px;
+            width: 300px; height: 300px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .header-inner {
             position: relative;
             z-index: 1;
         }
 
         .avatar {
-            width: 120px;
-            height: 120px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
+            font-size: 2rem;
             font-weight: 700;
             color: white;
-            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.4);
+            margin: 0 auto 1.25rem;
+            border: 3px solid rgba(255,255,255,0.25);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
         }
 
         header h1 {
-            font-size: 2.75rem;
+            font-size: 2.4rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #fff 0%, #e0e0e0 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.4rem;
         }
 
         .subtitle {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 300;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255,255,255,0.75);
             margin-bottom: 1.5rem;
         }
 
-        .social-header {
+        .tagline {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.55);
+            max-width: 520px;
+            margin: 0 auto 1.75rem;
+        }
+
+        .header-links {
             display: flex;
             justify-content: center;
             gap: 1rem;
-            margin-top: 1.5rem;
+            flex-wrap: wrap;
         }
 
-        .social-header a {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            display: flex;
+        .header-links a {
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1.1rem;
+            border-radius: 9999px;
+            background: rgba(255,255,255,0.12);
             color: white;
             text-decoration: none;
-            transition: var(--transition);
-            backdrop-filter: blur(10px);
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: background 0.2s, transform 0.2s;
         }
 
-        .social-header a:hover {
-            background: var(--primary);
-            transform: translateY(-3px);
-            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
+        .header-links a:hover {
+            background: rgba(255,255,255,0.22);
+            transform: translateY(-2px);
         }
 
-        /* Main Content */
+        /* ── Layout ── */
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 3rem 1.5rem;
+            padding: 0 1.5rem;
         }
 
-        .section-header {
-            text-align: center;
-            margin-bottom: 3rem;
+        .content {
+            padding: 3rem 0 4rem;
         }
 
-        .section-header h2 {
-            font-size: 2rem;
-            color: var(--dark);
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent);
             margin-bottom: 0.5rem;
         }
 
-        .section-header p {
-            color: var(--text-light);
-            font-size: 1.1rem;
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.4rem;
         }
 
-        /* Cards Grid */
+        .section-desc {
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        /* ── Grid ── */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.5rem;
         }
 
+        /* ── Cards ── */
         .card {
-            background: var(--white);
-            border-radius: 16px;
+            background: var(--card-bg);
+            border-radius: 14px;
             overflow: hidden;
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
-            cursor: pointer;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
             text-decoration: none;
             color: inherit;
-            display: block;
+            display: flex;
+            flex-direction: column;
         }
 
         .card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-lg);
+            transform: translateY(-6px);
+            box-shadow: 0 16px 32px rgba(0,0,0,0.12);
         }
 
         .card-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
+            height: 72px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 1.75rem;
-            margin-bottom: 1rem;
+            padding: 0 1.25rem;
+            font-size: 1.8rem;
         }
 
-        .card-icon.blue { background: linear-gradient(135deg, #3498db, #2980b9); color: white; }
-        .card-icon.green { background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; }
-        .card-icon.purple { background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white; }
-        .card-icon.orange { background: linear-gradient(135deg, #e67e22, #d35400); color: white; }
-        .card-icon.red { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
-        .card-icon.teal { background: linear-gradient(135deg, #1abc9c, #16a085); color: white; }
-        .card-icon.yellow { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; }
-        .card-icon.pink { background: linear-gradient(135deg, #fd79a8, #e84393); color: white; }
-
-        .card-content {
-            padding: 1.5rem;
+        .card-body {
+            padding: 1rem 1.25rem 1.4rem;
+            flex: 1;
         }
 
-        .card h3 {
-            font-size: 1.2rem;
+        .card-title {
+            font-size: 1rem;
             font-weight: 600;
-            color: var(--dark);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.35rem;
+            color: var(--text);
         }
 
-        .card p {
-            font-size: 0.9rem;
-            color: var(--text-light);
+        .card-desc {
+            font-size: 0.85rem;
+            color: var(--muted);
             line-height: 1.5;
         }
 
-        .card-arrow {
-            position: absolute;
-            bottom: 1.5rem;
-            right: 1.5rem;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--light);
+        .card-footer-link {
+            padding: 0.75rem 1.25rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent);
+            border-top: 1px solid var(--border);
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: var(--transition);
+            gap: 0.3rem;
         }
 
-        .card:hover .card-arrow {
-            background: var(--primary);
-            color: white;
+        .card-footer-link::after {
+            content: '→';
+            transition: transform 0.2s;
         }
 
-        /* Tools Grid */
-        .tools-section {
-            margin-top: 4rem;
+        .card:hover .card-footer-link::after {
+            transform: translateX(4px);
         }
 
-        /* Footer */
+        /* gradient backgrounds for icons */
+        .g-blue    { background: linear-gradient(135deg, #3b82f6, #6366f1); }
+        .g-green   { background: linear-gradient(135deg, #10b981, #059669); }
+        .g-orange  { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .g-cyan    { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .g-purple  { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .g-indigo  { background: linear-gradient(135deg, #6366f1, #4338ca); }
+        .g-red     { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .g-navy    { background: linear-gradient(135deg, #1d4ed8, #1e3a5f); }
+        .g-teal    { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+        .g-slate   { background: linear-gradient(135deg, #64748b, #334155); }
+        .g-rose    { background: linear-gradient(135deg, #f43f5e, #e11d48); }
+        .g-amber   { background: linear-gradient(135deg, #f59e0b, #b45309); }
+        .g-emerald { background: linear-gradient(135deg, #34d399, #059669); }
+        .g-sky     { background: linear-gradient(135deg, #38bdf8, #0284c7); }
+        .g-violet  { background: linear-gradient(135deg, #a78bfa, #7c3aed); }
+        .g-lime    { background: linear-gradient(135deg, #a3e635, #65a30d); }
+        .g-pink    { background: linear-gradient(135deg, #f472b6, #be185d); }
+
+        /* ── Divider ── */
+        .section-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 3rem 0 2.5rem;
+        }
+
+        /* ── Footer ── */
         footer {
-            background: var(--dark);
-            color: white;
-            padding: 3rem 0;
-            margin-top: 4rem;
+            background: var(--primary);
+            color: rgba(255,255,255,0.7);
+            padding: 2.5rem 0;
+            text-align: center;
         }
 
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-            text-align: center;
+        footer p {
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
         }
 
         .footer-links {
             display: flex;
-            flex-wrap: wrap;
             justify-content: center;
-            gap: 1rem;
-            margin-top: 1.5rem;
+            gap: 1.25rem;
+            flex-wrap: wrap;
         }
 
         .footer-links a {
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255,255,255,0.6);
             text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            transition: var(--transition);
-            font-size: 0.9rem;
+            font-size: 0.82rem;
+            transition: color 0.2s;
         }
 
         .footer-links a:hover {
-            background: var(--primary);
             color: white;
         }
 
-        .copyright {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            header {
-                padding: 3rem 1.5rem;
-            }
-
-            header h1 {
-                font-size: 2rem;
-            }
-
-            .grid {
-                grid-template-columns: 1fr;
-            }
-
-            .container {
-                padding: 2rem 1rem;
-            }
+        /* ── Responsive ── */
+        @media (max-width: 640px) {
+            header h1 { font-size: 1.9rem; }
+            .grid { grid-template-columns: 1fr; }
+            .section-title { font-size: 1.3rem; }
         }
     </style>
 </head>
 <body>
+
+    <!-- ══ HEADER ══ -->
     <header>
-        <div class="avatar">AP</div>
-        <h1>Abhijit Phadke</h1>
-        <p class="subtitle">Software Developer & Technology Enthusiast</p>
-        <div class="social-header">
-            <a href="https://github.com/aphadke77" target="_blank" title="GitHub">
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-            </a>
-            <a href="https://linkedin.com/in/abhijit-phadke" target="_blank" title="LinkedIn">
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-            </a>
-            <a href="mailto:phadke.abhijit@gmail.com" title="Email">
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M0 3v18h24v-18h-24zm21.518 2l-9.518 7.713-9.518-7.713h19.036zm-19.518 14v-11.817l10 8.104 10-8.104v11.817h-20z"/></svg>
-            </a>
+        <div class="header-inner">
+            <div class="avatar">AP</div>
+            <h1>Abhijit Phadke</h1>
+            <p class="subtitle">Software Developer &amp; Technology Enthusiast</p>
+            <p class="tagline">Versatile technology leader with expertise in data engineering, cloud technologies, and project management.</p>
+            <div class="header-links">
+                <a href="https://github.com/aphadke77" target="_blank">&#128025; GitHub</a>
+                <a href="https://linkedin.com/in/abhijit-phadke" target="_blank">&#128101; LinkedIn</a>
+                <a href="mailto:phadke.abhijit@gmail.com">&#9993; Email</a>
+                <a href="https://theaisole.com" target="_blank">&#127758; theaisole</a>
+            </div>
         </div>
     </header>
-    
-    <main class="container">
-        <div class="section-header">
-            <h2>About Me</h2>
-            <p>Versatile technology leader with expertise in data engineering, cloud technologies, and project management.</p>
-        </div>
 
-        <div class="grid">
-            <a href="Profile.html" class="card">
-                <div class="card-content">
-                    <div class="card-icon blue">👤</div>
-                    <h3>Profile</h3>
-                    <p>Learn more about my background, experience, and areas of expertise.</p>
-                </div>
-            </a>
-            
-            <a href="Story.html" class="card">
-                <div class="card-content">
-                    <div class="card-icon green">📖</div>
-                    <h3>Skills & Stories</h3>
-                    <p>Explore my technical skills, competencies, and professional journey.</p>
-                </div>
-            </a>
-        </div>
+    <!-- ══ MAIN ══ -->
+    <main class="content">
+        <div class="container">
 
-        <section class="tools-section">
-            <div class="section-header">
-                <h2>Tools & Resources</h2>
-                <p>Handy tools and comprehensive guides for developers</p>
-            </div>
+            <!-- About Me -->
+            <div class="section-label">About Me</div>
+            <div class="section-title">Profile &amp; Background</div>
+            <p class="section-desc">Learn more about my experience, skills, and professional journey.</p>
 
             <div class="grid">
-                <a href="counter.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon teal">🔢</div>
-                        <h3>Counter</h3>
-                        <p>A simple counter application for tracking and counting.</p>
+                <a href="Profile.html" class="card">
+                    <div class="card-icon g-blue">&#128100;</div>
+                    <div class="card-body">
+                        <div class="card-title">Profile</div>
+                        <div class="card-desc">My background, experience, and areas of expertise as a versatile technology leader.</div>
                     </div>
-                </a>
-                
-                <a href="bash-cheatsheet.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon purple">💻</div>
-                        <h3>Bash Cheatsheet</h3>
-                        <p>Comprehensive guide to Bash commands and scripting techniques.</p>
-                    </div>
-                </a>
-                
-                <a href="git-cheatsheet.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon orange">📦</div>
-                        <h3>Git Commands</h3>
-                        <p>Essential Git commands and workflows for version control.</p>
-                    </div>
-                </a>
-                
-                <a href="llm-tools.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon pink">🤖</div>
-                        <h3>LLM Tools</h3>
-                        <p>Collection of tools related to Large Language Models.</p>
-                    </div>
-                </a>
-                
-                <a href="pandas-eda-cheatsheet.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon blue">📊</div>
-                        <h3>Pandas Cheatsheet</h3>
-                        <p>Quick reference for Pandas data analysis and exploration.</p>
-                    </div>
-                </a>
-                
-                <a href="pasgen.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon green">🔐</div>
-                        <h3>Password Generator</h3>
-                        <p>Tool to create secure, random passwords for your accounts.</p>
-                    </div>
-                </a>
-                
-                <a href="certificate-generator.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon yellow">🎓</div>
-                        <h3>Certificate Generator</h3>
-                        <p>Create professional certificates of completion in PDF format.</p>
-                    </div>
-                </a>
-                
-                <a href="password-strength-checker.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon red">🛡️</div>
-                        <h3>Password Strength</h3>
-                        <p>Check the strength of your passwords with detailed feedback.</p>
-                    </div>
+                    <div class="card-footer-link">View Profile</div>
                 </a>
 
-                <a href="password-validator.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon purple">🔎</div>
-                        <h3>Password Validator</h3>
-                        <p>Validate passwords against security criteria and requirements.</p>
+                <a href="Story.html" class="card">
+                    <div class="card-icon g-green">&#127775;</div>
+                    <div class="card-body">
+                        <div class="card-title">Skills &amp; Stories</div>
+                        <div class="card-desc">Technical competencies, professional milestones, and my journey in tech.</div>
                     </div>
-                </a>
-
-                <a href="resume-builder.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon teal">📄</div>
-                        <h3>Resume Builder</h3>
-                        <p>Create professional resumes with customizable templates.</p>
-                    </div>
-                </a>
-
-                <a href="storage-cleaner.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon orange">💾</div>
-                        <h3>Storage Cleaner</h3>
-                        <p>Analyze disk storage, find duplicates, and get cleanup recommendations.</p>
-                    </div>
-                </a>
-                
-                <a href="cyber-kill-chain-quiz.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon yellow">🎯</div>
-                        <h3>Cyber Kill Chain Quiz</h3>
-                        <p>Test your knowledge of the cyber kill chain framework.</p>
-                    </div>
-                </a>
-                
-                <a href="india-cricket.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon orange">🏏</div>
-                        <h3>Cricket Analysis</h3>
-                        <p>Analyse performance of Indian Cricket Team.</p>
-                    </div>
-                </a>
-                
-                <a href="theaisole.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon blue">🌐</div>
-                        <h3>theaisole</h3>
-                        <p>Technology solutions for everyone - products, services, and more.</p>
-                    </div>
-                </a>
-                
-                <a href="antivirus_info.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon green">🛡️</div>
-                        <h3>Antivirus</h3>
-                        <p>Simple and lightweight antivirus application for macOS and Windows.</p>
-                    </div>
-                </a>
-                
-                <a href="rag-workflow.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon purple">🔍</div>
-                        <h3>RAG Workflow</h3>
-                        <p>Explore Retrieval Augmented Generation concepts.</p>
-                    </div>
-                </a>
-                
-                <a href="agile-scrum-website.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon teal">📋</div>
-                        <h3>Agile & Scrum</h3>
-                        <p>Comprehensive guide to Agile methodology and Scrum framework.</p>
-                    </div>
-                </a>
-                
-                <a href="morse-code-translator.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon green">📡</div>
-                        <h3>Morse Code</h3>
-                        <p>Translate text to Morse code and vice versa.</p>
-                    </div>
-                </a>
-                
-                <a href="todo-list.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon blue">✅</div>
-                        <h3>To-Do List</h3>
-                        <p>Interactive task manager with local storage.</p>
-                    </div>
-                </a>
-                
-                <a href="virtualbox-cli.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon pink">🖥️</div>
-                        <h3>VirtualBox CLI</h3>
-                        <p>Complete reference for VirtualBox command-line interface.</p>
-                    </div>
-                </a>
-                
-                <a href="mock-interview.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon yellow">🎤</div>
-                        <h3>Mock Interview</h3>
-                        <p>AI-powered mock interview simulation with feedback and scoring.</p>
-                    </div>
+                    <div class="card-footer-link">View Skills</div>
                 </a>
             </div>
-        </section>
+
+            <hr class="section-divider">
+
+            <!-- Development Tools -->
+            <div class="section-label">Development</div>
+            <div class="section-title">Developer Tools &amp; Cheatsheets</div>
+            <p class="section-desc">Quick references and utilities for everyday development tasks.</p>
+
+            <div class="grid">
+                <a href="bash-cheatsheet.html" class="card">
+                    <div class="card-icon g-slate">&#128187;</div>
+                    <div class="card-body">
+                        <div class="card-title">Bash Cheatsheet</div>
+                        <div class="card-desc">Comprehensive guide to Bash commands, scripting techniques, and shell productivity.</div>
+                    </div>
+                    <div class="card-footer-link">Open Cheatsheet</div>
+                </a>
+
+                <a href="git-cheatsheet.html" class="card">
+                    <div class="card-icon g-orange">&#128229;</div>
+                    <div class="card-body">
+                        <div class="card-title">Git Commands</div>
+                        <div class="card-desc">Essential Git commands for version control, branching, and collaboration workflows.</div>
+                    </div>
+                    <div class="card-footer-link">Open Cheatsheet</div>
+                </a>
+
+                <a href="pandas-eda-cheatsheet.html" class="card">
+                    <div class="card-icon g-indigo">&#128202;</div>
+                    <div class="card-body">
+                        <div class="card-title">Pandas Cheatsheet</div>
+                        <div class="card-desc">Quick reference for Pandas data analysis, EDA operations, and DataFrame manipulation.</div>
+                    </div>
+                    <div class="card-footer-link">Open Cheatsheet</div>
+                </a>
+
+                <a href="virtualbox-cli.html" class="card">
+                    <div class="card-icon g-violet">&#128230;</div>
+                    <div class="card-body">
+                        <div class="card-title">VirtualBox CLI</div>
+                        <div class="card-desc">Command-line reference for managing VirtualBox VMs, snapshots, and networking.</div>
+                    </div>
+                    <div class="card-footer-link">Open Cheatsheet</div>
+                </a>
+
+                <a href="counter.html" class="card">
+                    <div class="card-icon g-teal">&#128290;</div>
+                    <div class="card-body">
+                        <div class="card-title">Counter</div>
+                        <div class="card-desc">A simple interactive counter application for tracking numbers and counts.</div>
+                    </div>
+                    <div class="card-footer-link">Open Tool</div>
+                </a>
+
+                <a href="morse-code-translator.html" class="card">
+                    <div class="card-icon g-amber">&#128225;</div>
+                    <div class="card-body">
+                        <div class="card-title">Morse Code Translator</div>
+                        <div class="card-desc">Translate text to Morse code and back with audio playback support.</div>
+                    </div>
+                    <div class="card-footer-link">Open Tool</div>
+                </a>
+
+                <a href="todo-list.html" class="card">
+                    <div class="card-icon g-sky">&#9989;</div>
+                    <div class="card-body">
+                        <div class="card-title">To-Do List</div>
+                        <div class="card-desc">Manage tasks and stay organized with this lightweight to-do application.</div>
+                    </div>
+                    <div class="card-footer-link">Open App</div>
+                </a>
+
+                <a href="rrsp-calculator.html" class="card">
+                    <div class="card-icon g-lime">&#128181;</div>
+                    <div class="card-body">
+                        <div class="card-title">RRSP Calculator</div>
+                        <div class="card-desc">Calculate RRSP contribution room, tax savings, and retirement projections.</div>
+                    </div>
+                    <div class="card-footer-link">Open Calculator</div>
+                </a>
+            </div>
+
+            <hr class="section-divider">
+
+            <!-- AI & Data -->
+            <div class="section-label">AI &amp; Data</div>
+            <div class="section-title">Machine Learning &amp; AI Tools</div>
+            <p class="section-desc">Explore LLMs, RAG pipelines, and data-driven analysis.</p>
+
+            <div class="grid">
+                <a href="llm-tools.html" class="card">
+                    <div class="card-icon g-purple">&#129302;</div>
+                    <div class="card-body">
+                        <div class="card-title">LLM Tools</div>
+                        <div class="card-desc">A curated collection of tools and resources for working with Large Language Models.</div>
+                    </div>
+                    <div class="card-footer-link">Explore Tools</div>
+                </a>
+
+                <a href="rag-workflow.html" class="card">
+                    <div class="card-icon g-rose">&#128269;</div>
+                    <div class="card-body">
+                        <div class="card-title">RAG Workflow Explorer</div>
+                        <div class="card-desc">Interactive guide to Retrieval-Augmented Generation pipelines and architecture.</div>
+                    </div>
+                    <div class="card-footer-link">Explore RAG</div>
+                </a>
+
+                <a href="india-cricket.html" class="card">
+                    <div class="card-icon g-emerald">&#127955;</div>
+                    <div class="card-body">
+                        <div class="card-title">Cricket Analysis</div>
+                        <div class="card-desc">Data-driven performance analysis of the Indian cricket team with visualizations.</div>
+                    </div>
+                    <div class="card-footer-link">View Analysis</div>
+                </a>
+            </div>
+
+            <hr class="section-divider">
+
+            <!-- Security -->
+            <div class="section-label">Security</div>
+            <div class="section-title">Cybersecurity Tools &amp; Learning</div>
+            <p class="section-desc">Password utilities, security awareness, and cybersecurity knowledge.</p>
+
+            <div class="grid">
+                <a href="pasgen.html" class="card">
+                    <div class="card-icon g-red">&#128274;</div>
+                    <div class="card-body">
+                        <div class="card-title">Password Generator</div>
+                        <div class="card-desc">Create strong, randomized passwords with customizable length and character sets.</div>
+                    </div>
+                    <div class="card-footer-link">Generate Password</div>
+                </a>
+
+                <a href="sentence-password-generator.html" class="card">
+                    <div class="card-icon g-purple">&#128272;</div>
+                    <div class="card-body">
+                        <div class="card-title">Sentence Password Generator</div>
+                        <div class="card-desc">Turn a memorable sentence into a strong password using scrambling, leet substitutions, and word-length encoding.</div>
+                    </div>
+                    <div class="card-footer-link">Generate from Sentence</div>
+                </a>
+
+                <a href="cyber-kill-chain-quiz.html" class="card">
+                    <div class="card-icon g-navy">&#127919;</div>
+                    <div class="card-body">
+                        <div class="card-title">Cyber Kill Chain Quiz</div>
+                        <div class="card-desc">Test your knowledge of the Lockheed Martin Cyber Kill Chain framework and attack phases.</div>
+                    </div>
+                    <div class="card-footer-link">Take Quiz</div>
+                </a>
+
+                <a href="agile-scrum-website.html" class="card">
+                    <div class="card-icon g-cyan">&#128204;</div>
+                    <div class="card-body">
+                        <div class="card-title">Agile &amp; Scrum Guide</div>
+                        <div class="card-desc">Comprehensive reference for Agile methodologies, Scrum ceremonies, and best practices.</div>
+                    </div>
+                    <div class="card-footer-link">Read Guide</div>
+                </a>
+            </div>
+
+        </div>
     </main>
-    
+
+    <!-- ══ FOOTER ══ -->
     <footer>
-        <div class="footer-content">
+        <div class="container">
             <p>&copy; 2025 Abhijit Phadke. All rights reserved.</p>
             <div class="footer-links">
-                <a href="https://github.com/yourusername" target="_blank">GitHub</a>
-                <a href="https://linkedin.com/in/yourusername" target="_blank">LinkedIn</a>
+                <a href="https://github.com/aphadke77" target="_blank">GitHub</a>
+                <a href="https://linkedin.com/in/abhijit-phadke" target="_blank">LinkedIn</a>
                 <a href="mailto:phadke.abhijit@gmail.com">Email</a>
                 <a href="Profile.html">Profile</a>
                 <a href="Story.html">Skills</a>
+                <a href="https://theaisole.com" target="_blank">theaisole</a>
             </div>
         </div>
     </footer>
+
 </body>
 </html>

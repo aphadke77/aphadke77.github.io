@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RRSP Returns Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --secondary: #1e3a5f;
+            --accent: #3b82f6;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --green: #10b981;
+            --purple: #8b5cf6;
+            --amber: #f59e0b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1e40af 100%);
+            color: white;
+            padding: 3rem 2rem 2.5rem;
+            text-align: center;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: white; }
+
+        header h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.4rem; }
+        header p  { font-size: 0.95rem; opacity: 0.75; }
+
+        main {
+            max-width: 1000px;
+            margin: 2.5rem auto;
+            padding: 0 1.25rem 4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 1.75rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+
+        .card h2 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 1.25rem;
+        }
+
+        /* Two-col layout */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        /* Sliders */
+        .slider-group { margin-bottom: 1.25rem; }
+        .slider-group:last-child { margin-bottom: 0; }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .slider-value {
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 1px 4px rgba(59,130,246,0.4);
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        /* Summary cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .stat-card {
+            border-radius: 10px;
+            padding: 1.1rem 1.25rem;
+            border-left: 4px solid transparent;
+        }
+
+        .stat-card.blue   { background: #eff6ff; border-left-color: var(--accent); }
+        .stat-card.green  { background: #ecfdf5; border-left-color: var(--green); }
+        .stat-card.purple { background: #f5f3ff; border-left-color: var(--purple); }
+        .stat-card.amber  { background: #fffbeb; border-left-color: var(--amber); }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--muted);
+            margin-bottom: 0.35rem;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stat-card.blue   .stat-value { color: var(--accent); }
+        .stat-card.green  .stat-value { color: var(--green); }
+        .stat-card.purple .stat-value { color: var(--purple); }
+        .stat-card.amber  .stat-value { color: var(--amber); }
+
+        .stat-sub {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 0.3rem;
+        }
+
+        /* Chart */
+        .chart-wrap {
+            width: 100%;
+            overflow: hidden;
+        }
+
+        svg.chart {
+            width: 100%;
+            height: 320px;
+            display: block;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* Tooltip */
+        #chartTooltip {
+            position: fixed;
+            background: #1e293b;
+            color: white;
+            padding: 0.6rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s;
+            z-index: 100;
+            line-height: 1.7;
+            min-width: 140px;
+        }
+
+        /* Info accordion */
+        .accordion-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 0;
+            transition: color 0.2s;
+        }
+
+        .accordion-btn:hover { color: var(--accent); }
+
+        .accordion-icon {
+            font-size: 1.3rem;
+            transition: transform 0.25s;
+            color: var(--accent);
+        }
+
+        .accordion-icon.open { transform: rotate(45deg); }
+
+        .accordion-body {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.35s ease;
+        }
+
+        .accordion-body.open { max-height: 1200px; }
+
+        .withdrawal-section {
+            margin-top: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .withdrawal-card {
+            border-radius: 10px;
+            padding: 1.25rem;
+            border-left: 4px solid transparent;
+        }
+
+        .withdrawal-card.green  { background: #ecfdf5; border-left-color: var(--green); }
+        .withdrawal-card.blue   { background: #eff6ff; border-left-color: var(--accent); }
+        .withdrawal-card.amber  { background: #fffbeb; border-left-color: var(--amber); }
+
+        .withdrawal-card h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .withdrawal-card .amount {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .withdrawal-card.green  .amount { color: var(--green); }
+        .withdrawal-card.blue   .amount { color: var(--accent); }
+        .withdrawal-card.amber  .amount { color: var(--amber); }
+
+        .withdrawal-card ul {
+            padding-left: 1.1rem;
+            font-size: 0.82rem;
+            color: var(--text);
+            line-height: 1.8;
+        }
+
+        .withdrawal-card .example {
+            font-size: 0.8rem;
+            font-style: italic;
+            color: var(--muted);
+            margin-top: 0.5rem;
+        }
+
+        .note {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            font-size: 0.82rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        @media (max-width: 620px) {
+            .two-col      { grid-template-columns: 1fr; }
+            .summary-grid { grid-template-columns: 1fr; }
+            .stat-value   { font-size: 1.35rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="index.html" class="back-link">&#8592; Back to Portfolio</a>
+    <h1>RRSP Returns Calculator</h1>
+    <p>Calculate your RRSP growth and retirement savings potential</p>
+</header>
+
+<main>
+
+    <!-- Inputs + Summary -->
+    <div class="two-col">
+
+        <div class="card">
+            <h2>Your Contributions</h2>
+
+            <div class="slider-group">
+                <div class="slider-label">
+                    <span>Initial Amount</span>
+                    <span class="slider-value" id="lbl-initial">$10,000</span>
+                </div>
+                <input type="range" id="s-initial" min="0" max="100000" step="1000" value="10000">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-label">
+                    <span>Monthly Contribution</span>
+                    <span class="slider-value" id="lbl-monthly">$500</span>
+                </div>
+                <input type="range" id="s-monthly" min="0" max="3000" step="50" value="500">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-label">
+                    <span>Expected Annual Return</span>
+                    <span class="slider-value" id="lbl-return">7%</span>
+                </div>
+                <input type="range" id="s-return" min="0" max="15" step="0.5" value="7">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-label">
+                    <span>Time Horizon</span>
+                    <span class="slider-value" id="lbl-years">25 yrs</span>
+                </div>
+                <input type="range" id="s-years" min="1" max="40" step="1" value="25">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-label">
+                    <span>Marginal Tax Rate</span>
+                    <span class="slider-value" id="lbl-tax">30%</span>
+                </div>
+                <input type="range" id="s-tax" min="0" max="50" step="1" value="30">
+            </div>
+        </div>
+
+        <div class="summary-grid" style="align-content:start">
+            <div class="stat-card blue">
+                <div class="stat-label">Final Balance</div>
+                <div class="stat-value" id="out-balance">—</div>
+                <div class="stat-sub" id="out-years-label">After 25 years</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-label">Investment Earnings</div>
+                <div class="stat-value" id="out-earnings">—</div>
+                <div class="stat-sub">Growth from returns</div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-label">Total Contributed</div>
+                <div class="stat-value" id="out-contributed">—</div>
+                <div class="stat-sub">Your contributions</div>
+            </div>
+            <div class="stat-card amber">
+                <div class="stat-label">Est. Tax Savings</div>
+                <div class="stat-value" id="out-tax">—</div>
+                <div class="stat-sub" id="out-tax-label">At 30% tax rate</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Chart -->
+    <div class="card">
+        <h2>Growth Over Time</h2>
+        <div class="chart-wrap">
+            <svg class="chart" id="chart" viewBox="0 0 800 300" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="chart-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Total Balance</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div>Contributions</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Earnings</div>
+        </div>
+    </div>
+
+    <!-- Withdrawal accordion -->
+    <div class="card">
+        <button class="accordion-btn" onclick="toggleAccordion()">
+            <span>Penalty-Free RRSP Withdrawal Options</span>
+            <span class="accordion-icon" id="acc-icon">+</span>
+        </button>
+        <div class="accordion-body" id="acc-body">
+            <div class="withdrawal-section">
+                <div class="withdrawal-card green">
+                    <h3>&#127968; Home Buyers' Plan (HBP)</h3>
+                    <div class="amount">Withdraw up to $60,000 &nbsp;($120,000 for couples)</div>
+                    <ul>
+                        <li>Use funds to buy or build a qualifying home</li>
+                        <li>Must be a first-time home buyer (or not owned in past 4 years)</li>
+                        <li><strong>Repayment:</strong> 15 years, starting 2 years after withdrawal</li>
+                        <li>Missed repayments are added to taxable income</li>
+                        <li>Minimum annual repayment: withdrawal ÷ 15</li>
+                    </ul>
+                    <p class="example">Example: Withdraw $60,000 → Repay $4,000/year for 15 years</p>
+                </div>
+
+                <div class="withdrawal-card blue">
+                    <h3>&#127979; Lifelong Learning Plan (LLP)</h3>
+                    <div class="amount">Withdraw up to $10,000/year &nbsp;(max $20,000 total)</div>
+                    <ul>
+                        <li>Use funds for full-time education or training for you or your spouse</li>
+                        <li>Must be enrolled in a qualifying educational program</li>
+                        <li>Can withdraw over a 4-year period</li>
+                        <li><strong>Repayment:</strong> 10 years, starting 5 years after first withdrawal</li>
+                        <li>Missed repayments are added to taxable income</li>
+                    </ul>
+                    <p class="example">Example: Withdraw $20,000 total → Repay $2,000/year for 10 years</p>
+                </div>
+
+                <div class="withdrawal-card amber">
+                    <h3>&#9888;&#65039; Regular RRSP Withdrawals (Not Penalty-Free)</h3>
+                    <ul>
+                        <li><strong>Withholding tax:</strong> 10% (up to $5k), 20% ($5k–$15k), 30% (over $15k)</li>
+                        <li>Full amount added to taxable income for the year</li>
+                        <li>You permanently lose that contribution room</li>
+                        <li>Additional tax may be owed at filing if your marginal rate exceeds withholding</li>
+                    </ul>
+                    <p class="example" style="color:#d97706;font-style:normal;font-weight:600;margin-top:0.6rem">
+                        Consider withdrawing in retirement when your income and tax rate may be lower.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="note">
+        <strong>Note:</strong> This calculator provides estimates based on consistent returns and contributions.
+        Actual RRSP performance will vary based on market conditions and investment choices.
+        The 2025 RRSP contribution limit is 18% of earned income (up to $32,490) minus pension adjustments.
+        Consult a financial advisor for personalized advice.
+    </div>
+
+</main>
+
+<div id="chartTooltip"></div>
+
+<script>
+    const fmt = v => new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(v);
+
+    function getInputs() {
+        return {
+            initial:  +document.getElementById('s-initial').value,
+            monthly:  +document.getElementById('s-monthly').value,
+            ret:      +document.getElementById('s-return').value,
+            years:    +document.getElementById('s-years').value,
+            tax:      +document.getElementById('s-tax').value,
+        };
+    }
+
+    function calcData({ initial, monthly, ret, years }) {
+        const monthlyRate = ret / 100 / 12;
+        const data = [];
+        for (let y = 0; y <= years; y++) {
+            let bal = initial;
+            const months = y * 12;
+            for (let m = 1; m <= months; m++) {
+                bal = bal * (1 + monthlyRate) + monthly;
+            }
+            const contributed = initial + monthly * months;
+            const earnings = bal - contributed;
+            data.push({ year: y, balance: Math.round(bal), contributed: Math.round(contributed), earnings: Math.round(Math.max(0, earnings)) });
+        }
+        return data;
+    }
+
+    function update() {
+        const inp = getInputs();
+        const data = calcData(inp);
+        const last = data[data.length - 1];
+        const taxSavings = (inp.initial + inp.monthly * inp.years * 12) * (inp.tax / 100);
+
+        // Labels
+        document.getElementById('lbl-initial').textContent = fmt(inp.initial);
+        document.getElementById('lbl-monthly').textContent = fmt(inp.monthly);
+        document.getElementById('lbl-return').textContent  = inp.ret + '%';
+        document.getElementById('lbl-years').textContent   = inp.years + ' yrs';
+        document.getElementById('lbl-tax').textContent     = inp.tax + '%';
+
+        // Summary
+        document.getElementById('out-balance').textContent     = fmt(last.balance);
+        document.getElementById('out-earnings').textContent    = fmt(last.earnings);
+        document.getElementById('out-contributed').textContent = fmt(last.contributed);
+        document.getElementById('out-tax').textContent         = fmt(taxSavings);
+        document.getElementById('out-years-label').textContent = 'After ' + inp.years + ' years';
+        document.getElementById('out-tax-label').textContent   = 'At ' + inp.tax + '% tax rate';
+
+        drawChart(data);
+    }
+
+    // SVG chart
+    const PAD = { top: 20, right: 20, bottom: 30, left: 55 };
+    const W = 800, H = 300;
+    const CW = W - PAD.left - PAD.right;
+    const CH = H - PAD.top - PAD.bottom;
+
+    function drawChart(data) {
+        const svg = document.getElementById('chart');
+        const maxVal = Math.max(...data.map(d => d.balance));
+        const n = data.length;
+
+        const xScale = i => PAD.left + (i / (n - 1)) * CW;
+        const yScale = v => PAD.top + CH - (v / maxVal) * CH;
+
+        const polyline = (key, color) => {
+            const pts = data.map((d, i) => `${xScale(i)},${yScale(d[key])}`).join(' ');
+            return `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+        };
+
+        const area = (key, color) => {
+            const pts = data.map((d, i) => `${xScale(i)},${yScale(d[key])}`).join(' ');
+            const first = `${xScale(0)},${yScale(0)}`;
+            const last  = `${xScale(n - 1)},${yScale(0)}`;
+            return `<polygon points="${first} ${pts} ${last}" fill="${color}" opacity="0.08"/>`;
+        };
+
+        // Grid lines & Y-axis labels
+        const ticks = 5;
+        let gridHtml = '';
+        for (let i = 0; i <= ticks; i++) {
+            const val = (maxVal / ticks) * i;
+            const y   = yScale(val);
+            const label = val >= 1000 ? `$${(val / 1000).toFixed(0)}k` : `$${val}`;
+            gridHtml += `<line x1="${PAD.left}" y1="${y}" x2="${W - PAD.right}" y2="${y}" stroke="#e2e8f0" stroke-width="1"/>`;
+            gridHtml += `<text x="${PAD.left - 6}" y="${y + 4}" text-anchor="end" font-size="10" fill="#94a3b8">${label}</text>`;
+        }
+
+        // X-axis labels
+        let xLabels = '';
+        const step = Math.max(1, Math.floor((n - 1) / 6));
+        for (let i = 0; i < n; i += step) {
+            xLabels += `<text x="${xScale(i)}" y="${H - 4}" text-anchor="middle" font-size="10" fill="#94a3b8">Yr ${data[i].year}</text>`;
+        }
+
+        // Hover areas
+        let hitAreas = '';
+        for (let i = 0; i < n; i++) {
+            const x = xScale(i);
+            const w = CW / (n - 1);
+            hitAreas += `<rect x="${x - w/2}" y="${PAD.top}" width="${w}" height="${CH}"
+                fill="transparent" data-i="${i}"
+                onmouseenter="showTip(event,${i})" onmouseleave="hideTip()"/>`;
+        }
+
+        svg.innerHTML =
+            gridHtml +
+            xLabels +
+            area('balance',     '#3b82f6') +
+            area('contributed', '#8b5cf6') +
+            area('earnings',    '#10b981') +
+            polyline('contributed', '#8b5cf6') +
+            polyline('earnings',    '#10b981') +
+            polyline('balance',     '#3b82f6') +
+            hitAreas;
+
+        // Store data for tooltip
+        svg._data = data;
+        svg._xScale = xScale;
+        svg._yScale = yScale;
+    }
+
+    function showTip(e, i) {
+        const svg   = document.getElementById('chart');
+        const d     = svg._data[i];
+        const tip   = document.getElementById('chartTooltip');
+        tip.innerHTML = `<strong>Year ${d.year}</strong><br>
+            Balance: <strong>${fmt(d.balance)}</strong><br>
+            Contributed: ${fmt(d.contributed)}<br>
+            Earnings: ${fmt(d.earnings)}`;
+        tip.style.opacity = '1';
+        tip.style.left = (e.clientX + 14) + 'px';
+        tip.style.top  = (e.clientY - 10) + 'px';
+    }
+
+    function hideTip() {
+        document.getElementById('chartTooltip').style.opacity = '0';
+    }
+
+    function toggleAccordion() {
+        const body = document.getElementById('acc-body');
+        const icon = document.getElementById('acc-icon');
+        const open = body.classList.toggle('open');
+        icon.classList.toggle('open', open);
+        icon.textContent = open ? '+' : '+';
+    }
+
+    // Wire up sliders
+    ['s-initial','s-monthly','s-return','s-years','s-tax'].forEach(id => {
+        document.getElementById(id).addEventListener('input', update);
+    });
+
+    update();
+</script>
+
+</body>
+</html>
