@@ -162,16 +162,43 @@
             line-height: 1.7;
         }
 
+        /* Category sections */
+        .category-section {
+            margin-top: 3rem;
+        }
+
+        .category-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .category-label h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .category-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e0e4e8;
+        }
+
         /* Cards Grid */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
         }
 
         .card {
             background: var(--white);
-            border-radius: 16px;
+            border-radius: 12px;
             overflow: hidden;
             box-shadow: var(--shadow-sm);
             transition: var(--transition);
@@ -182,19 +209,19 @@
         }
 
         .card:hover {
-            transform: translateY(-8px);
+            transform: translateY(-4px);
             box-shadow: var(--shadow-lg);
         }
 
         .card-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 9px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.75rem;
-            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            margin-bottom: 0.6rem;
         }
 
         .card-icon.blue { background: linear-gradient(135deg, #3498db, #2980b9); color: white; }
@@ -207,44 +234,20 @@
         .card-icon.pink { background: linear-gradient(135deg, #fd79a8, #e84393); color: white; }
 
         .card-content {
-            padding: 1.5rem;
+            padding: 1rem;
         }
 
         .card h3 {
-            font-size: 1.2rem;
+            font-size: 0.9rem;
             font-weight: 600;
             color: var(--dark);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
         }
 
         .card p {
-            font-size: 0.9rem;
+            font-size: 0.78rem;
             color: var(--text-light);
-            line-height: 1.5;
-        }
-
-        .card-arrow {
-            position: absolute;
-            bottom: 1.5rem;
-            right: 1.5rem;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--light);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
-
-        .card:hover .card-arrow {
-            background: var(--primary);
-            color: white;
-        }
-
-        /* Tools Grid */
-        .tools-section {
-            margin-top: 4rem;
+            line-height: 1.4;
         }
 
         /* Footer */
@@ -341,157 +344,115 @@
             <p>Welcome to my personal portfolio and developer hub. This platform showcases my projects, skills, and provides a collection of useful developer tools and resources. Explore the various tools I've created, from password generators to code cheatsheets, or learn more about my professional journey.</p>
         </div>
 
-        <section class="tools-section">
-            <div class="section-header">
-                <h2>Tools & Resources</h2>
-                <p>Handy tools and comprehensive guides for developers</p>
-            </div>
-
+        <!-- Security -->
+        <section class="category-section">
+            <div class="category-label"><h3>Security</h3></div>
             <div class="grid">
-                <a href="counter.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon teal">🔢</div>
-                        <h3>Counter</h3>
-                        <p>A simple counter application for tracking and counting.</p>
-                    </div>
-                </a>
-                
-                <a href="bash-cheatsheet.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon purple">💻</div>
-                        <h3>Bash Cheatsheet</h3>
-                        <p>Comprehensive guide to Bash commands and scripting techniques.</p>
-                    </div>
-                </a>
-                
-                <a href="git-cheatsheet.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon orange">📦</div>
-                        <h3>Git Commands</h3>
-                        <p>Essential Git commands and workflows for version control.</p>
-                    </div>
-                </a>
-                
-                <a href="llm-tools.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon pink">🤖</div>
-                        <h3>LLM Tools</h3>
-                        <p>Collection of tools related to Large Language Models.</p>
-                    </div>
-                </a>
-                
-                <a href="pandas-eda-cheatsheet.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon blue">📊</div>
-                        <h3>Pandas Cheatsheet</h3>
-                        <p>Quick reference for Pandas data analysis and exploration.</p>
-                    </div>
-                </a>
-                
                 <a href="pasgen.html" class="card">
                     <div class="card-content">
                         <div class="card-icon green">🔐</div>
                         <h3>Password Generator</h3>
-                        <p>Tool to create secure, random passwords for your accounts.</p>
+                        <p>Generate secure, random passwords.</p>
                     </div>
                 </a>
-                
-                <a href="certificate-generator.html" class="card">
+                <a href="sentence-password-generator.html" class="card">
                     <div class="card-content">
-                        <div class="card-icon yellow">🎓</div>
-                        <h3>Certificate Generator</h3>
-                        <p>Create professional certificates of completion in PDF format.</p>
+                        <div class="card-icon teal">💬</div>
+                        <h3>Sentence Password Generator</h3>
+                        <p>Memorable passwords from word sentences.</p>
                     </div>
                 </a>
-                
                 <a href="password-strength-checker.html" class="card">
                     <div class="card-content">
                         <div class="card-icon red">🛡️</div>
                         <h3>Password Strength</h3>
-                        <p>Check the strength of your passwords with detailed feedback.</p>
+                        <p>Check password strength with detailed feedback.</p>
                     </div>
                 </a>
-
                 <a href="password-validator.html" class="card">
                     <div class="card-content">
                         <div class="card-icon purple">🔎</div>
                         <h3>Password Validator</h3>
-                        <p>Validate passwords against security criteria and requirements.</p>
+                        <p>Validate passwords against security criteria.</p>
                     </div>
                 </a>
-
-                <a href="resume-builder.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon teal">📄</div>
-                        <h3>Resume Builder</h3>
-                        <p>Create professional resumes with customizable templates.</p>
-                    </div>
-                </a>
-
-                <a href="storage-cleaner.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon orange">💾</div>
-                        <h3>Storage Cleaner</h3>
-                        <p>Analyze disk storage, find duplicates, and get cleanup recommendations.</p>
-                    </div>
-                </a>
-                
-                <a href="cyber-kill-chain-quiz.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon yellow">🎯</div>
-                        <h3>Cyber Kill Chain Quiz</h3>
-                        <p>Test your knowledge of the cyber kill chain framework.</p>
-                    </div>
-                </a>
-                
-                <a href="india-cricket.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon orange">🏏</div>
-                        <h3>Cricket Analysis</h3>
-                        <p>Analyse performance of Indian Cricket Team.</p>
-                    </div>
-                </a>
-                
-                <a href="theaisole.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon blue">🌐</div>
-                        <h3>theaisole</h3>
-                        <p>Technology solutions for everyone - products, services, and more.</p>
-                    </div>
-                </a>
-                
                 <a href="antivirus_info.html" class="card">
                     <div class="card-content">
                         <div class="card-icon green">🛡️</div>
                         <h3>Antivirus</h3>
-                        <p>Simple and lightweight antivirus application for macOS and Windows.</p>
+                        <p>Lightweight antivirus for macOS and Windows.</p>
                     </div>
                 </a>
-                
+                <a href="cyber-kill-chain-quiz.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon yellow">🎯</div>
+                        <h3>Cyber Kill Chain Quiz</h3>
+                        <p>Test your cybersecurity framework knowledge.</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Developer Tools -->
+        <section class="category-section">
+            <div class="category-label"><h3>Developer Tools</h3></div>
+            <div class="grid">
+                <a href="bash-cheatsheet.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon purple">💻</div>
+                        <h3>Bash Cheatsheet</h3>
+                        <p>Bash commands and scripting reference.</p>
+                    </div>
+                </a>
+                <a href="git-cheatsheet.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon orange">📦</div>
+                        <h3>Git Commands</h3>
+                        <p>Essential Git commands and workflows.</p>
+                    </div>
+                </a>
+                <a href="pandas-eda-cheatsheet.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon blue">📊</div>
+                        <h3>Pandas Cheatsheet</h3>
+                        <p>Quick reference for Pandas data analysis.</p>
+                    </div>
+                </a>
+                <a href="virtualbox-cli.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon pink">🖥️</div>
+                        <h3>VirtualBox CLI</h3>
+                        <p>Complete VirtualBox command-line reference.</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- AI & Data -->
+        <section class="category-section">
+            <div class="category-label"><h3>AI & Data</h3></div>
+            <div class="grid">
+                <a href="llm-tools.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon pink">🤖</div>
+                        <h3>LLM Tools</h3>
+                        <p>Tools related to Large Language Models.</p>
+                    </div>
+                </a>
                 <a href="rag-workflow.html" class="card">
                     <div class="card-content">
                         <div class="card-icon purple">🔍</div>
                         <h3>RAG Workflow</h3>
-                        <p>Explore Retrieval Augmented Generation concepts.</p>
+                        <p>Retrieval Augmented Generation concepts.</p>
                     </div>
                 </a>
-                
-                <a href="agile-scrum-website.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon teal">📋</div>
-                        <h3>Agile & Scrum</h3>
-                        <p>Comprehensive guide to Agile methodology and Scrum framework.</p>
-                    </div>
-                </a>
-                
-                <a href="morse-code-translator.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon green">📡</div>
-                        <h3>Morse Code</h3>
-                        <p>Translate text to Morse code and vice versa.</p>
-                    </div>
-                </a>
-                
+            </div>
+        </section>
+
+        <!-- Productivity -->
+        <section class="category-section">
+            <div class="category-label"><h3>Productivity</h3></div>
+            <div class="grid">
                 <a href="todo-list.html" class="card">
                     <div class="card-content">
                         <div class="card-icon blue">✅</div>
@@ -499,60 +460,95 @@
                         <p>Interactive task manager with local storage.</p>
                     </div>
                 </a>
-                
-                <a href="virtualbox-cli.html" class="card">
+                <a href="counter.html" class="card">
                     <div class="card-content">
-                        <div class="card-icon pink">🖥️</div>
-                        <h3>VirtualBox CLI</h3>
-                        <p>Complete reference for VirtualBox command-line interface.</p>
+                        <div class="card-icon teal">🔢</div>
+                        <h3>Counter</h3>
+                        <p>Simple counter for tracking and counting.</p>
                     </div>
                 </a>
-                
-                <a href="mock-interview.html" class="card">
+                <a href="resume-builder.html" class="card">
                     <div class="card-content">
-                        <div class="card-icon yellow">🎤</div>
-                        <h3>Mock Interview</h3>
-                        <p>AI-powered mock interview simulation with feedback and scoring.</p>
+                        <div class="card-icon teal">📄</div>
+                        <h3>Resume Builder</h3>
+                        <p>Create professional resumes with templates.</p>
                     </div>
                 </a>
-
-                <a href="sentence-password-generator.html" class="card">
+                <a href="certificate-generator.html" class="card">
                     <div class="card-content">
-                        <div class="card-icon teal">💬</div>
-                        <h3>Sentence Password Generator</h3>
-                        <p>Generate memorable passwords from random word sentences.</p>
+                        <div class="card-icon yellow">🎓</div>
+                        <h3>Certificate Generator</h3>
+                        <p>Create completion certificates in PDF format.</p>
                     </div>
                 </a>
-
+                <a href="storage-cleaner.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon orange">💾</div>
+                        <h3>Storage Cleaner</h3>
+                        <p>Find duplicates and get cleanup recommendations.</p>
+                    </div>
+                </a>
                 <a href="rrsp-calculator.html" class="card">
                     <div class="card-content">
                         <div class="card-icon green">💰</div>
                         <h3>RRSP Calculator</h3>
-                        <p>Calculate RRSP contributions, tax savings, and retirement projections.</p>
+                        <p>Calculate RRSP contributions and tax savings.</p>
+                    </div>
+                </a>
+                <a href="mock-interview.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon yellow">🎤</div>
+                        <h3>Mock Interview</h3>
+                        <p>AI-powered interview simulation with feedback.</p>
                     </div>
                 </a>
             </div>
         </section>
 
-        <section class="about-section">
-            <div class="section-header">
-                <h2>Skills & Stories</h2>
-                <p>Explore my technical skills, competencies, and professional journey.</p>
+        <!-- Learning & Reference -->
+        <section class="category-section">
+            <div class="category-label"><h3>Learning & Reference</h3></div>
+            <div class="grid">
+                <a href="agile-scrum-website.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon teal">📋</div>
+                        <h3>Agile & Scrum</h3>
+                        <p>Guide to Agile methodology and Scrum framework.</p>
+                    </div>
+                </a>
+                <a href="morse-code-translator.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon green">📡</div>
+                        <h3>Morse Code</h3>
+                        <p>Translate text to Morse code and vice versa.</p>
+                    </div>
+                </a>
+                <a href="india-cricket.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon orange">🏏</div>
+                        <h3>Cricket Analysis</h3>
+                        <p>Analyse performance of Indian Cricket Team.</p>
+                    </div>
+                </a>
+                <a href="theaisole.html" class="card">
+                    <div class="card-content">
+                        <div class="card-icon blue">🌐</div>
+                        <h3>theaisole</h3>
+                        <p>Technology solutions — products, services, and more.</p>
+                    </div>
+                </a>
             </div>
+        </section>
+
+        <!-- About -->
+        <section class="category-section">
+            <div class="category-label"><h3>About</h3></div>
             <div class="grid">
                 <a href="Story.html" class="card">
                     <div class="card-content">
                         <div class="card-icon green">📖</div>
                         <h3>Skills & Stories</h3>
-                        <p>Explore my technical skills, competencies, and professional journey.</p>
-                    </div>
-                </a>
-
-                <a href="Profile.html" class="card">
-                    <div class="card-content">
-                        <div class="card-icon blue">👤</div>
-                        <h3>Profile</h3>
-                        <p>Detailed professional profile and portfolio overview.</p>
+                        <p>My technical skills and professional journey.</p>
                     </div>
                 </a>
             </div>
