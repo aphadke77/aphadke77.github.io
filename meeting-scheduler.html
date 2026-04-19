@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Scheduler - Multi Timezone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #2ecc71;
+            --accent: #9b59b6;
+            --dark: #2c3e50;
+            --gray-900: #1a1a2e;
+            --gray-800: #16213e;
+            --gray-700: #0f3460;
+            --light: #ecf0f1;
+            --white: #ffffff;
+            --text-dark: #333;
+            --text-light: #666;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.15);
+            --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 50%, var(--gray-700) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        header h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        header p { font-size: 1rem; color: #a0aec0; }
+
+        .container { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; }
+
+        /* Live Clock Strip */
+        .clock-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .clock-card {
+            background: var(--white);
+            border-radius: 14px;
+            padding: 1.2rem 1rem;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            border-top: 4px solid var(--primary);
+            transition: var(--transition);
+        }
+
+        .clock-card:nth-child(1) { border-color: #e74c3c; }
+        .clock-card:nth-child(2) { border-color: #3498db; }
+        .clock-card:nth-child(3) { border-color: #2ecc71; }
+        .clock-card:nth-child(4) { border-color: #9b59b6; }
+
+        .clock-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+        .clock-card .tz-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-light);
+            margin-bottom: 0.3rem;
+        }
+
+        .clock-card .tz-name {
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            font-weight: 500;
+            margin-bottom: 0.4rem;
+        }
+
+        .clock-card .live-time {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--dark);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .clock-card .live-date {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 0.2rem;
+        }
+
+        /* Scheduler Card */
+        .scheduler-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+        }
+
+        .scheduler-card h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 0.7rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: var(--text-dark);
+            transition: var(--transition);
+            background: #f8fafc;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.15);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.8rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(52,152,219,0.4); }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover { background: #e2e8f0; }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .btn-danger:hover { background: #fecaca; }
+
+        .btn-group { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 0.5rem; }
+
+        /* Results Table */
+        .results-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .results-card.visible { display: block; }
+
+        .results-card h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 1.2rem;
+        }
+
+        .meeting-info {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 10px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #0c4a6e;
+        }
+
+        .meeting-info strong { display: block; font-size: 1rem; margin-bottom: 0.2rem; color: #075985; }
+
+        .tz-table { width: 100%; border-collapse: collapse; }
+
+        .tz-table th {
+            background: #f8fafc;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .tz-table td {
+            padding: 0.9rem 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.95rem;
+        }
+
+        .tz-table tr:last-child td { border-bottom: none; }
+        .tz-table tr:hover td { background: #f8fafc; }
+
+        .tz-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-ist  { background: #fee2e2; color: #991b1b; }
+        .badge-est  { background: #dbeafe; color: #1e40af; }
+        .badge-pst  { background: #dcfce7; color: #166534; }
+        .badge-gmt  { background: #f3e8ff; color: #6b21a8; }
+
+        .working-hours { font-size: 0.8rem; color: var(--text-light); margin-top: 0.2rem; }
+
+        .status-icon {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        .status-ok   { background: #22c55e; }
+        .status-warn { background: #f59e0b; }
+        .status-bad  { background: #ef4444; }
+
+        /* Saved Meetings */
+        .saved-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+        }
+
+        .saved-card h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 1.2rem;
+        }
+
+        .saved-list { display: flex; flex-direction: column; gap: 0.8rem; }
+
+        .saved-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.2rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #f8fafc;
+            gap: 1rem;
+        }
+
+        .saved-item-info { flex: 1; }
+        .saved-item-info .title { font-weight: 600; font-size: 0.95rem; color: var(--dark); }
+        .saved-item-info .meta  { font-size: 0.82rem; color: var(--text-light); margin-top: 0.15rem; }
+
+        .saved-item-times {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            font-size: 0.8rem;
+        }
+
+        .time-chip {
+            padding: 0.2rem 0.55rem;
+            border-radius: 6px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 640px) {
+            .clock-strip { grid-template-columns: repeat(2, 1fr); }
+            .form-row { grid-template-columns: 1fr; }
+            header h1 { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>&#128197; Meeting Scheduler</h1>
+    <p>Plan meetings across IST &bull; EST &bull; PST &bull; GMT instantly</p>
+</header>
+
+<div class="container">
+
+    <!-- Live Clocks -->
+    <div class="clock-strip">
+        <div class="clock-card">
+            <div class="tz-label">IST</div>
+            <div class="tz-name">India Standard Time</div>
+            <div class="live-time" id="clock-ist">--:--:--</div>
+            <div class="live-date" id="date-ist">--</div>
+        </div>
+        <div class="clock-card">
+            <div class="tz-label">EST</div>
+            <div class="tz-name">Eastern Standard Time</div>
+            <div class="live-time" id="clock-est">--:--:--</div>
+            <div class="live-date" id="date-est">--</div>
+        </div>
+        <div class="clock-card">
+            <div class="tz-label">PST</div>
+            <div class="tz-name">Pacific Standard Time</div>
+            <div class="live-time" id="clock-pst">--:--:--</div>
+            <div class="live-date" id="date-pst">--</div>
+        </div>
+        <div class="clock-card">
+            <div class="tz-label">GMT</div>
+            <div class="tz-name">Greenwich Mean Time</div>
+            <div class="live-time" id="clock-gmt">--:--:--</div>
+            <div class="live-date" id="date-gmt">--</div>
+        </div>
+    </div>
+
+    <!-- Scheduler Form -->
+    <div class="scheduler-card">
+        <h2>&#128337; Schedule a Meeting</h2>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="meeting-title">Meeting Title</label>
+                <input type="text" id="meeting-title" placeholder="e.g. Weekly Sync" />
+            </div>
+            <div class="form-group">
+                <label for="source-tz">Your Timezone</label>
+                <select id="source-tz">
+                    <option value="Asia/Kolkata">IST - India Standard Time</option>
+                    <option value="America/New_York" selected>EST - Eastern Time</option>
+                    <option value="America/Los_Angeles">PST - Pacific Time</option>
+                    <option value="GMT">GMT - Greenwich Mean Time</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="meeting-date">Date</label>
+                <input type="date" id="meeting-date" />
+            </div>
+            <div class="form-group">
+                <label for="meeting-time">Start Time</label>
+                <input type="time" id="meeting-time" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="duration">Duration</label>
+                <select id="duration">
+                    <option value="30">30 minutes</option>
+                    <option value="60" selected>1 hour</option>
+                    <option value="90">1.5 hours</option>
+                    <option value="120">2 hours</option>
+                    <option value="180">3 hours</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="meeting-notes">Notes (optional)</label>
+                <input type="text" id="meeting-notes" placeholder="Agenda, link, etc." />
+            </div>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="convertTime()">&#128269; Convert &amp; Preview</button>
+            <button class="btn btn-secondary" onclick="setNow()">&#9200; Use Current Time</button>
+            <button class="btn btn-secondary" onclick="clearForm()">&#10006; Clear</button>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-card" id="results-card">
+        <h2>&#127758; Meeting Times by Timezone</h2>
+        <div class="meeting-info" id="meeting-info"></div>
+        <table class="tz-table">
+            <thead>
+                <tr>
+                    <th>Timezone</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Local Date</th>
+                    <th>Working Hours?</th>
+                </tr>
+            </thead>
+            <tbody id="tz-rows"></tbody>
+        </table>
+        <div class="btn-group" style="margin-top:1.2rem">
+            <button class="btn btn-primary" onclick="saveMeeting()">&#128190; Save Meeting</button>
+            <button class="btn btn-secondary" onclick="copyText()">&#128203; Copy Summary</button>
+        </div>
+    </div>
+
+    <!-- Saved Meetings -->
+    <div class="saved-card">
+        <h2>&#128204; Saved Meetings</h2>
+        <div class="saved-list" id="saved-list">
+            <div class="empty-state">No meetings saved yet. Schedule one above!</div>
+        </div>
+    </div>
+
+</div>
+
+<footer>Meeting Scheduler &mdash; All times use your browser's locale for DST awareness.</footer>
+
+<script>
+    const TZ_CONFIG = [
+        { id: 'ist', label: 'IST', name: 'India Standard Time',    tz: 'Asia/Kolkata',          badge: 'badge-ist', clockId: 'clock-ist', dateId: 'date-ist' },
+        { id: 'est', label: 'EST', name: 'US Eastern Time',         tz: 'America/New_York',      badge: 'badge-est', clockId: 'clock-est', dateId: 'date-est' },
+        { id: 'pst', label: 'PST', name: 'US Pacific Time',         tz: 'America/Los_Angeles',   badge: 'badge-pst', clockId: 'clock-pst', dateId: 'date-pst' },
+        { id: 'gmt', label: 'GMT', name: 'Greenwich Mean Time',     tz: 'GMT',                   badge: 'badge-gmt', clockId: 'clock-gmt', dateId: 'date-gmt' },
+    ];
+
+    /* ── Live Clocks ── */
+    function updateClocks() {
+        const now = new Date();
+        TZ_CONFIG.forEach(cfg => {
+            const timeStr = now.toLocaleTimeString('en-US', { timeZone: cfg.tz, hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dateStr = now.toLocaleDateString('en-US', { timeZone: cfg.tz, weekday: 'short', month: 'short', day: 'numeric' });
+            document.getElementById(cfg.clockId).textContent = timeStr;
+            document.getElementById(cfg.dateId).textContent  = dateStr;
+        });
+    }
+    updateClocks();
+    setInterval(updateClocks, 1000);
+
+    /* ── Set default date/time ── */
+    function setNow() {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mo   = String(now.getMonth() + 1).padStart(2, '0');
+        const dd   = String(now.getDate()).padStart(2, '0');
+        document.getElementById('meeting-date').value = `${yyyy}-${mo}-${dd}`;
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('meeting-time').value = `${hh}:${mm}`;
+    }
+    // Set defaults on load
+    window.addEventListener('DOMContentLoaded', setNow);
+
+    /* ── Working hours check (9am-6pm local) ── */
+    function workingStatus(dateInTz, tz) {
+        const h = parseInt(dateInTz.toLocaleString('en-US', { timeZone: tz, hour: 'numeric', hour12: false }), 10);
+        if (h >= 9 && h < 18) return { icon: 'status-ok',   label: 'Business hours' };
+        if ((h >= 7 && h < 9) || (h >= 18 && h < 20)) return { icon: 'status-warn', label: 'Early / Late' };
+        return { icon: 'status-bad', label: 'Outside hours' };
+    }
+
+    /* ── Convert ── */
+    let lastConverted = null;
+
+    function convertTime() {
+        const title    = document.getElementById('meeting-title').value.trim() || 'Untitled Meeting';
+        const sourceTz = document.getElementById('source-tz').value;
+        const dateVal  = document.getElementById('meeting-date').value;
+        const timeVal  = document.getElementById('meeting-time').value;
+        const duration = parseInt(document.getElementById('duration').value, 10);
+        const notes    = document.getElementById('meeting-notes').value.trim();
+
+        if (!dateVal || !timeVal) { alert('Please select a date and start time.'); return; }
+
+        // Convert "dateVal + timeVal in sourceTz" → UTC
+        // Treat the input as if it were UTC first (naiveUTC), then measure
+        // how far sourceTz sits from UTC at that moment and adjust.
+        const naiveUTC = new Date(`${dateVal}T${timeVal}:00Z`);
+
+        const srcFormatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: sourceTz,
+            year: 'numeric', month: 'numeric', day: 'numeric',
+            hour: 'numeric', minute: 'numeric', second: 'numeric',
+            hour12: false
+        });
+
+        // See what naiveUTC looks like when rendered in sourceTz
+        const parts = srcFormatter.formatToParts(naiveUTC);
+        const p     = Object.fromEntries(parts.map(pt => [pt.type, pt.value]));
+        // Rebuild that rendered time as a UTC timestamp
+        const tzAsUTC = new Date(
+            `${p.year}-${String(p.month).padStart(2,'0')}-${String(p.day).padStart(2,'0')}` +
+            `T${String(p.hour === '24' ? '0' : p.hour).padStart(2,'0')}:${String(p.minute).padStart(2,'0')}:${String(p.second).padStart(2,'0')}Z`
+        );
+        // offsetMs = how much sourceTz is behind UTC (positive = behind, e.g. EST = +5h)
+        const offsetMs = naiveUTC - tzAsUTC;
+        const startUTC = new Date(naiveUTC.getTime() + offsetMs);
+        const endUTC   = new Date(startUTC.getTime() + duration * 60000);
+
+        // Build rows
+        const tbody = document.getElementById('tz-rows');
+        tbody.innerHTML = '';
+
+        let summaryLines = [`Meeting: ${title}`, `Duration: ${duration} min`, ``];
+
+        TZ_CONFIG.forEach(cfg => {
+            const startLocal = startUTC.toLocaleTimeString('en-US', { timeZone: cfg.tz, hour: '2-digit', minute: '2-digit', hour12: true });
+            const endLocal   = endUTC.toLocaleTimeString('en-US',   { timeZone: cfg.tz, hour: '2-digit', minute: '2-digit', hour12: true });
+            const dateLocal  = startUTC.toLocaleDateString('en-US', { timeZone: cfg.tz, weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+            const ws         = workingStatus(startUTC, cfg.tz);
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><span class="tz-badge ${cfg.badge}">${cfg.label}</span><br><small style="color:var(--text-light)">${cfg.name}</small></td>
+                <td><strong>${startLocal}</strong></td>
+                <td>${endLocal}</td>
+                <td>${dateLocal}</td>
+                <td><span class="status-icon ${ws.icon}"></span>${ws.label}</td>
+            `;
+            tbody.appendChild(tr);
+            summaryLines.push(`${cfg.label.padEnd(4)}: ${startLocal} – ${endLocal} (${dateLocal})`);
+        });
+
+        if (notes) summaryLines.push(``, `Notes: ${notes}`);
+
+        document.getElementById('meeting-info').innerHTML =
+            `<strong>${title}</strong>Duration: ${duration} minutes${notes ? ' &nbsp;|&nbsp; ' + notes : ''}`;
+
+        document.getElementById('results-card').classList.add('visible');
+        document.getElementById('results-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        lastConverted = { title, sourceTz, dateVal, timeVal, duration, notes, startUTC, endUTC, summaryLines };
+    }
+
+    /* ── Copy Summary ── */
+    function copyText() {
+        if (!lastConverted) return;
+        navigator.clipboard.writeText(lastConverted.summaryLines.join('\n'))
+            .then(() => alert('Summary copied to clipboard!'))
+            .catch(() => alert('Copy failed – please select and copy manually.'));
+    }
+
+    /* ── Save / Display Saved ── */
+    let savedMeetings = JSON.parse(localStorage.getItem('savedMeetings') || '[]');
+
+    function saveMeeting() {
+        if (!lastConverted) return;
+        const { title, startUTC, endUTC, duration, notes } = lastConverted;
+        const entry = { id: Date.now(), title, startUTC: startUTC.toISOString(), endUTC: endUTC.toISOString(), duration, notes };
+        savedMeetings.unshift(entry);
+        localStorage.setItem('savedMeetings', JSON.stringify(savedMeetings));
+        renderSaved();
+        alert('Meeting saved!');
+    }
+
+    function deleteMeeting(id) {
+        savedMeetings = savedMeetings.filter(m => m.id !== id);
+        localStorage.setItem('savedMeetings', JSON.stringify(savedMeetings));
+        renderSaved();
+    }
+
+    function renderSaved() {
+        const container = document.getElementById('saved-list');
+        if (!savedMeetings.length) {
+            container.innerHTML = '<div class="empty-state">No meetings saved yet. Schedule one above!</div>';
+            return;
+        }
+
+        container.innerHTML = savedMeetings.map(m => {
+            const startUTC = new Date(m.startUTC);
+            const chips = TZ_CONFIG.map(cfg => {
+                const t = startUTC.toLocaleTimeString('en-US', { timeZone: cfg.tz, hour: '2-digit', minute: '2-digit', hour12: true });
+                return `<span class="time-chip ${cfg.badge}">${cfg.label}: ${t}</span>`;
+            }).join('');
+
+            const dateStr = startUTC.toLocaleDateString('en-US', { timeZone: 'GMT', weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+            return `
+                <div class="saved-item">
+                    <div class="saved-item-info">
+                        <div class="title">${escHtml(m.title)}</div>
+                        <div class="meta">${dateStr} &bull; ${m.duration} min${m.notes ? ' &bull; ' + escHtml(m.notes) : ''}</div>
+                    </div>
+                    <div class="saved-item-times">${chips}</div>
+                    <button class="btn btn-danger" onclick="deleteMeeting(${m.id})" title="Delete">&#128465;</button>
+                </div>`;
+        }).join('');
+    }
+
+    function escHtml(str) {
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function clearForm() {
+        document.getElementById('meeting-title').value = '';
+        document.getElementById('meeting-notes').value = '';
+        document.getElementById('results-card').classList.remove('visible');
+        lastConverted = null;
+        setNow();
+    }
+
+    renderSaved();
+</script>
+</body>
+</html>
