@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resume Builder</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
@@ -496,11 +496,25 @@
 
             try {
                 const wordContent = generateResumeHTML(data);
-                const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Resume - ${data.firstName} ${data.lastName}</title></head><body>`;
+                const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset='utf-8'>
+<title>Resume - ${data.firstName} ${data.lastName}</title>
+<!--[if gte mso 9]>
+<xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml>
+<![endif]-->
+<style>
+@page { margin: 1in; size: 8.5in 11in; }
+body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; font-size: 11pt; color: #333; line-height: 1.4; }
+h1 { font-size: 22pt; font-weight: bold; text-align: center; color: #1a1a2e; margin-bottom: 4pt; }
+h3 { font-size: 12pt; font-weight: bold; color: #333; border-bottom: 1pt solid #ddd; padding-bottom: 3pt; margin-top: 12pt; margin-bottom: 6pt; }
+p { font-size: 11pt; margin: 2pt 0; }
+</style>
+</head><body>`;
                 const footer = '</body></html>';
                 const fullHTML = header + wordContent + footer;
 
-                const blob = new Blob([fullHTML], { type: 'application/vnd.ms-word' });
+                const blob = new Blob(['\ufeff' + fullHTML], { type: 'application/msword' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
                 link.download = `${data.firstName}_${data.lastName}_Resume.doc`;
@@ -510,7 +524,7 @@
             }
         }
 
-        function downloadPDF() {
+        async function downloadPDF() {
             const data = getFormData();
             if (!data.firstName || !data.lastName) {
                 alert('Please fill in your name');
@@ -518,95 +532,21 @@
             }
 
             try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                doc.setFontSize(20);
-                doc.text(data.firstName + ' ' + data.lastName, 20, 20);
-                
-                doc.setFontSize(12);
-                let y = 35;
-                
-                if (data.email) {
-                    doc.text('Email: ' + data.email, 20, y);
-                    y += 7;
-                }
-                if (data.phone) {
-                    doc.text('Phone: ' + data.phone, 20, y);
-                    y += 7;
-                }
-                if (data.location) {
-                    doc.text('Location: ' + data.location, 20, y);
-                    y += 7;
-                }
-                
-                y += 10;
-                
-                if (data.summary) {
-                    doc.setFontSize(14);
-                    doc.text('Summary', 20, y);
-                    y += 7;
-                    doc.setFontSize(10);
-                    const summaryLines = doc.splitTextToSize(data.summary, 170);
-                    doc.text(summaryLines, 20, y);
-                    y += summaryLines.length * 5 + 10;
-                }
-                
-                if (data.experience.length > 0 && data.experience[0].title) {
-                    doc.setFontSize(14);
-                    doc.text('Experience', 20, y);
-                    y += 7;
-                    doc.setFontSize(10);
-                    data.experience.forEach(exp => {
-                        if (exp.title) {
-                            doc.setFont('helvetica', 'bold');
-                            doc.text(exp.title + (exp.company ? ' at ' + exp.company : ''), 20, y);
-                            y += 5;
-                            doc.setFont('helvetica', 'normal');
-                            doc.text(exp.start + (exp.end ? ' - ' + exp.end : ''), 20, y);
-                            y += 5;
-                            if (exp.description) {
-                                const descLines = doc.splitTextToSize(exp.description, 170);
-                                doc.text(descLines, 20, y);
-                                y += descLines.length * 5;
-                            }
-                            y += 5;
-                        }
-                    });
-                }
-                
-                if (data.education.length > 0 && data.education[0].degree) {
-                    doc.setFontSize(14);
-                    doc.text('Education', 20, y);
-                    y += 7;
-                    doc.setFontSize(10);
-                    data.education.forEach(edu => {
-                        if (edu.degree) {
-                            doc.setFont('helvetica', 'bold');
-                            doc.text(edu.degree + (edu.institution ? ' - ' + edu.institution : ''), 20, y);
-                            y += 5;
-                            doc.setFont('helvetica', 'normal');
-                            doc.text(edu.graduation + (edu.gpa ? ' | GPA: ' + edu.gpa : ''), 20, y);
-                            y += 5;
-                        }
-                    });
-                }
-                
-                if (data.techSkills || data.softSkills) {
-                    doc.setFontSize(14);
-                    doc.text('Skills', 20, y);
-                    y += 7;
-                    doc.setFontSize(10);
-                    if (data.techSkills) {
-                        doc.text('Technical: ' + data.techSkills, 20, y);
-                        y += 5;
-                    }
-                    if (data.softSkills) {
-                        doc.text('Soft: ' + data.softSkills, 20, y);
-                    }
-                }
-                
-                doc.save(data.firstName + '_' + data.lastName + '_Resume.pdf');
+                const wrapper = document.createElement('div');
+                wrapper.style.cssText = 'background:white;width:794px;padding:40px;font-family:Segoe UI,Arial,sans-serif;';
+                wrapper.innerHTML = generateResumeHTML(data);
+                document.body.appendChild(wrapper);
+
+                const opt = {
+                    margin: 10,
+                    filename: `${data.firstName}_${data.lastName}_Resume.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                await html2pdf().set(opt).from(wrapper).save();
+                document.body.removeChild(wrapper);
             } catch (e) {
                 alert('Error generating PDF: ' + e.message);
             }
