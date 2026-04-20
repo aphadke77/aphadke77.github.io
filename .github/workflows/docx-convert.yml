@@ -1,0 +1,61 @@
+name: Convert DOCX to PDF and HTML
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.docx'
+
+permissions:
+  contents: write
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install system dependencies (pandoc + LibreOffice)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            pandoc \
+            libreoffice \
+            libreoffice-writer \
+            fonts-liberation \
+            fonts-dejavu-core
+
+      - name: Install Python dependencies
+        run: pip install python-docx
+
+      - name: Convert DOCX files to PDF and HTML
+        run: python3 docx_converter.py --output-dir converted --formats pdf,html --verbose
+
+      - name: Check for new converted files
+        id: check_changes
+        run: |
+          git add converted/
+          if git diff --staged --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push converted files
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "ci: auto-convert DOCX → PDF/HTML [skip ci]"
+          git push origin main
