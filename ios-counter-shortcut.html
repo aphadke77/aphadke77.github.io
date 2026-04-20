@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Counter">
+  <meta name="theme-color" content="#1c1c1e">
+  <title>Counter</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    :root {
+      --bg: #1c1c1e;
+      --card: #2c2c2e;
+      --label: #ffffff;
+      --secondary-label: #ebebf5a3;
+      --separator: #38383a;
+      --blue: #0a84ff;
+      --green: #30d158;
+      --red: #ff453a;
+      --system-fill: #787880;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f2f2f7;
+        --card: #ffffff;
+        --label: #000000;
+        --secondary-label: #6c6c70;
+        --separator: #c6c6c8;
+        --blue: #007aff;
+        --green: #34c759;
+        --red: #ff3b30;
+        --system-fill: #787880;
+      }
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
+      overflow: hidden;
+    }
+
+    .safe-area-top {
+      height: env(safe-area-inset-top, 20px);
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 100dvh;
+      padding: env(safe-area-inset-top, 20px) 24px env(safe-area-inset-bottom, 24px);
+    }
+
+    /* Header */
+    .header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 16px;
+    }
+
+    .header-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--label);
+      letter-spacing: -0.4px;
+    }
+
+    .header-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--card);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--blue);
+      font-size: 14px;
+      font-weight: 600;
+      transition: opacity 0.1s;
+    }
+
+    .header-btn:active { opacity: 0.6; }
+
+    /* Counter display */
+    .counter-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .counter-label {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--secondary-label);
+      letter-spacing: -0.2px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-size: 12px;
+    }
+
+    .counter-value {
+      font-size: clamp(80px, 22vw, 120px);
+      font-weight: 700;
+      color: var(--label);
+      letter-spacing: -4px;
+      line-height: 1;
+      transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s;
+      min-width: 3ch;
+      text-align: center;
+    }
+
+    .counter-value.bump {
+      transform: scale(1.08);
+    }
+
+    .counter-value.negative {
+      color: var(--red);
+    }
+
+    /* Step control */
+    .step-control {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card);
+      border-radius: 12px;
+      padding: 10px 16px;
+    }
+
+    .step-label {
+      font-size: 13px;
+      color: var(--secondary-label);
+      font-weight: 500;
+    }
+
+    .step-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--label);
+      min-width: 28px;
+      text-align: center;
+    }
+
+    .step-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: none;
+      background: var(--separator);
+      color: var(--label);
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.1s;
+    }
+
+    .step-btn:active { opacity: 0.5; }
+
+    /* Main buttons */
+    .main-buttons {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      flex: 1;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: inherit;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.1s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:active {
+      transform: scale(0.95);
+      opacity: 0.85;
+    }
+
+    .btn-large {
+      height: 88px;
+      font-size: 22px;
+    }
+
+    .btn-small {
+      height: 56px;
+      font-size: 16px;
+    }
+
+    .btn-decrease {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .btn-increase {
+      background: var(--green);
+      color: #fff;
+    }
+
+    .btn-reset {
+      background: var(--card);
+      color: var(--blue);
+    }
+
+    .btn-history {
+      background: var(--card);
+      color: var(--label);
+    }
+
+    .btn-icon {
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    /* History sheet */
+    .sheet-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .sheet-overlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border-radius: 24px 24px 0 0;
+      padding: 12px 20px env(safe-area-inset-bottom, 20px);
+      z-index: 11;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+      max-height: 60vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sheet.visible {
+      transform: translateY(0);
+    }
+
+    .sheet-handle {
+      width: 36px;
+      height: 5px;
+      background: var(--separator);
+      border-radius: 3px;
+      margin: 0 auto 16px;
+    }
+
+    .sheet-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--label);
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .history-list {
+      overflow-y: auto;
+      flex: 1;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--separator);
+      font-size: 15px;
+      color: var(--label);
+    }
+
+    .history-item:last-child { border-bottom: none; }
+
+    .history-delta {
+      font-weight: 600;
+    }
+
+    .history-delta.pos { color: var(--green); }
+    .history-delta.neg { color: var(--red); }
+
+    .history-time {
+      font-size: 13px;
+      color: var(--secondary-label);
+    }
+
+    .history-empty {
+      text-align: center;
+      color: var(--secondary-label);
+      font-size: 15px;
+      padding: 24px 0;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 20px) + 60px);
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: var(--card);
+      color: var(--label);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 10px 18px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 20;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <button class="header-btn" onclick="showHistory()" aria-label="History">
+        &#9776;
+      </button>
+      <span class="header-title">Counter</span>
+      <button class="header-btn" onclick="copyCount()" aria-label="Copy">
+        &#x2398;
+      </button>
+    </div>
+
+    <div class="counter-section">
+      <div class="counter-label">Current Count</div>
+      <div class="counter-value" id="counterValue">0</div>
+      <div class="step-control">
+        <span class="step-label">Step</span>
+        <button class="step-btn" onclick="changeStep(-1)">−</button>
+        <span class="step-value" id="stepValue">1</span>
+        <button class="step-btn" onclick="changeStep(1)">+</button>
+      </div>
+    </div>
+
+    <div class="main-buttons">
+      <div class="btn-row">
+        <button class="btn btn-large btn-decrease" onclick="adjust(-1)" aria-label="Decrease">
+          <span class="btn-icon">−</span>
+        </button>
+        <button class="btn btn-large btn-increase" onclick="adjust(1)" aria-label="Increase">
+          <span class="btn-icon">+</span>
+        </button>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-small btn-history" onclick="showHistory()">History</button>
+        <button class="btn btn-small btn-reset" onclick="resetCount()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Sheet -->
+  <div class="sheet-overlay" id="overlay" onclick="hideHistory()"></div>
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">History</div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let count = parseInt(localStorage.getItem('counter_count') || '0');
+    let step = parseInt(localStorage.getItem('counter_step') || '1');
+    let history = JSON.parse(localStorage.getItem('counter_history') || '[]');
+
+    const counterEl = document.getElementById('counterValue');
+    const stepEl = document.getElementById('stepValue');
+    const toastEl = document.getElementById('toast');
+    let toastTimer = null;
+
+    function save() {
+      localStorage.setItem('counter_count', count);
+      localStorage.setItem('counter_step', step);
+      localStorage.setItem('counter_history', JSON.stringify(history.slice(-50)));
+    }
+
+    function render() {
+      counterEl.textContent = count;
+      counterEl.classList.toggle('negative', count < 0);
+      stepEl.textContent = step;
+    }
+
+    function bump() {
+      counterEl.classList.remove('bump');
+      void counterEl.offsetWidth;
+      counterEl.classList.add('bump');
+      setTimeout(() => counterEl.classList.remove('bump'), 200);
+      if (navigator.vibrate) navigator.vibrate(10);
+    }
+
+    function adjust(dir) {
+      const delta = dir * step;
+      count += delta;
+      history.push({ delta, value: count, time: Date.now() });
+      bump();
+      render();
+      save();
+    }
+
+    function resetCount() {
+      if (count === 0) return;
+      history.push({ delta: -count, value: 0, time: Date.now(), reset: true });
+      count = 0;
+      bump();
+      render();
+      save();
+      showToast('Reset to 0');
+    }
+
+    function changeStep(dir) {
+      step = Math.max(1, step + dir);
+      render();
+      save();
+    }
+
+    function copyCount() {
+      navigator.clipboard?.writeText(String(count)).then(() => {
+        showToast(`Copied: ${count}`);
+      }).catch(() => showToast(`Count: ${count}`));
+    }
+
+    function showToast(msg) {
+      clearTimeout(toastTimer);
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+    }
+
+    function showHistory() {
+      const list = document.getElementById('historyList');
+      const items = [...history].reverse();
+      if (items.length === 0) {
+        list.innerHTML = '<div class="history-empty">No history yet</div>';
+      } else {
+        list.innerHTML = items.map(item => {
+          const d = item.delta;
+          const sign = d >= 0 ? '+' : '';
+          const cls = d >= 0 ? 'pos' : 'neg';
+          const label = item.reset ? 'Reset' : `${sign}${d}`;
+          const time = new Date(item.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          return `<div class="history-item">
+            <span class="history-delta ${cls}">${label}</span>
+            <span>${item.value}</span>
+            <span class="history-time">${time}</span>
+          </div>`;
+        }).join('');
+      }
+      document.getElementById('overlay').classList.add('visible');
+      document.getElementById('sheet').classList.add('visible');
+    }
+
+    function hideHistory() {
+      document.getElementById('overlay').classList.remove('visible');
+      document.getElementById('sheet').classList.remove('visible');
+    }
+
+    render();
+  </script>
+</body>
+</html>
