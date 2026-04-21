@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NotebookLM CLI Cheat Sheet</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; max-width: 1200px; margin: 0 auto; padding: 20px; color: #333; }
+        h1 { text-align: center; color: #2c3e50; padding-bottom: 10px; border-bottom: 2px solid #3498db; }
+        h2 { color: #2980b9; margin-top: 30px; padding-bottom: 5px; border-bottom: 1px solid #ddd; }
+        .section { margin-bottom: 40px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { padding: 12px 15px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f8f9fa; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .command { font-family: 'Courier New', Courier, monospace; font-weight: bold; color: #c0392b; }
+        .example { font-family: 'Courier New', Courier, monospace; background-color: #f9f9f9; padding: 2px 4px; border-radius: 3px; color: #16a085; font-size: 13px; }
+        footer { margin-top: 40px; text-align: center; font-size: 14px; color: #7f8c8d; border-top: 1px solid #ddd; padding-top: 20px; }
+        .nav-button { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: 500; margin-bottom: 20px; }
+        .flow-box { background: #eaf4fb; border-left: 4px solid #3498db; padding: 15px 20px; border-radius: 4px; margin-bottom: 30px; font-family: 'Courier New', Courier, monospace; font-size: 14px; color: #1a252f; }
+        .flow-box span { color: #7f8c8d; font-style: italic; font-family: 'Segoe UI', sans-serif; }
+        .badge { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 10px; margin-left: 6px; font-weight: 600; vertical-align: middle; }
+        .badge-new { background: #d5f5e3; color: #1e8449; }
+        .badge-tip { background: #fef9e7; color: #b7950b; }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="nav-button">&larr; Return to Index</a>
+    <h1>NotebookLM CLI Cheat Sheet</h1>
+    <p style="text-align:center; color:#7f8c8d;">Unofficial Python CLI for Google NotebookLM &mdash; <code>notebooklm-py</code> package</p>
+
+    <div class="flow-box">
+        <b>Quick Start Flow:</b><br>
+        notebooklm login &nbsp;<span>→ authenticate</span><br>
+        notebooklm list &nbsp;<span>→ find notebook ID</span><br>
+        notebooklm use &lt;id&gt; &nbsp;<span>→ set active notebook</span><br>
+        notebooklm source add "&lt;url&gt;" &nbsp;<span>→ add a source</span><br>
+        notebooklm ask "your question" &nbsp;<span>→ chat with notebook</span><br>
+        notebooklm artifact list &nbsp;<span>→ see generated artifacts</span><br>
+        notebooklm download report &nbsp;<span>→ export artifact</span>
+    </div>
+
+    <div class="section">
+        <h2>Session Commands</h2>
+        <table>
+            <tr><th>Command</th><th>Description</th><th>Example</th></tr>
+            <tr><td class="command">notebooklm login</td><td>Authenticate via browser</td><td class="example">notebooklm login</td></tr>
+            <tr><td class="command">notebooklm use &lt;id&gt;</td><td>Set active notebook (partial ID works)</td><td class="example">notebooklm use abc123</td></tr>
+            <tr><td class="command">notebooklm status</td><td>Show current active notebook and conversation</td><td class="example">notebooklm status</td></tr>
+            <tr><td class="command">notebooklm clear</td><td>Clear current notebook context</td><td class="example">notebooklm clear</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Notebook Management</h2>
+        <table>
+            <tr><th>Command</th><th>Description</th><th>Example</th></tr>
+            <tr><td class="command">notebooklm list</td><td>List all notebooks with their IDs</td><td class="example">notebooklm list</td></tr>
+            <tr><td class="command">notebooklm create</td><td>Create a new notebook</td><td class="example">notebooklm create "My Research"</td></tr>
+            <tr><td class="command">notebooklm rename</td><td>Rename an existing notebook</td><td class="example">notebooklm rename "New Name"</td></tr>
+            <tr><td class="command">notebooklm delete</td><td>Delete the active notebook</td><td class="example">notebooklm delete</td></tr>
+            <tr><td class="command">notebooklm summary</td><td>Get AI-generated summary of the notebook</td><td class="example">notebooklm summary</td></tr>
+            <tr><td class="command">notebooklm metadata</td><td>Export notebook metadata and sources list</td><td class="example">notebooklm metadata</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Sources</h2>
+        <table>
+            <tr><th>Command</th><th>Description</th><th>Example</th></tr>
+            <tr><td class="command">notebooklm source list</td><td>List all sources in current notebook</td><td class="example">notebooklm source list</td></tr>
+            <tr><td class="command">notebooklm source add</td><td>Add a URL as a source</td><td class="example">notebooklm source add "https://example.com"</td></tr>
+            <tr><td class="command">notebooklm source add-drive</td><td>Add a Google Drive file as a source</td><td class="example">notebooklm source add-drive &lt;drive-id&gt;</td></tr>
+            <tr><td class="command">notebooklm source add-research</td><td>Add a research paper as a source</td><td class="example">notebooklm source add-research &lt;id&gt;</td></tr>
+            <tr><td class="command">notebooklm source get</td><td>Get details of a specific source</td><td class="example">notebooklm source get &lt;source-id&gt;</td></tr>
+            <tr><td class="command">notebooklm source fulltext</td><td>Get full text content of a source</td><td class="example">notebooklm source fulltext &lt;source-id&gt;</td></tr>
+            <tr><td class="command">notebooklm source rename</td><td>Rename a source</td><td class="example">notebooklm source rename &lt;id&gt; "New Title"</td></tr>
+            <tr><td class="command">notebooklm source refresh</td><td>Refresh/re-index a source</td><td class="example">notebooklm source refresh &lt;source-id&gt;</td></tr>
+            <tr><td class="command">notebooklm source stale</td><td>List stale sources needing refresh</td><td class="example">notebooklm source stale</td></tr>
+            <tr><td class="command">notebooklm source guide</td><td>Generate a guide from sources</td><td class="example">notebooklm source guide</td></tr>
+            <tr><td class="command">notebooklm source delete</td><td>Delete a source by ID</td><td class="example">notebooklm source delete &lt;source-id&gt;</td></tr>
+            <tr><td class="command">notebooklm source delete-by-title</td><td>Delete a source by title</td><td class="example">notebooklm source delete-by-title "My Doc"</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Chat</h2>
+        <table>
+            <tr><th>Command</th><th>Description</th><th>Example</th></tr>
+            <tr><td class="command">notebooklm ask</td><td>Ask the active notebook a question</td><td class="example">notebooklm ask "Summarize key points"</td></tr>
+            <tr><td class="command">notebooklm history</td><td>View conversation history or save as note</td><td class="example">notebooklm history</td></tr>
+            <tr><td class="command">notebooklm configure</td><td>Configure chat persona and response settings</td><td class="example">notebooklm configure</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Generate Artifacts</h2>
+        <table>
+            <tr><th>Command</th><th>Description</th><th>Example</th></tr>
+            <tr><td class="command">notebooklm generate audio</td><td>Generate an audio overview (podcast-style)</td><td class="example">notebooklm generate audio</td></tr>
+            <tr><td class="command">notebooklm generate report</td><td>Generate a written report</td><td class="example">notebooklm generate report</td></tr>
+            <tr><td class="command">notebooklm generate quiz</td><td>Generate a quiz from sources</td><td class="example">notebooklm generate quiz</td></tr>
+            <tr><td class="command">notebooklm generate flashcards</td><td>Generate flashcards</td><td class="example">notebooklm generate flashcards</td></tr>
+            <tr><td class="command">notebooklm generate mind-map</td><td>Generate a mind map</td><td class="example">notebooklm generate mind-map</td></tr>
+            <tr><td class="command">notebooklm generate slide-deck</td><td>Generate a slide deck</td><td class="example">notebooklm generate slide-deck</td></tr>
+            <tr><td class="command">notebooklm generate infographic</td><td>Generate an infographic</td><td class="example">notebooklm generate infographic</td></tr>
+            <tr><td class="command">notebooklm generate data-table</td><td>Generate a data table from sources</td><td class="example">notebooklm generate data-table</td></tr>
+            <tr><td class="command">notebooklm generate video</td><td>Generate a video</td><td class="example">notebooklm generate video</td></tr>
+            <tr><td class="command">notebooklm generate cinematic-video</td><td>Generate a cinematic video</td><td class="example">notebooklm generate cinematic-video</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Download &amp; Export Artifacts</h2>
+        <table>
+            <tr><th>Command</th><th>Description</th><th>Example</th></tr>
+            <tr><td class="command">notebooklm artifact list</td><td>List all artifacts in active notebook</td><td class="example">notebooklm artifact list</td></tr>
+            <tr><td class="command">notebooklm artifact get &lt;id&gt;</td><td>Get details of a specific artifact</td><td class="example">notebooklm artifact get abc123</td></tr>
+            <tr><td class="command">notebooklm artifact export &lt;id&gt;</td><td>Export a specific artifact by ID</td><td class="example">notebooklm artifact export abc123</td></tr>
+            <tr><td class="command">notebooklm artifact rename &lt;id&gt;</td><td>Rename an artifact</td><td class="example">notebooklm artifact rename abc123 "New Name"</td></tr>
+            <tr><td class="command">notebooklm artifact delete &lt;id&gt;</td><td>Delete an artifact</td><td class="example">notebooklm artifact delete abc123</td></tr>
+            <tr><td class="command">notebooklm artifact suggestions</td><td>Get artifact suggestions</td><td class="example">notebooklm artifact suggestions</td></tr>
+            <tr><td class="command">notebooklm download audio</td><td>Download audio overview file</td><td class="example">notebooklm download audio</td></tr>
+            <tr><td class="command">notebooklm download report</td><td>Download generated report</td><td class="example">notebooklm download report</td></tr>
+            <tr><td class="command">notebooklm download flashcards</td><td>Download flashcards</td><td class="example">notebooklm download flashcards</td></tr>
+            <tr><td class="command">notebooklm download quiz</td><td>Download quiz</td><td class="example">notebooklm download quiz</td></tr>
+            <tr><td class="command">notebooklm download slide-deck</td><td>Download slide deck</td><td class="example">notebooklm download slide-deck</td></tr>
+            <tr><td class="command">notebooklm download mind-map</td><td>Download mind map</td><td class="example">notebooklm download mind-map</td></tr>
+            <tr><td class="command">notebooklm download infographic</td><td>Download infographic</td><td class="example">notebooklm download infographic</td></tr>
+            <tr><td class="command">notebooklm download data-table</td><td>Download data table</td><td class="example">notebooklm download data-table</td></tr>
+            <tr><td class="command">notebooklm download video</td><td>Download video</td><td class="example">notebooklm download video</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Notes</h2>
+        <table>
+            <tr><th>Command</th><th>Description</th><th>Example</th></tr>
+            <tr><td class="command">notebooklm note list</td><td>List all notes in active notebook</td><td class="example">notebooklm note list</td></tr>
+            <tr><td class="command">notebooklm note create</td><td>Create a new note</td><td class="example">notebooklm note create "My note text"</td></tr>
+            <tr><td class="command">notebooklm note get &lt;id&gt;</td><td>Get a specific note</td><td class="example">notebooklm note get abc123</td></tr>
+            <tr><td class="command">notebooklm note rename &lt;id&gt;</td><td>Rename a note</td><td class="example">notebooklm note rename abc123 "New Title"</td></tr>
+            <tr><td class="command">notebooklm note delete &lt;id&gt;</td><td>Delete a note</td><td class="example">notebooklm note delete abc123</td></tr>
+            <tr><td class="command">notebooklm history save</td><td>Save conversation history as a note</td><td class="example">notebooklm history save</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Sharing</h2>
+        <table>
+            <tr><th>Command</th><th>Description</th><th>Example</th></tr>
+            <tr><td class="command">notebooklm share status</td><td>Show sharing status of active notebook</td><td class="example">notebooklm share status</td></tr>
+            <tr><td class="command">notebooklm share public</td><td>Make notebook public</td><td class="example">notebooklm share public</td></tr>
+            <tr><td class="command">notebooklm share add</td><td>Add a collaborator</td><td class="example">notebooklm share add user@email.com</td></tr>
+            <tr><td class="command">notebooklm share remove</td><td>Remove a collaborator</td><td class="example">notebooklm share remove user@email.com</td></tr>
+            <tr><td class="command">notebooklm share update</td><td>Update sharing settings</td><td class="example">notebooklm share update</td></tr>
+            <tr><td class="command">notebooklm share view-level</td><td>View access level settings</td><td class="example">notebooklm share view-level</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Global Options</h2>
+        <table>
+            <tr><th>Flag</th><th>Description</th><th>Example</th></tr>
+            <tr><td class="command">--version</td><td>Show CLI version</td><td class="example">notebooklm --version</td></tr>
+            <tr><td class="command">--storage PATH</td><td>Custom path to storage_state.json</td><td class="example">notebooklm --storage ~/custom/state.json list</td></tr>
+            <tr><td class="command">-v</td><td>Verbose output (INFO level)</td><td class="example">notebooklm -v ask "question"</td></tr>
+            <tr><td class="command">-vv</td><td>Very verbose output (DEBUG level)</td><td class="example">notebooklm -vv source add "url"</td></tr>
+            <tr><td class="command">--help</td><td>Show help for any command</td><td class="example">notebooklm source --help</td></tr>
+        </table>
+    </div>
+
+    <footer>
+        <p>NotebookLM CLI &mdash; <code>pip install notebooklm-py</code> &mdash; Requires Python 3.10+</p>
+        <p>Default storage: <code>~/.notebooklm/storage_state.json</code></p>
+    </footer>
+</body>
+</html>
