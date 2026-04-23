@@ -3,317 +3,641 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meet NotebookLM: Google's AI-Powered Note-Taking and Research Tool</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Meet NotebookLM: Google's AI-Powered Research Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #3498db;
-            --primary-dark: #2980b9;
-            --dark: #2c3e50;
-            --gray-900: #1a1a2e;
-            --gray-800: #16213e;
-            --gray-700: #0f3460;
-            --light: #ecf0f1;
-            --white: #ffffff;
-            --text-dark: #333;
-            --text-light: #666;
-            --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
-            --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
-        }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        :root {
+            --bg: #0b0f1a;
+            --surface: #131929;
+            --surface2: #1a2235;
+            --teal: #00c4b4;
+            --teal-dim: rgba(0,196,180,0.12);
+            --gold: #f0a500;
+            --gold-dim: rgba(240,165,0,0.15);
+            --orange: #e05a2b;
+            --orange-dim: rgba(224,90,43,0.15);
+            --purple: #7c5cbf;
+            --purple-dim: rgba(124,92,191,0.15);
+            --gray: #6b7a99;
+            --gray-dim: rgba(107,122,153,0.15);
+            --text: #e8edf5;
+            --muted: #8a9bb8;
+            --border: rgba(255,255,255,0.07);
+        }
+
+        html { scroll-behavior: smooth; }
+
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.7;
-            color: var(--text-dark);
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            position: relative;
             min-height: 100vh;
+            padding: 3rem 5vw 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
         }
 
-        header {
-            background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 50%, var(--gray-700) 100%);
-            color: white;
-            padding: 4rem 2rem 3rem;
-            text-align: center;
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -120px; right: -120px;
+            width: 480px; height: 480px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,196,180,0.22) 0%, transparent 70%);
+            pointer-events: none;
         }
 
-        header h1 {
-            font-size: clamp(1.6rem, 4vw, 2.6rem);
-            font-weight: 700;
-            line-height: 1.3;
-            max-width: 800px;
-            margin: 0 auto 1rem;
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -160px; right: 60px;
+            width: 420px; height: 420px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(100,30,30,0.55) 0%, transparent 70%);
+            pointer-events: none;
         }
 
-        .meta {
-            font-size: 0.9rem;
-            opacity: 0.75;
-            margin-top: 0.5rem;
-        }
-
-        .meta span { margin: 0 0.5rem; }
-
-        .nav-button {
-            display: inline-block;
-            padding: 8px 18px;
-            background: rgba(255,255,255,0.15);
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            margin-bottom: 2rem;
-            transition: background 0.2s;
-            border: 1px solid rgba(255,255,255,0.25);
-        }
-        .nav-button:hover { background: rgba(255,255,255,0.25); }
-
-        main {
-            max-width: 820px;
-            margin: 0 auto;
-            padding: 3rem 2rem 4rem;
-        }
-
-        .intro-box {
-            background: white;
-            border-left: 4px solid var(--primary);
-            border-radius: 0 10px 10px 0;
-            padding: 1.5rem 1.8rem;
-            margin-bottom: 2.5rem;
-            box-shadow: var(--shadow-sm);
-            font-size: 1.05rem;
-            color: #444;
-        }
-
-        section {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem 2.2rem;
-            margin-bottom: 1.8rem;
-            box-shadow: var(--shadow-sm);
-        }
-
-        section h2 {
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: var(--dark);
-            margin-bottom: 1.2rem;
-            padding-bottom: 0.6rem;
-            border-bottom: 2px solid var(--light);
-        }
-
-        section h3 {
-            font-size: 1.05rem;
+        .hero-eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.72rem;
             font-weight: 600;
-            color: var(--primary-dark);
-            margin: 1.4rem 0 0.5rem;
+            letter-spacing: 0.14em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 1.8rem;
         }
 
-        section h3:first-of-type { margin-top: 0; }
+        .hero-eyebrow span { color: var(--muted); }
+        .hero-eyebrow::before {
+            content: '';
+            display: inline-block;
+            width: 36px; height: 2px;
+            background: var(--teal);
+        }
 
-        section p {
-            color: #555;
+        .hero-content {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-text { flex: 1; }
+
+        .hero-text h1 {
+            font-size: clamp(3rem, 8vw, 5.5rem);
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.2rem;
+        }
+
+        .hero-text h1 .meet { color: var(--text); }
+        .hero-text h1 .brand { color: var(--teal); display: block; }
+
+        .hero-text .subtitle {
+            font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+            font-weight: 400;
+            color: var(--muted);
+            margin-top: 0.4rem;
+            line-height: 1.35;
+        }
+
+        .hero-badge {
+            width: 130px; height: 130px;
+            border-radius: 50%;
+            border: 2px solid var(--teal);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            flex-shrink: 0;
+            background: var(--teal-dim);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-badge .badge-icon { font-size: 2rem; margin-bottom: 0.3rem; }
+        .hero-badge .badge-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--teal);
+            line-height: 1.3;
+        }
+
+        .hero-divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, var(--teal) 0%, transparent 100%);
+            margin: 2.5rem 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-intro {
+            position: relative;
+            z-index: 1;
+            border-left: 3px solid var(--teal);
+            padding: 1.2rem 1.6rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 0 8px 8px 0;
+            font-size: 1.05rem;
+            color: var(--muted);
+            max-width: 640px;
+        }
+
+        .hero-intro strong { color: var(--text); }
+
+        .hero-meta {
+            font-size: 0.82rem;
+            color: var(--gray);
+            margin-top: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── SECTION WRAPPER ── */
+        .section {
+            padding: 4rem 5vw;
+            position: relative;
+        }
+
+        .section:nth-child(even) { background: var(--surface); }
+
+        .section-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--teal);
             margin-bottom: 0.8rem;
         }
 
-        ul {
-            padding-left: 1.4rem;
-            color: #555;
-            margin-bottom: 0.8rem;
+        .section-label::before {
+            content: '';
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--teal);
         }
 
-        ul li { margin-bottom: 0.35rem; }
+        .section-title {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 2rem;
+        }
 
+        /* ── UPLOAD GRID ── */
+        .upload-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .upload-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.4rem 1rem;
+            text-align: center;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .upload-card:hover {
+            border-color: var(--teal);
+            transform: translateY(-2px);
+        }
+
+        .upload-card .uc-icon {
+            font-size: 1.8rem;
+            margin-bottom: 0.6rem;
+            display: block;
+        }
+
+        .upload-card .uc-label {
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--muted);
+        }
+
+        /* ── FEATURE GRID ── */
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .feature-cell {
+            background: var(--surface2);
+            padding: 2rem;
+            border-top: 3px solid transparent;
+            transition: background 0.2s;
+        }
+
+        .feature-cell:nth-child(1) { border-top-color: var(--teal); }
+        .feature-cell:nth-child(2) { border-top-color: var(--gold); }
+        .feature-cell:nth-child(3) { border-top-color: var(--orange); }
+        .feature-cell:nth-child(4) { border-top-color: var(--purple); }
+
+        .feature-cell:hover { background: rgba(255,255,255,0.04); }
+
+        .feature-cell .fc-icon { font-size: 1.6rem; margin-bottom: 0.8rem; display: block; }
+
+        .feature-cell h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+            color: var(--text);
+        }
+
+        .feature-cell p {
+            font-size: 0.88rem;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
+        /* ── OUTPUT LIST ── */
+        .output-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .output-item {
+            display: flex;
+            align-items: center;
             gap: 1rem;
-            margin-top: 0.8rem;
-        }
-
-        .feature-card {
-            background: #f8f9fa;
-            border-radius: 8px;
             padding: 1rem 1.2rem;
-            border-left: 3px solid var(--primary);
+            background: var(--surface2);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            transition: border-color 0.2s;
         }
 
-        .feature-card h4 {
+        .output-item:hover { border-color: rgba(255,255,255,0.18); }
+
+        .output-dot {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .dot-teal   { background: var(--teal-dim);   color: var(--teal); }
+        .dot-gold   { background: var(--gold-dim);   color: var(--gold); }
+        .dot-orange { background: var(--orange-dim); color: var(--orange); }
+        .dot-purple { background: var(--purple-dim); color: var(--purple); }
+        .dot-gray   { background: var(--gray-dim);   color: var(--gray); }
+
+        .output-text h4 {
             font-size: 0.95rem;
             font-weight: 600;
-            color: var(--dark);
-            margin-bottom: 0.3rem;
+            color: var(--text);
+            margin-bottom: 0.1rem;
         }
 
-        .feature-card p {
-            font-size: 0.87rem;
-            color: #666;
-            margin: 0;
+        .output-text p {
+            font-size: 0.82rem;
+            color: var(--muted);
         }
 
-        .tags {
+        /* ── BENEFITS ── */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .benefit-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.6rem;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .benefit-card:hover { transform: translateY(-3px); border-color: var(--teal); }
+
+        .benefit-card .bc-icon { font-size: 1.6rem; margin-bottom: 0.8rem; display: block; }
+
+        .benefit-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        .benefit-card p { font-size: 0.85rem; color: var(--muted); }
+
+        /* ── CTA ── */
+        .cta-section {
+            padding: 5rem 5vw;
+            text-align: center;
+            background: var(--surface);
+        }
+
+        .cta-section h2 {
+            font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p { color: var(--muted); max-width: 500px; margin: 0 auto 2rem; }
+
+        .cta-btn {
+            display: inline-block;
+            background: var(--teal);
+            color: #0b0f1a;
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 0.8rem 2.2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .cta-btn:hover { opacity: 0.88; transform: translateY(-2px); }
+
+        /* ── TAGS ── */
+        .tags-section {
+            padding: 2.5rem 5vw;
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
-            margin-top: 0.5rem;
+            justify-content: center;
         }
 
         .tag {
-            background: #eaf2fb;
-            color: var(--primary-dark);
+            background: rgba(255,255,255,0.06);
+            color: var(--muted);
+            border: 1px solid var(--border);
             border-radius: 20px;
-            padding: 4px 12px;
-            font-size: 0.8rem;
+            padding: 5px 14px;
+            font-size: 0.78rem;
             font-weight: 500;
         }
 
-        .cta-box {
-            background: linear-gradient(135deg, var(--gray-900), var(--gray-700));
-            color: white;
-            border-radius: 12px;
-            padding: 2rem 2.2rem;
+        /* ── FOOTER ── */
+        footer {
+            padding: 2rem 5vw;
             text-align: center;
-            margin-top: 2rem;
+            font-size: 0.82rem;
+            color: var(--gray);
+            border-top: 1px solid var(--border);
         }
 
-        .cta-box p {
-            color: rgba(255,255,255,0.85);
-            margin-bottom: 1.2rem;
-        }
+        footer a { color: var(--teal); text-decoration: none; }
 
-        .cta-link {
-            display: inline-block;
-            background: var(--primary);
-            color: white;
+        .nav-back {
+            position: fixed;
+            top: 1.2rem; left: 1.5rem;
+            z-index: 200;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.82rem;
+            font-weight: 500;
+            padding: 7px 14px;
+            border-radius: 6px;
             text-decoration: none;
-            padding: 0.65rem 1.8rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.95rem;
+            backdrop-filter: blur(10px);
             transition: background 0.2s;
         }
-        .cta-link:hover { background: var(--primary-dark); }
+        .nav-back:hover { background: rgba(255,255,255,0.12); color: var(--text); }
 
-        .author-line {
-            text-align: center;
-            margin-top: 2.5rem;
-            color: #888;
-            font-size: 0.9rem;
-        }
-
-        .author-line strong { color: var(--dark); }
-
-        footer {
-            text-align: center;
-            padding: 1.5rem;
-            font-size: 0.85rem;
-            color: #999;
-            border-top: 1px solid #ddd;
-            margin-top: 2rem;
-        }
-
-        @media (max-width: 600px) {
-            main { padding: 2rem 1rem 3rem; }
-            section { padding: 1.4rem 1.2rem; }
+        @media (max-width: 700px) {
+            .upload-grid { grid-template-columns: repeat(2, 1fr); }
+            .feature-grid { grid-template-columns: 1fr; }
+            .hero-badge { width: 90px; height: 90px; }
+            .hero-badge .badge-icon { font-size: 1.4rem; }
         }
     </style>
 </head>
 <body>
 
-<header>
-    <a href="index.html" class="nav-button">&larr; Back to Portfolio</a>
-    <h1>Meet NotebookLM: Google's AI-Powered Note-Taking and Research Tool</h1>
-    <div class="meta">
-        <span>April 19, 2025</span>&bull;<span>By Abhijit Phadke</span>
-    </div>
-</header>
+<a href="index.html" class="nav-back">&larr; Portfolio</a>
 
-<main>
-
-    <div class="intro-box">
-        Google Labs has unveiled <strong>NotebookLM</strong>, an AI-powered research and note-taking assistant built on Google's Gemini language model. Designed for seamless interaction with your personal documents, it empowers users to extract, synthesize, and repurpose information effectively.
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-eyebrow">
+        <span>Google Labs</span>
+        &bull;
+        <span>AI Research Tool</span>
     </div>
 
-    <section>
-        <h2>Core Features</h2>
-
-        <h3>Source-Grounded AI</h3>
-        <p>Unlike traditional AI chatbots, NotebookLM delivers precise results by anchoring its analysis to the documents you upload. This reduces the likelihood of inaccuracies or "hallucinations" in its responses, ensuring that summaries, answers, and generated content are always reliable and source-specific.</p>
-
-        <h3>Flexible Document Formats</h3>
-        <p>NotebookLM supports diverse input types, letting you upload:</p>
-        <ul>
-            <li>Google Docs &amp; Slides</li>
-            <li>PDFs</li>
-            <li>Text files (.txt, Markdown)</li>
-            <li>Web URLs</li>
-            <li>YouTube links</li>
-            <li>Audio files</li>
-            <li>Pasted text</li>
-        </ul>
-
-        <h3>AI-Driven Summaries</h3>
-        <p>Upon document upload, NotebookLM automatically provides concise summaries, highlights key topics, and suggests relevant questions to accelerate comprehension.</p>
-
-        <h3>Q&amp;A with Citations</h3>
-        <p>Ask queries based on your uploaded sources, and NotebookLM delivers answers complete with inline citations. This feature ensures transparency, showing you precisely where the information originates.</p>
-
-        <h3>Dynamic Content Generation</h3>
-        <p>NotebookLM goes beyond research. It helps users repurpose their source material into diverse formats such as:</p>
-        <ul>
-            <li>Audio overviews or podcasts</li>
-            <li>Briefing documents</li>
-            <li>Study guides with short-answer questions and glossaries</li>
-            <li>FAQs</li>
-            <li>Timelines or event sequences</li>
-            <li>Mind maps to visually link concepts</li>
-        </ul>
-        <p>Users can also add and organize their personal notes, creating a tailored workspace for ongoing projects.</p>
-    </section>
-
-    <section>
-        <h2>Why NotebookLM Stands Out</h2>
-        <div class="feature-grid">
-            <div class="feature-card">
-                <h4>Enhanced Productivity</h4>
-                <p>Save valuable time by letting NotebookLM sift through dense content and extract the essence for you.</p>
-            </div>
-            <div class="feature-card">
-                <h4>Accelerated Insights</h4>
-                <p>Quickly grasp complex ideas without getting bogged down by excessive details.</p>
-            </div>
-            <div class="feature-card">
-                <h4>Streamlined Research</h4>
-                <p>NotebookLM acts as a powerful assistant, simplifying your research process and delivering actionable insights.</p>
-            </div>
-            <div class="feature-card">
-                <h4>Effortless Repurposing</h4>
-                <p>Transform existing material into new formats like audio summaries or study guides, all with AI-powered creativity.</p>
-            </div>
+    <div class="hero-content">
+        <div class="hero-text">
+            <h1>
+                <span class="meet">Meet</span>
+                <span class="brand">NotebookLM</span>
+            </h1>
+            <p class="subtitle">Google's AI-Powered<br>Research Assistant</p>
         </div>
-    </section>
-
-    <div class="cta-box">
-        <p>Ready to revolutionize how you research and take notes? Start simplifying your workflow and unlocking smarter insights today!</p>
-        <a href="https://notebooklm.google/" class="cta-link" target="_blank" rel="noopener">Try NotebookLM &rarr;</a>
-    </div>
-
-    <div class="author-line">
-        <p>Written with enthusiasm by <strong>Abhijit Phadke</strong></p>
-        <div class="tags" style="justify-content:center; margin-top:0.8rem;">
-            <span class="tag">#NotebookLM</span>
-            <span class="tag">#GoogleLabs</span>
-            <span class="tag">#AI</span>
-            <span class="tag">#NoteTakingTools</span>
-            <span class="tag">#ResearchAssistant</span>
-            <span class="tag">#ContentGeneration</span>
-            <span class="tag">#SourceGroundedAI</span>
-            <span class="tag">#Productivity</span>
+        <div class="hero-badge">
+            <span class="badge-icon">🔷</span>
+            <span class="badge-label">Gemini<br>Powered</span>
         </div>
     </div>
 
-</main>
+    <div class="hero-divider"></div>
+
+    <div class="hero-intro">
+        NotebookLM is an AI research assistant that stays grounded in <strong>YOUR documents</strong> — no hallucinations, just precise, cited answers from your sources.
+    </div>
+
+    <div class="hero-meta">April 19, 2025 &nbsp;&bull;&nbsp; Abhijit Phadke</div>
+</section>
+
+<!-- UPLOAD SOURCES -->
+<section class="section">
+    <div class="section-label">Supported Sources</div>
+    <h2 class="section-title">What You Can Upload</h2>
+    <div class="upload-grid">
+        <div class="upload-card">
+            <span class="uc-icon">📄</span>
+            <span class="uc-label">PDFs</span>
+        </div>
+        <div class="upload-card">
+            <span class="uc-icon">🌐</span>
+            <span class="uc-label">Web URLs</span>
+        </div>
+        <div class="upload-card">
+            <span class="uc-icon">📺</span>
+            <span class="uc-label">YouTube</span>
+        </div>
+        <div class="upload-card">
+            <span class="uc-icon">🎵</span>
+            <span class="uc-label">Audio</span>
+        </div>
+        <div class="upload-card">
+            <span class="uc-icon">📝</span>
+            <span class="uc-label">Text / MD</span>
+        </div>
+        <div class="upload-card">
+            <span class="uc-icon">📊</span>
+            <span class="uc-label">Google<br>Docs &amp; Slides</span>
+        </div>
+        <div class="upload-card">
+            <span class="uc-icon">📋</span>
+            <span class="uc-label">Pasted Text</span>
+        </div>
+    </div>
+</section>
+
+<!-- CORE FEATURES -->
+<section class="section">
+    <div class="section-label">Core Features</div>
+    <h2 class="section-title">What Makes It Powerful</h2>
+    <div class="feature-grid">
+        <div class="feature-cell">
+            <span class="fc-icon">🎯</span>
+            <h3>Source-Grounded AI</h3>
+            <p>Answers are anchored to your uploaded documents only — eliminating hallucinations for reliable, source-specific results.</p>
+        </div>
+        <div class="feature-cell">
+            <span class="fc-icon">⚡</span>
+            <h3>Auto Summaries</h3>
+            <p>Instant key-topic summaries when you upload any source, with suggested questions to accelerate comprehension.</p>
+        </div>
+        <div class="feature-cell">
+            <span class="fc-icon">💬</span>
+            <h3>Q&amp;A with Citations</h3>
+            <p>Ask anything — get answers with precise inline citations showing exactly where information originates.</p>
+        </div>
+        <div class="feature-cell">
+            <span class="fc-icon">📝</span>
+            <h3>Personal Notes</h3>
+            <p>Add your own notes alongside AI-generated insights, creating a tailored workspace for ongoing projects.</p>
+        </div>
+    </div>
+</section>
+
+<!-- OUTPUT TYPES -->
+<section class="section">
+    <div class="section-label">Output Types</div>
+    <h2 class="section-title">Turn Sources Into...</h2>
+    <div class="output-list">
+        <div class="output-item">
+            <div class="output-dot dot-teal">🔊</div>
+            <div class="output-text">
+                <h4>Audio Podcast</h4>
+                <p>Auto-generated audio overview of your docs</p>
+            </div>
+        </div>
+        <div class="output-item">
+            <div class="output-dot dot-gold">📰</div>
+            <div class="output-text">
+                <h4>Briefing Doc</h4>
+                <p>Concise executive-style briefing</p>
+            </div>
+        </div>
+        <div class="output-item">
+            <div class="output-dot dot-orange">📚</div>
+            <div class="output-text">
+                <h4>Study Guide</h4>
+                <p>Q&amp;A, glossary &amp; short-answer questions</p>
+            </div>
+        </div>
+        <div class="output-item">
+            <div class="output-dot dot-teal">❓</div>
+            <div class="output-text">
+                <h4>FAQ</h4>
+                <p>Frequently asked questions from content</p>
+            </div>
+        </div>
+        <div class="output-item">
+            <div class="output-dot dot-gray">📅</div>
+            <div class="output-text">
+                <h4>Timeline</h4>
+                <p>Chronological event sequences extracted</p>
+            </div>
+        </div>
+        <div class="output-item">
+            <div class="output-dot dot-purple">🗺️</div>
+            <div class="output-text">
+                <h4>Mind Map</h4>
+                <p>Visual concept map linking key ideas</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- KEY BENEFITS -->
+<section class="section">
+    <div class="section-label">Why It Stands Out</div>
+    <h2 class="section-title">Key Benefits</h2>
+    <div class="benefits-grid">
+        <div class="benefit-card">
+            <span class="bc-icon">⏱️</span>
+            <h3>Enhanced Productivity</h3>
+            <p>Let NotebookLM sift through dense content and extract the essence, saving you hours.</p>
+        </div>
+        <div class="benefit-card">
+            <span class="bc-icon">🔍</span>
+            <h3>Accelerated Insights</h3>
+            <p>Quickly grasp complex ideas without getting bogged down in excessive details.</p>
+        </div>
+        <div class="benefit-card">
+            <span class="bc-icon">🧪</span>
+            <h3>Streamlined Research</h3>
+            <p>Simplify your research process and surface actionable insights fast.</p>
+        </div>
+        <div class="benefit-card">
+            <span class="bc-icon">🔄</span>
+            <h3>Effortless Repurposing</h3>
+            <p>Transform material into new formats — audio, guides, FAQs — with AI creativity.</p>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+    <h2>Ready to Revolutionize Your Research?</h2>
+    <p>Start simplifying your workflow and unlocking smarter insights today with NotebookLM.</p>
+    <a href="https://notebooklm.google/" class="cta-btn" target="_blank" rel="noopener">Try NotebookLM &rarr;</a>
+</div>
+
+<!-- TAGS -->
+<div class="tags-section">
+    <span class="tag">#NotebookLM</span>
+    <span class="tag">#GoogleLabs</span>
+    <span class="tag">#AI</span>
+    <span class="tag">#NoteTakingTools</span>
+    <span class="tag">#ResearchAssistant</span>
+    <span class="tag">#ContentGeneration</span>
+    <span class="tag">#SourceGroundedAI</span>
+    <span class="tag">#DocumentSummaries</span>
+    <span class="tag">#Productivity</span>
+    <span class="tag">#EnhancedInsights</span>
+    <span class="tag">#EfficientResearch</span>
+</div>
 
 <footer>
     &copy; 2025 Abhijit Phadke &mdash; Originally published on <a href="https://a6hijitphadke.blogspot.com" target="_blank" rel="noopener">The AI Sole</a>
