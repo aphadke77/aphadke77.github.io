@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meet NotebookLM: Google's AI-Powered Research Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg:       #0b0f1a;
+            --card:     #141c2e;
+            --card2:    #111827;
+            --teal:     #00c4b4;
+            --teal-dim: rgba(0,196,180,0.10);
+            --teal-glow:rgba(0,196,180,0.18);
+            --gold:     #f0a500;
+            --gold-dim: rgba(240,165,0,0.15);
+            --red:      #e05a2b;
+            --red-dim:  rgba(224,90,43,0.15);
+            --purple:   #7c5cbf;
+            --purple-dim:rgba(124,92,191,0.15);
+            --steel:    #4a6080;
+            --steel-dim:rgba(74,96,128,0.18);
+            --text:     #e2e8f4;
+            --muted:    #8a9bb8;
+            --border:   rgba(255,255,255,0.07);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.65;
+            overflow-x: hidden;
+        }
+
+        /* ─── NAV BACK ─── */
+        .nav-back {
+            position: fixed; top: 1.1rem; left: 1.4rem; z-index: 300;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.8rem; font-weight: 500;
+            padding: 6px 14px; border-radius: 6px;
+            text-decoration: none;
+            backdrop-filter: blur(12px);
+            transition: background .2s, color .2s;
+        }
+        .nav-back:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+
+        /* ─── HERO ─── */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            padding: 7rem 6vw 5rem;
+            display: flex; flex-direction: column; justify-content: center;
+            overflow: hidden;
+        }
+
+        /* teal glow – top right */
+        .hero .deco-teal {
+            position: absolute; top: -140px; right: -140px;
+            width: 520px; height: 520px; border-radius: 50%;
+            background: radial-gradient(circle at 40% 40%, rgba(0,196,180,.30) 0%, transparent 65%);
+            pointer-events: none;
+        }
+        /* dark maroon glow – bottom right */
+        .hero .deco-maroon {
+            position: absolute; bottom: -180px; right: 40px;
+            width: 460px; height: 460px; border-radius: 50%;
+            background: radial-gradient(circle at 50% 50%, rgba(100,20,20,.65) 0%, transparent 65%);
+            pointer-events: none;
+        }
+
+        .eyebrow {
+            display: flex; align-items: center; gap: .6rem;
+            font-size: .68rem; font-weight: 700;
+            letter-spacing: .16em; text-transform: uppercase;
+            color: var(--muted); margin-bottom: 2rem;
+            position: relative; z-index: 1;
+        }
+        .eyebrow::before {
+            content: '';
+            display: inline-block; width: 32px; height: 2px;
+            background: var(--teal); border-radius: 2px;
+        }
+
+        .hero-row {
+            display: flex; align-items: flex-start;
+            justify-content: space-between; gap: 2rem;
+            position: relative; z-index: 1;
+        }
+
+        .hero-title { flex: 1; }
+        .hero-title h1 {
+            font-size: clamp(3.2rem, 9vw, 6rem);
+            font-weight: 900; line-height: 1.0;
+            letter-spacing: -.035em;
+        }
+        .hero-title h1 .meet  { color: var(--text);  display: block; }
+        .hero-title h1 .brand { color: var(--teal); display: block; }
+        .hero-title .sub {
+            margin-top: .6rem;
+            font-size: clamp(1rem, 2.4vw, 1.5rem);
+            font-weight: 400; color: var(--muted); line-height: 1.3;
+        }
+
+        .gem-badge {
+            width: 130px; height: 130px; border-radius: 50%;
+            border: 2px solid var(--teal);
+            background: var(--teal-dim);
+            backdrop-filter: blur(10px);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center;
+            flex-shrink: 0; position: relative; z-index: 1;
+        }
+        .gem-badge svg { width: 36px; height: 36px; margin-bottom: 6px; }
+        .gem-badge span {
+            font-size: .65rem; font-weight: 700;
+            letter-spacing: .07em; text-transform: uppercase; color: var(--teal);
+            line-height: 1.3;
+        }
+
+        .divider {
+            width: 100%; height: 1px;
+            background: linear-gradient(90deg, var(--teal) 0%, transparent 70%);
+            margin: 2.6rem 0; position: relative; z-index: 1;
+        }
+
+        .hero-quote {
+            border-left: 3px solid var(--teal);
+            padding: 1.15rem 1.6rem;
+            background: rgba(255,255,255,0.025);
+            border-radius: 0 8px 8px 0;
+            font-size: 1rem; color: var(--muted);
+            max-width: 600px; position: relative; z-index: 1;
+        }
+        .hero-quote strong { color: var(--text); }
+
+        .hero-meta {
+            font-size: .8rem; color: var(--steel);
+            margin-top: 1.1rem; position: relative; z-index: 1;
+        }
+
+        /* ─── SECTIONS ─── */
+        .sec {
+            position: relative;
+            padding: 5rem 6vw;
+            overflow: hidden;
+        }
+        .sec:nth-child(odd) { background: var(--card2); }
+        .sec:nth-child(even){ background: var(--bg);    }
+
+        .sec-label {
+            display: flex; align-items: center; gap: .5rem;
+            font-size: .68rem; font-weight: 700;
+            letter-spacing: .16em; text-transform: uppercase;
+            color: var(--teal); margin-bottom: .7rem;
+        }
+        .sec-label::before {
+            content: ''; display: inline-block;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--teal);
+        }
+
+        .sec-title {
+            font-size: clamp(1.9rem, 4.5vw, 3rem);
+            font-weight: 800; letter-spacing: -.025em;
+            margin-bottom: 2.2rem;
+        }
+
+        /* ─── DECORATIVE CIRCLES IN SECTIONS ─── */
+        .deco-circle {
+            position: absolute; border-radius: 50%;
+            pointer-events: none;
+        }
+        .deco-left-teal {
+            left: -200px; top: 50%; transform: translateY(-50%);
+            width: 460px; height: 460px;
+            background: radial-gradient(circle at 60% 50%, rgba(0,196,180,.20) 0%, transparent 65%);
+        }
+        .deco-right-maroon {
+            right: -180px; top: 50%; transform: translateY(-50%);
+            width: 460px; height: 460px;
+            background: radial-gradient(circle at 40% 50%, rgba(100,20,20,.55) 0%, transparent 65%);
+        }
+        .deco-right-teal {
+            right: -180px; bottom: -120px;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle at 40% 40%, rgba(0,196,180,.14) 0%, transparent 65%);
+        }
+
+        /* ─── UPLOAD CARDS ─── */
+        .upload-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            position: relative; z-index: 1;
+        }
+
+        .u-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            transition: border-color .2s, transform .2s;
+        }
+        .u-card:hover { border-color: var(--teal); transform: translateY(-3px); }
+        .u-card .u-icon { font-size: 1.9rem; margin-bottom: .55rem; display: block; }
+        .u-card .u-name {
+            font-size: .82rem; font-weight: 500; color: var(--muted); line-height: 1.3;
+        }
+
+        /* ─── FEATURE GRID ─── */
+        .feat-wrap {
+            position: relative; z-index: 1;
+        }
+        .feat-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 12px; overflow: hidden;
+        }
+        .f-cell {
+            background: var(--card);
+            padding: 2rem 2rem 2rem 1.8rem;
+            border-top: 3px solid transparent;
+            transition: background .2s;
+        }
+        .f-cell:hover { background: rgba(255,255,255,0.035); }
+        .f-cell:nth-child(1) { border-top-color: var(--teal);   }
+        .f-cell:nth-child(2) { border-top-color: var(--gold);   }
+        .f-cell:nth-child(3) { border-top-color: var(--red);    }
+        .f-cell:nth-child(4) { border-top-color: var(--purple); }
+        .f-cell .f-icon { font-size: 1.6rem; margin-bottom: .7rem; display: block; }
+        .f-cell h3 { font-size: 1rem; font-weight: 700; margin-bottom: .35rem; }
+        .f-cell p  { font-size: .87rem; color: var(--muted); line-height: 1.55; }
+
+        /* ─── OUTPUT LIST ─── */
+        .out-list {
+            display: flex; flex-direction: column; gap: .7rem;
+            position: relative; z-index: 1;
+        }
+        .out-item {
+            display: flex; align-items: center; gap: 1rem;
+            padding: 1rem 1.3rem;
+            background: var(--card);
+            border: 1px solid var(--border); border-radius: 10px;
+            transition: border-color .2s;
+        }
+        .out-item:hover { border-color: rgba(255,255,255,0.16); }
+        .out-dot {
+            width: 42px; height: 42px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0;
+        }
+        .d-teal   { background: var(--teal-dim);   }
+        .d-gold   { background: var(--gold-dim);   }
+        .d-red    { background: var(--red-dim);    }
+        .d-purple { background: var(--purple-dim); }
+        .d-steel  { background: var(--steel-dim);  }
+        .out-text h4 { font-size: .95rem; font-weight: 600; margin-bottom: .1rem; }
+        .out-text p  { font-size: .82rem; color: var(--muted); }
+
+        /* ─── BENEFITS ─── */
+        .ben-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 1.2rem;
+            position: relative; z-index: 1;
+        }
+        .b-card {
+            background: var(--card);
+            border: 1px solid var(--border); border-radius: 12px;
+            padding: 1.7rem;
+            transition: transform .2s, border-color .2s;
+        }
+        .b-card:hover { transform: translateY(-3px); border-color: var(--teal); }
+        .b-card .b-icon { font-size: 1.65rem; margin-bottom: .75rem; display: block; }
+        .b-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: .35rem; }
+        .b-card p  { font-size: .85rem; color: var(--muted); }
+
+        /* ─── CTA ─── */
+        .cta {
+            padding: 5.5rem 6vw;
+            text-align: center;
+            background: var(--card2);
+            position: relative; overflow: hidden;
+        }
+        .cta .deco-circle {
+            left: 50%; top: 50%; transform: translate(-50%,-50%);
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(0,196,180,.07) 0%, transparent 65%);
+        }
+        .cta h2 {
+            font-size: clamp(1.6rem, 3.5vw, 2.5rem);
+            font-weight: 800; margin-bottom: 1rem;
+            position: relative; z-index: 1;
+        }
+        .cta p {
+            color: var(--muted); max-width: 480px;
+            margin: 0 auto 2rem; position: relative; z-index: 1;
+        }
+        .cta-btn {
+            display: inline-block;
+            background: var(--teal); color: #0b0f1a;
+            font-weight: 700; font-size: .95rem;
+            padding: .78rem 2.2rem; border-radius: 8px;
+            text-decoration: none;
+            transition: opacity .2s, transform .2s;
+            position: relative; z-index: 1;
+        }
+        .cta-btn:hover { opacity: .85; transform: translateY(-2px); }
+
+        /* ─── TAGS ─── */
+        .tags {
+            padding: 2.5rem 6vw;
+            display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center;
+        }
+        .tag {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--muted); border-radius: 20px;
+            padding: 5px 13px; font-size: .78rem; font-weight: 500;
+        }
+
+        /* ─── FOOTER ─── */
+        footer {
+            padding: 1.8rem 6vw;
+            text-align: center; font-size: .82rem;
+            color: var(--steel);
+            border-top: 1px solid var(--border);
+        }
+        footer a { color: var(--teal); text-decoration: none; }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 720px) {
+            .upload-grid { grid-template-columns: repeat(2, 1fr); }
+            .feat-grid   { grid-template-columns: 1fr; }
+            .gem-badge   { width: 90px; height: 90px; }
+            .gem-badge svg { width: 26px; height: 26px; }
+        }
+    </style>
+</head>
+<body>
+
+<a href="index.html" class="nav-back">&larr; Portfolio</a>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section class="hero">
+    <div class="deco-teal deco-circle"></div>
+    <div class="deco-maroon deco-circle"></div>
+
+    <div class="eyebrow">
+        <span>Google Labs</span>
+        &nbsp;&middot;&nbsp;
+        <span>AI Research Tool</span>
+    </div>
+
+    <div class="hero-row">
+        <div class="hero-title">
+            <h1>
+                <span class="meet">Meet</span>
+                <span class="brand">NotebookLM</span>
+            </h1>
+            <p class="sub">Google's AI-Powered<br>Research Assistant</p>
+        </div>
+
+        <!-- Gemini badge -->
+        <div class="gem-badge">
+            <!-- diamond / gemini icon -->
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M24 4L44 24L24 44L4 24L24 4Z" stroke="#00c4b4" stroke-width="2.5" fill="rgba(0,196,180,0.12)"/>
+                <path d="M24 14L34 24L24 34L14 24L24 14Z" fill="#00c4b4" opacity=".5"/>
+            </svg>
+            <span>Gemini<br>Powered</span>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="hero-quote">
+        NotebookLM is an AI research assistant that stays grounded in
+        <strong>YOUR documents</strong> — no hallucinations, just precise,
+        cited answers from your sources.
+    </div>
+
+    <div class="hero-meta">April 19, 2025 &nbsp;&bull;&nbsp; Abhijit Phadke</div>
+</section>
+
+<!-- ══════════════ UPLOAD SOURCES ══════════════ -->
+<section class="sec">
+    <!-- large teal circle floating left -->
+    <div class="deco-circle deco-left-teal"></div>
+
+    <div class="sec-label">Supported Sources</div>
+    <h2 class="sec-title">What You Can Upload</h2>
+
+    <div class="upload-grid">
+        <div class="u-card">
+            <span class="u-icon">📄</span>
+            <span class="u-name">PDFs</span>
+        </div>
+        <div class="u-card">
+            <span class="u-icon">🌐</span>
+            <span class="u-name">Web URLs</span>
+        </div>
+        <div class="u-card">
+            <span class="u-icon">📺</span>
+            <span class="u-name">YouTube</span>
+        </div>
+        <div class="u-card">
+            <span class="u-icon">🎵</span>
+            <span class="u-name">Audio</span>
+        </div>
+        <div class="u-card">
+            <span class="u-icon">📝</span>
+            <span class="u-name">Text / MD</span>
+        </div>
+        <div class="u-card">
+            <span class="u-icon">📊</span>
+            <span class="u-name">Google<br>Docs &amp; Slides</span>
+        </div>
+        <div class="u-card">
+            <span class="u-icon">📋</span>
+            <span class="u-name">Pasted Text</span>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════ CORE FEATURES ══════════════ -->
+<section class="sec">
+    <!-- dark maroon circle floating right -->
+    <div class="deco-circle deco-right-maroon"></div>
+
+    <div class="sec-label">Core Features</div>
+    <h2 class="sec-title">What Makes It Powerful</h2>
+
+    <div class="feat-wrap">
+        <div class="feat-grid">
+            <div class="f-cell">
+                <span class="f-icon">🎯</span>
+                <h3>Source-Grounded AI</h3>
+                <p>Answers are anchored to your uploaded documents only — eliminating hallucinations for reliable, source-specific results.</p>
+            </div>
+            <div class="f-cell">
+                <span class="f-icon">⚡</span>
+                <h3>Auto Summaries</h3>
+                <p>Instant key-topic summaries when you upload any source, with suggested questions to accelerate comprehension.</p>
+            </div>
+            <div class="f-cell">
+                <span class="f-icon">💬</span>
+                <h3>Q&amp;A with Citations</h3>
+                <p>Ask anything — get answers with precise inline citations showing exactly where information originates.</p>
+            </div>
+            <div class="f-cell">
+                <span class="f-icon">📝</span>
+                <h3>Personal Notes</h3>
+                <p>Add your own notes alongside AI-generated insights, creating a tailored workspace for ongoing projects.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════ OUTPUT TYPES ══════════════ -->
+<section class="sec">
+    <div class="deco-circle deco-right-teal"></div>
+
+    <div class="sec-label">Output Types</div>
+    <h2 class="sec-title">Turn Sources Into...</h2>
+
+    <div class="out-list">
+        <div class="out-item">
+            <div class="out-dot d-teal">🔊</div>
+            <div class="out-text">
+                <h4>Audio Podcast</h4>
+                <p>Auto-generated audio overview of your docs</p>
+            </div>
+        </div>
+        <div class="out-item">
+            <div class="out-dot d-gold">📰</div>
+            <div class="out-text">
+                <h4>Briefing Doc</h4>
+                <p>Concise executive-style briefing</p>
+            </div>
+        </div>
+        <div class="out-item">
+            <div class="out-dot d-red">📚</div>
+            <div class="out-text">
+                <h4>Study Guide</h4>
+                <p>Q&amp;A, glossary &amp; short-answer questions</p>
+            </div>
+        </div>
+        <div class="out-item">
+            <div class="out-dot d-teal">❓</div>
+            <div class="out-text">
+                <h4>FAQ</h4>
+                <p>Frequently asked questions from content</p>
+            </div>
+        </div>
+        <div class="out-item">
+            <div class="out-dot d-steel">📅</div>
+            <div class="out-text">
+                <h4>Timeline</h4>
+                <p>Chronological event sequences extracted</p>
+            </div>
+        </div>
+        <div class="out-item">
+            <div class="out-dot d-purple">🗺️</div>
+            <div class="out-text">
+                <h4>Mind Map</h4>
+                <p>Visual concept map linking key ideas</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════ KEY BENEFITS ══════════════ -->
+<section class="sec">
+    <div class="deco-circle deco-left-teal"></div>
+
+    <div class="sec-label">Why It Stands Out</div>
+    <h2 class="sec-title">Key Benefits</h2>
+
+    <div class="ben-grid">
+        <div class="b-card">
+            <span class="b-icon">⏱️</span>
+            <h3>Enhanced Productivity</h3>
+            <p>Let NotebookLM sift through dense content and extract the essence, saving you hours.</p>
+        </div>
+        <div class="b-card">
+            <span class="b-icon">🔍</span>
+            <h3>Accelerated Insights</h3>
+            <p>Quickly grasp complex ideas without getting bogged down in excessive details.</p>
+        </div>
+        <div class="b-card">
+            <span class="b-icon">🧪</span>
+            <h3>Streamlined Research</h3>
+            <p>Simplify your research process and surface actionable insights fast.</p>
+        </div>
+        <div class="b-card">
+            <span class="b-icon">🔄</span>
+            <h3>Effortless Repurposing</h3>
+            <p>Transform material into audio summaries, study guides, FAQs and more.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════ CTA ══════════════ -->
+<div class="cta">
+    <div class="deco-circle"></div>
+    <h2>Ready to Revolutionize Your Research?</h2>
+    <p>Start simplifying your workflow and unlocking smarter insights today with NotebookLM.</p>
+    <a href="https://notebooklm.google/" class="cta-btn" target="_blank" rel="noopener">
+        Try NotebookLM &rarr;
+    </a>
+</div>
+
+<!-- ══════════════ TAGS ══════════════ -->
+<div class="tags">
+    <span class="tag">#NotebookLM</span>
+    <span class="tag">#GoogleLabs</span>
+    <span class="tag">#AI</span>
+    <span class="tag">#NoteTakingTools</span>
+    <span class="tag">#ResearchAssistant</span>
+    <span class="tag">#ContentGeneration</span>
+    <span class="tag">#SourceGroundedAI</span>
+    <span class="tag">#DocumentSummaries</span>
+    <span class="tag">#Productivity</span>
+    <span class="tag">#EnhancedInsights</span>
+    <span class="tag">#EfficientResearch</span>
+</div>
+
+<footer>
+    &copy; 2025 Abhijit Phadke &mdash; Originally published on
+    <a href="https://a6hijitphadke.blogspot.com" target="_blank" rel="noopener">The AI Sole</a>
+</footer>
+
+</body>
+</html>
