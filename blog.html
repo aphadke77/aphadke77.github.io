@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — theaisole</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f4f6fb;
+    --surface2: #e8edf5;
+    --accent: #0099cc;
+    --accent2: #3b6cf6;
+    --text: #0f1623;
+    --muted: #6b7a99;
+    --border: rgba(0,0,0,0.08);
+    --grad1: linear-gradient(135deg, #0099cc 0%, #3b6cf6 100%);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 5vw;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    letter-spacing: -0.02em;
+    background: var(--grad1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-decoration: none;
+  }
+  .nav-back {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 400;
+    text-decoration: none;
+    display: flex; align-items: center; gap: 0.3rem;
+    transition: color 0.2s;
+  }
+  .nav-back:hover { color: var(--text); }
+
+  /* HERO */
+  .hero {
+    padding: 9rem 5vw 5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 20%, rgba(0,153,204,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 80% 70%, rgba(59,108,246,0.07) 0%, transparent 60%);
+  }
+  .hero-grid {
+    position: absolute; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(0,153,204,0.08);
+    border: 1px solid rgba(0,153,204,0.2);
+    border-radius: 100px;
+    padding: 0.35rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .hero-badge::before { content: '●'; font-size: 0.5rem; }
+  .hero-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+  .hero-title em {
+    font-style: normal;
+    background: var(--grad1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-sub {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* BLOG GRID */
+  .blog-section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 4rem 5vw 6rem;
+  }
+
+  .filter-bar {
+    display: flex; gap: 0.6rem; flex-wrap: wrap;
+    margin-bottom: 3rem;
+  }
+  .filter-btn {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn.active,
+  .filter-btn:hover {
+    background: var(--grad1);
+    color: #fff;
+    border-color: transparent;
+  }
+
+  .posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.75rem;
+  }
+
+  /* FEATURED POST */
+  .post-featured {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.3s, transform 0.3s;
+    position: relative;
+  }
+  .post-featured::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--grad1);
+  }
+  .post-featured:hover { border-color: rgba(0,153,204,0.35); transform: translateY(-4px); }
+
+  .post-featured-visual {
+    background: linear-gradient(135deg, #0f1623 0%, #1a2a4a 60%, #0099cc22 100%);
+    display: flex; align-items: center; justify-content: center;
+    min-height: 260px;
+    padding: 3rem;
+  }
+  .post-featured-emoji { font-size: 5rem; }
+
+  .post-featured-body { padding: 2.5rem; display: flex; flex-direction: column; justify-content: center; }
+  .post-tag {
+    display: inline-block;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(0,153,204,0.3);
+    padding: 0.25rem 0.7rem;
+    border-radius: 100px;
+    margin-bottom: 1rem;
+  }
+  .post-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.55rem;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    margin-bottom: 0.9rem;
+  }
+  .post-excerpt {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+  .post-meta {
+    display: flex; align-items: center; gap: 1.2rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .post-author { font-weight: 500; color: var(--text); }
+  .post-read-more {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    color: var(--accent);
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-top: 1.5rem;
+    transition: gap 0.2s;
+  }
+  .post-featured:hover .post-read-more { gap: 0.7rem; }
+
+  /* REGULAR POST CARD */
+  .post-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: flex; flex-direction: column;
+    transition: border-color 0.3s, transform 0.3s;
+    position: relative;
+  }
+  .post-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--grad1);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .post-card:hover { border-color: rgba(0,153,204,0.3); transform: translateY(-3px); }
+  .post-card:hover::before { opacity: 1; }
+
+  .post-card-visual {
+    background: linear-gradient(135deg, #0f1623 0%, #1a2a4a 70%);
+    display: flex; align-items: center; justify-content: center;
+    height: 140px;
+    font-size: 3rem;
+  }
+  .post-card-body { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+  .post-card-body .post-title { font-size: 1.05rem; margin-bottom: 0.6rem; }
+  .post-card-body .post-excerpt { font-size: 0.85rem; flex: 1; }
+  .post-card-body .post-read-more { margin-top: 1.2rem; }
+
+  /* NEWSLETTER STRIP */
+  .newsletter-strip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3rem;
+    text-align: center;
+    margin-top: 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .newsletter-strip::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--grad1);
+  }
+  .newsletter-strip h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+  .newsletter-strip p { color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+  .newsletter-form { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+  .newsletter-form input {
+    padding: 0.75rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    width: 280px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .newsletter-form input:focus { border-color: var(--accent); }
+  .newsletter-form button {
+    padding: 0.75rem 1.75rem;
+    background: var(--grad1);
+    color: #fff;
+    border: none;
+    border-radius: 100px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .newsletter-form button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,153,204,0.28); }
+
+  /* FOOTER */
+  footer {
+    padding: 2.5rem 5vw;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+  }
+  .footer-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; background: var(--grad1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .footer-copy { font-size: 0.8rem; color: var(--muted); }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a { font-size: 0.82rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--text); }
+
+  /* ANIMATIONS */
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .post-featured { grid-template-columns: 1fr; }
+    .post-featured-visual { min-height: 180px; }
+    footer { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="theaisole.html" class="nav-back">&#8592; theaisole</a>
+  <a href="theaisole.html" class="nav-logo">theaisole</a>
+  <a href="index.html" class="nav-back">Index &#8594;</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Tech Blog</div>
+    <h1 class="hero-title">Insights, Guides &<br><em>AI Deep Dives</em></h1>
+    <p class="hero-sub">Educational articles and thought leadership for a tech-curious audience. We write to inform, not to impress.</p>
+  </div>
+</section>
+
+<div class="blog-section">
+
+  <div class="filter-bar reveal">
+    <button class="filter-btn active">All</button>
+    <button class="filter-btn">AI & Tools</button>
+    <button class="filter-btn">Security</button>
+    <button class="filter-btn">Productivity</button>
+    <button class="filter-btn">Guides</button>
+  </div>
+
+  <div class="posts-grid reveal">
+
+    <!-- Featured Post -->
+    <a href="meet-notebooklm.html" class="post-featured">
+      <div class="post-featured-visual">
+        <div class="post-featured-emoji">📓</div>
+      </div>
+      <div class="post-featured-body">
+        <span class="post-tag">AI &amp; Tools · Featured</span>
+        <div class="post-title">Meet NotebookLM: Google's AI-Powered Note-Taking and Research Tool</div>
+        <p class="post-excerpt">Discover how Google's NotebookLM transforms the way you research, summarise, and interact with your documents. From automatic summaries to AI-generated podcasts, this guide covers everything you need to get started.</p>
+        <div class="post-meta">
+          <span class="post-author">Abhijit Phadke</span>
+          <span>·</span>
+          <span>Apr 2025</span>
+          <span>·</span>
+          <span>5 min read</span>
+        </div>
+        <span class="post-read-more">Read Article →</span>
+      </div>
+    </a>
+
+    <!-- Placeholder cards (coming soon) -->
+    <div class="post-card" style="opacity:0.55;pointer-events:none;">
+      <div class="post-card-visual">🛡️</div>
+      <div class="post-card-body">
+        <span class="post-tag">Security</span>
+        <div class="post-title">Staying Safe Online: A Practical Guide for Everyday Users</div>
+        <p class="post-excerpt">Simple, actionable steps to protect yourself from phishing, malware, and data breaches — no tech background required.</p>
+        <div class="post-meta"><span class="post-author">Coming Soon</span></div>
+      </div>
+    </div>
+
+    <div class="post-card" style="opacity:0.55;pointer-events:none;">
+      <div class="post-card-visual">🤖</div>
+      <div class="post-card-body">
+        <span class="post-tag">AI &amp; Tools</span>
+        <div class="post-title">Understanding RAG: Making AI Smarter with Your Own Data</div>
+        <p class="post-excerpt">Retrieval-Augmented Generation explained in plain English — what it is, why it matters, and how businesses are using it today.</p>
+        <div class="post-meta"><span class="post-author">Coming Soon</span></div>
+      </div>
+    </div>
+
+    <div class="post-card" style="opacity:0.55;pointer-events:none;">
+      <div class="post-card-visual">📊</div>
+      <div class="post-card-body">
+        <span class="post-tag">Productivity</span>
+        <div class="post-title">Data Literacy for Non-Technical Professionals</div>
+        <p class="post-excerpt">You don't need to be a data scientist to make data-driven decisions. Here's how to read, interpret, and question the numbers around you.</p>
+        <div class="post-meta"><span class="post-author">Coming Soon</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Newsletter -->
+  <div class="newsletter-strip reveal">
+    <h2>Stay in the Loop</h2>
+    <p>New articles on AI, security, and practical tech — delivered straight to your inbox.</p>
+    <form class="newsletter-form" onsubmit="handleSubscribe(event)">
+      <input type="email" placeholder="your@email.com" required>
+      <button type="submit">Subscribe</button>
+    </form>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-logo">theaisole</div>
+  <div class="footer-copy">© 2025 theaisole. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="theaisole.html">Home</a>
+    <a href="theaisole.html#products">Products</a>
+    <a href="theaisole.html#services">Services</a>
+    <a href="theaisole.html#contact">Contact</a>
+  </div>
+</footer>
+
+<script>
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.06 });
+  reveals.forEach(el => observer.observe(el));
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  function handleSubscribe(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    btn.textContent = 'Subscribed ✓';
+    btn.style.background = 'linear-gradient(135deg,#2ecc71,#27ae60)';
+    e.target.querySelector('input').disabled = true;
+    btn.disabled = true;
+  }
+</script>
+</body>
+</html>
