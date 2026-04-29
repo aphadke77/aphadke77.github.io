@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 skill_task_runner.py
-Load skills.md and execute the tasks described in each skill section.
+Load skills.md or skills.pdf and execute the tasks described in each skill section.
 
 Usage:
   python skill_task_runner.py                               # interactive menu
@@ -9,7 +9,8 @@ Usage:
   python skill_task_runner.py --skill "Python Basics"       # run all tasks in a skill
   python skill_task_runner.py --skill "Python Basics" --task "Hello World"
   python skill_task_runner.py --run-all                     # run every task
-  python skill_task_runner.py --file my_skills.md --list    # custom file
+  python skill_task_runner.py --file skills.pdf --list      # load from PDF
+  python skill_task_runner.py --file my_skills.md --list    # custom markdown file
 """
 
 import re
@@ -24,10 +25,38 @@ from contextlib import redirect_stdout
 
 
 # ---------------------------------------------------------------------------
+# File loading  (.md and .pdf)
+# ---------------------------------------------------------------------------
+
+def _load_content(filepath: str) -> str:
+    """Return the text content of a .md or .pdf file."""
+    ext = os.path.splitext(filepath)[1].lower()
+    if ext != ".pdf":
+        with open(filepath, "r", encoding="utf-8") as fh:
+            return fh.read()
+
+    # PDF path — requires pdfminer.six
+    try:
+        from pdfminer.high_level import extract_text
+    except ImportError:
+        print(c("Error: pdfminer.six is needed to load PDF files.", RED))
+        print("  Install: pip install pdfminer.six")
+        sys.exit(1)
+
+    text = extract_text(filepath)
+    if not text.strip():
+        print(c(f"Warning: no text could be extracted from '{filepath}'.", YELLOW))
+    # pdfminer inserts \x0c (form-feed) at page boundaries, sometimes mid-line.
+    # Strip them so heading/fence patterns are not disrupted.
+    text = text.replace("\x0c", "")
+    return text
+
+
+# ---------------------------------------------------------------------------
 # Parsing
 # ---------------------------------------------------------------------------
 
-def parse_skills_md(filepath: str) -> dict:
+def parse_skills_file(filepath: str) -> dict:
     """
     Parse a skills.md file into a dict:
       {
@@ -44,9 +73,9 @@ def parse_skills_md(filepath: str) -> dict:
       }
     Skill sections start at ## headings; task sections at ### headings.
     Code blocks (```lang ... ```) are extracted per task.
+    Accepts both .md and .pdf files.
     """
-    with open(filepath, "r", encoding="utf-8") as fh:
-        content = fh.read()
+    content = _load_content(filepath)
 
     # Stash fenced code blocks so their interior headings are not mis-parsed.
     _stash: list[str] = []
@@ -368,7 +397,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--file", "-f", default="skills.md",
         metavar="PATH",
-        help="Path to the skills markdown file (default: skills.md)",
+        help="Path to skills file — .md or .pdf (default: skills.md)",
     )
     p.add_argument("--list", "-l", action="store_true", help="List all skills and exit")
     p.add_argument("--list-tasks", action="store_true",
@@ -391,11 +420,13 @@ def main() -> None:
 
     if not os.path.exists(md_path):
         print(c(f"Error: '{md_path}' not found.", RED))
-        print("  Create skills.md next to this script, or pass --file <path>.")
+        print("  Create skills.md (or skills.pdf) next to this script, or pass --file <path>.")
         sys.exit(1)
 
-    print(c(f"Loading: {md_path}", DIM))
-    skills = parse_skills_md(md_path)
+    ext = os.path.splitext(md_path)[1].lower()
+    fmt = "PDF" if ext == ".pdf" else "Markdown"
+    print(c(f"Loading ({fmt}): {md_path}", DIM))
+    skills = parse_skills_file(md_path)
 
     if not skills:
         print(c("No skills parsed. Check the file format.", RED))
