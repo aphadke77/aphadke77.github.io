@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CashLens — Currency Counter</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gold-dim: #5a4a22;
+    --green: #3dba7c;
+    --red: #e05b5b;
+    --text: #f0ece0;
+    --text-muted: #7a7060;
+    --text-dim: #4a4640;
+  }
+
+- { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘DM Mono’, monospace;
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+overflow-x: hidden;
+}
+
+/* Noise overlay */
+body::before {
+content: ‘’;
+position: fixed;
+inset: 0;
+background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘n’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.85’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23n)’ opacity=‘0.04’/%3E%3C/svg%3E”);
+pointer-events: none;
+z-index: 0;
+}
+
+.wrap {
+width: 100%;
+max-width: 720px;
+padding: 0 20px 60px;
+position: relative;
+z-index: 1;
+}
+
+/* Header */
+header {
+padding: 48px 0 32px;
+display: flex;
+align-items: flex-end;
+gap: 16px;
+}
+
+.logo-mark {
+width: 44px;
+height: 44px;
+border-radius: 10px;
+background: linear-gradient(135deg, var(–gold-dim), var(–gold));
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 22px;
+}
+
+.logo-text {
+font-family: ‘Syne’, sans-serif;
+font-weight: 800;
+font-size: 26px;
+letter-spacing: -0.5px;
+color: var(–text);
+}
+
+.logo-text span {
+color: var(–gold);
+}
+
+.tagline {
+font-size: 10px;
+color: var(–text-muted);
+letter-spacing: 2px;
+text-transform: uppercase;
+margin-left: auto;
+align-self: center;
+}
+
+/* Upload zone */
+.upload-zone {
+border: 1.5px dashed var(–border);
+border-radius: 16px;
+background: var(–surface);
+padding: 40px 24px;
+text-align: center;
+cursor: pointer;
+transition: all 0.25s ease;
+position: relative;
+overflow: hidden;
+}
+
+.upload-zone:hover, .upload-zone.drag-over {
+border-color: var(–gold-dim);
+background: #1a1810;
+}
+
+.upload-zone.has-image {
+padding: 0;
+border-style: solid;
+border-color: var(–gold-dim);
+}
+
+.upload-icon {
+font-size: 36px;
+margin-bottom: 12px;
+display: block;
+opacity: 0.6;
+}
+
+.upload-label {
+font-family: ‘Syne’, sans-serif;
+font-weight: 600;
+font-size: 15px;
+color: var(–text);
+margin-bottom: 6px;
+}
+
+.upload-sub {
+font-size: 11px;
+color: var(–text-muted);
+letter-spacing: 1px;
+}
+
+#fileInput { display: none; }
+
+.preview-img {
+width: 100%;
+max-height: 380px;
+object-fit: cover;
+border-radius: 14px;
+display: block;
+}
+
+.img-overlay {
+position: absolute;
+bottom: 0; left: 0; right: 0;
+background: linear-gradient(transparent, rgba(0,0,0,0.75));
+padding: 20px 16px 14px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.img-overlay span {
+font-size: 11px;
+color: #ccc;
+letter-spacing: 1px;
+}
+
+.change-btn {
+margin-left: auto;
+background: rgba(201,168,76,0.2);
+border: 1px solid var(–gold-dim);
+color: var(–gold-light);
+font-family: ‘DM Mono’, monospace;
+font-size: 10px;
+letter-spacing: 1px;
+padding: 5px 12px;
+border-radius: 6px;
+cursor: pointer;
+text-transform: uppercase;
+transition: all 0.2s;
+}
+
+.change-btn:hover { background: rgba(201,168,76,0.3); }
+
+/* Currency selector */
+.row {
+display: flex;
+gap: 12px;
+margin-top: 16px;
+align-items: stretch;
+}
+
+.currency-select {
+background: var(–surface);
+border: 1.5px solid var(–border);
+color: var(–text);
+font-family: ‘DM Mono’, monospace;
+font-size: 13px;
+padding: 0 14px;
+border-radius: 10px;
+cursor: pointer;
+appearance: none;
+-webkit-appearance: none;
+min-width: 130px;
+background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘12’ height=‘8’ viewBox=‘0 0 12 8’%3E%3Cpath d=‘M1 1l5 5 5-5’ stroke=’%237a7060’ stroke-width=‘1.5’ fill=‘none’ stroke-linecap=‘round’/%3E%3C/svg%3E”);
+background-repeat: no-repeat;
+background-position: right 12px center;
+padding-right: 32px;
+transition: border-color 0.2s;
+}
+
+.currency-select:focus {
+outline: none;
+border-color: var(–gold-dim);
+}
+
+/* Analyse button */
+.analyse-btn {
+flex: 1;
+background: linear-gradient(135deg, #8a6820, var(–gold));
+color: #0d0d0d;
+border: none;
+border-radius: 10px;
+font-family: ‘Syne’, sans-serif;
+font-weight: 700;
+font-size: 14px;
+letter-spacing: 1px;
+text-transform: uppercase;
+padding: 14px 24px;
+cursor: pointer;
+transition: all 0.2s ease;
+position: relative;
+overflow: hidden;
+}
+
+.analyse-btn:disabled {
+opacity: 0.35;
+cursor: not-allowed;
+background: var(–surface2);
+color: var(–text-muted);
+}
+
+.analyse-btn:not(:disabled):hover {
+transform: translateY(-1px);
+box-shadow: 0 6px 24px rgba(201,168,76,0.3);
+}
+
+.analyse-btn .spinner {
+display: inline-block;
+width: 14px;
+height: 14px;
+border: 2px solid rgba(0,0,0,0.3);
+border-top-color: #0d0d0d;
+border-radius: 50%;
+animation: spin 0.7s linear infinite;
+margin-right: 8px;
+vertical-align: middle;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Results panel */
+.result-panel {
+margin-top: 24px;
+border-radius: 14px;
+overflow: hidden;
+border: 1.5px solid var(–border);
+animation: slideUp 0.35s ease;
+}
+
+@keyframes slideUp {
+from { opacity: 0; transform: translateY(14px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+.result-header {
+background: var(–surface);
+padding: 14px 20px;
+display: flex;
+align-items: center;
+gap: 10px;
+border-bottom: 1px solid var(–border);
+}
+
+.result-header .dot {
+width: 8px; height: 8px;
+border-radius: 50%;
+background: var(–green);
+box-shadow: 0 0 8px var(–green);
+}
+
+.result-header span {
+font-size: 11px;
+letter-spacing: 2px;
+text-transform: uppercase;
+color: var(–text-muted);
+}
+
+/* Total display */
+.total-block {
+background: linear-gradient(135deg, #121008, #1a1508);
+padding: 28px 24px 20px;
+text-align: center;
+border-bottom: 1px solid var(–border);
+}
+
+.total-label {
+font-size: 10px;
+letter-spacing: 3px;
+text-transform: uppercase;
+color: var(–text-muted);
+margin-bottom: 8px;
+}
+
+.total-value {
+font-family: ‘Syne’, sans-serif;
+font-weight: 800;
+font-size: 52px;
+color: var(–gold-light);
+letter-spacing: -1px;
+line-height: 1;
+text-shadow: 0 0 40px rgba(201,168,76,0.3);
+}
+
+.total-currency {
+font-size: 14px;
+color: var(–text-muted);
+margin-top: 6px;
+letter-spacing: 2px;
+}
+
+/* Breakdown */
+.breakdown {
+background: var(–surface);
+padding: 16px 20px;
+}
+
+.breakdown-title {
+font-size: 10px;
+letter-spacing: 2px;
+text-transform: uppercase;
+color: var(–text-dim);
+margin-bottom: 14px;
+}
+
+.denomination-row {
+display: flex;
+align-items: center;
+padding: 8px 0;
+border-bottom: 1px solid var(–border);
+gap: 12px;
+}
+
+.denomination-row:last-child { border-bottom: none; }
+
+.denom-badge {
+background: var(–surface2);
+border: 1px solid var(–border);
+border-radius: 6px;
+padding: 3px 10px;
+font-size: 12px;
+color: var(–gold);
+min-width: 70px;
+text-align: center;
+font-weight: 500;
+}
+
+.denom-x {
+font-size: 11px;
+color: var(–text-muted);
+flex: 1;
+}
+
+.denom-sub {
+font-size: 12px;
+color: var(–text);
+}
+
+/* Notes / confidence */
+.notes-block {
+background: var(–surface2);
+border-top: 1px solid var(–border);
+padding: 14px 20px;
+font-size: 12px;
+color: var(–text-muted);
+line-height: 1.6;
+}
+
+.notes-block strong {
+color: var(–text-dim);
+font-size: 10px;
+letter-spacing: 1.5px;
+text-transform: uppercase;
+display: block;
+margin-bottom: 4px;
+}
+
+/* Error */
+.error-block {
+margin-top: 20px;
+background: #1a0a0a;
+border: 1.5px solid #4a1a1a;
+border-radius: 12px;
+padding: 16px 20px;
+font-size: 12px;
+color: var(–red);
+display: flex;
+gap: 10px;
+align-items: flex-start;
+animation: slideUp 0.3s ease;
+}
+
+/* History */
+.history-section {
+margin-top: 36px;
+}
+
+.section-title {
+font-size: 10px;
+letter-spacing: 3px;
+text-transform: uppercase;
+color: var(–text-dim);
+margin-bottom: 14px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.section-title::after {
+content: ‘’;
+flex: 1;
+height: 1px;
+background: var(–border);
+}
+
+.history-item {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 12px 16px;
+display: flex;
+align-items: center;
+gap: 14px;
+margin-bottom: 8px;
+transition: border-color 0.2s;
+}
+
+.history-item:hover { border-color: var(–gold-dim); }
+
+.history-thumb {
+width: 48px;
+height: 36px;
+border-radius: 6px;
+object-fit: cover;
+opacity: 0.7;
+}
+
+.history-amount {
+font-family: ‘Syne’, sans-serif;
+font-weight: 700;
+font-size: 18px;
+color: var(–gold-light);
+}
+
+.history-meta {
+font-size: 10px;
+color: var(–text-muted);
+margin-top: 2px;
+letter-spacing: 0.5px;
+}
+
+.history-time {
+margin-left: auto;
+font-size: 10px;
+color: var(–text-dim);
+}
+
+footer {
+text-align: center;
+padding: 20px 0 0;
+font-size: 10px;
+color: var(–text-dim);
+letter-spacing: 1px;
+}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo-mark">💰</div>
+    <div>
+      <div class="logo-text">Cash<span>Lens</span></div>
+    </div>
+    <div class="tagline">AI Currency Counter</div>
+  </header>
+
+  <!-- Upload area -->
+
+  <div class="upload-zone" id="uploadZone">
+    <input type="file" id="fileInput" accept="image/*" capture="environment">
+    <span class="upload-icon" id="uploadIcon">📷</span>
+    <div class="upload-label" id="uploadLabel">Drop a photo or tap to capture</div>
+    <div class="upload-sub" id="uploadSub">JPG · PNG · WEBP — any currency</div>
+    <img class="preview-img" id="previewImg" style="display:none" alt="preview">
+    <div class="img-overlay" id="imgOverlay" style="display:none">
+      <span>📎 Image loaded</span>
+      <button class="change-btn" onclick="resetImage()">Change</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <select class="currency-select" id="currencySelect">
+      <option value="auto">🌍 Auto-detect</option>
+      <option value="USD">🇺🇸 USD — Dollar</option>
+      <option value="CAD">🇨🇦 CAD — Dollar</option>
+      <option value="EUR">🇪🇺 EUR — Euro</option>
+      <option value="GBP">🇬🇧 GBP — Pound</option>
+      <option value="INR">🇮🇳 INR — Rupee</option>
+      <option value="JPY">🇯🇵 JPY — Yen</option>
+      <option value="AUD">🇦🇺 AUD — Dollar</option>
+      <option value="CNY">🇨🇳 CNY — Yuan</option>
+      <option value="AED">🇦🇪 AED — Dirham</option>
+      <option value="SGD">🇸🇬 SGD — Dollar</option>
+    </select>
+    <button class="analyse-btn" id="analyseBtn" disabled onclick="analyseImage()">
+      Count Currency
+    </button>
+  </div>
+
+  <div id="errorBlock" style="display:none"></div>
+  <div id="resultPanel" style="display:none"></div>
+
+  <div class="history-section" id="historySection" style="display:none">
+    <div class="section-title">Recent Scans</div>
+    <div id="historyList"></div>
+  </div>
+
+  <footer>Powered by Claude Vision · Images processed securely</footer>
+</div>
+
+<script>
+  let imageBase64 = null;
+  let imageType = null;
+  let history = [];
+
+  const uploadZone = document.getElementById('uploadZone');
+  const fileInput = document.getElementById('fileInput');
+  const previewImg = document.getElementById('previewImg');
+  const imgOverlay = document.getElementById('imgOverlay');
+  const uploadIcon = document.getElementById('uploadIcon');
+  const uploadLabel = document.getElementById('uploadLabel');
+  const uploadSub = document.getElementById('uploadSub');
+  const analyseBtn = document.getElementById('analyseBtn');
+  const resultPanel = document.getElementById('resultPanel');
+  const errorBlock = document.getElementById('errorBlock');
+
+  uploadZone.addEventListener('click', (e) => {
+    if (e.target.classList.contains('change-btn')) return;
+    fileInput.click();
+  });
+
+  uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.classList.add('drag-over');
+  });
+
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) loadFile(file);
+  });
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) loadFile(fileInput.files[0]);
+  });
+
+  function loadFile(file) {
+    imageType = file.type;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      imageBase64 = dataUrl.split(',')[1];
+      previewImg.src = dataUrl;
+      previewImg.style.display = 'block';
+      imgOverlay.style.display = 'flex';
+      uploadIcon.style.display = 'none';
+      uploadLabel.style.display = 'none';
+      uploadSub.style.display = 'none';
+      uploadZone.classList.add('has-image');
+      analyseBtn.disabled = false;
+      resultPanel.style.display = 'none';
+      errorBlock.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function resetImage() {
+    imageBase64 = null;
+    imageType = null;
+    previewImg.style.display = 'none';
+    imgOverlay.style.display = 'none';
+    uploadIcon.style.display = 'block';
+    uploadLabel.style.display = 'block';
+    uploadSub.style.display = 'block';
+    uploadZone.classList.remove('has-image');
+    analyseBtn.disabled = true;
+    fileInput.value = '';
+    resultPanel.style.display = 'none';
+    errorBlock.style.display = 'none';
+  }
+
+  async function analyseImage() {
+    if (!imageBase64) return;
+
+    const currency = document.getElementById('currencySelect').value;
+    const currencyHint = currency === 'auto' ? 'Identify the currency automatically from the image.' : `The currency in the image is ${currency}.`;
+
+    analyseBtn.disabled = true;
+    analyseBtn.innerHTML = '<span class="spinner"></span>Analysing...';
+    resultPanel.style.display = 'none';
+    errorBlock.style.display = 'none';
+
+    const prompt = `You are a precise currency counting assistant. Analyse this image of currency (banknotes and/or coins).
+
+${currencyHint}
+
+Your task:
+1. Identify every visible denomination and count how many of each appears
+2. Calculate the total value
+3. Note any partially visible or unclear items
+
+Respond ONLY with a JSON object in this exact format (no markdown, no explanation):
+{
+  "currency": "USD",
+  "symbol": "$",
+  "total": 47.50,
+  "denominations": [
+    {"denomination": "20", "label": "$20 bill", "count": 2, "subtotal": 40.00},
+    {"denomination": "5", "label": "$5 bill", "count": 1, "subtotal": 5.00},
+    {"denomination": "0.25", "label": "Quarter", "count": 10, "subtotal": 2.50}
+  ],
+  "confidence": "high",
+  "notes": "Two $20 bills, one $5 bill, and 10 quarters clearly visible."
+}
+
+If no currency is visible, set total to 0 and explain in notes.`;
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{
+            role: 'user',
+            content: [
+              {
+                type: 'image',
+                source: { type: 'base64', media_type: imageType, data: imageBase64 }
+              },
+              { type: 'text', text: prompt }
+            ]
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error?.message || 'API request failed');
+      }
+
+      const data = await response.json();
+      const rawText = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+
+      let parsed;
+      try {
+        const clean = rawText.replace(/```json|```/g, '').trim();
+        parsed = JSON.parse(clean);
+      } catch {
+        throw new Error('Could not parse AI response. Please try again.');
+      }
+
+      renderResult(parsed);
+      addToHistory(parsed);
+
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      analyseBtn.disabled = false;
+      analyseBtn.innerHTML = 'Count Currency';
+    }
+  }
+
+  function renderResult(data) {
+    const confidenceColor = data.confidence === 'high' ? '#3dba7c' : data.confidence === 'medium' ? '#c9a84c' : '#e05b5b';
+    const formatted = formatAmount(data.total, data.symbol);
+
+    const denomRows = (data.denominations || []).map(d => `
+      <div class="denomination-row">
+        <div class="denom-badge">${d.label || d.denomination}</div>
+        <div class="denom-x">× ${d.count}</div>
+        <div class="denom-sub">${data.symbol || ''}${formatNum(d.subtotal)}</div>
+      </div>
+    `).join('');
+
+    resultPanel.innerHTML = `
+      <div class="result-panel">
+        <div class="result-header">
+          <div class="dot" style="background:${confidenceColor};box-shadow:0 0 8px ${confidenceColor}"></div>
+          <span>Analysis Complete · ${data.confidence || 'unknown'} confidence</span>
+        </div>
+        <div class="total-block">
+          <div class="total-label">Total Value</div>
+          <div class="total-value">${formatted}</div>
+          <div class="total-currency">${data.currency || ''}</div>
+        </div>
+        ${denomRows ? `
+        <div class="breakdown">
+          <div class="breakdown-title">Breakdown</div>
+          ${denomRows}
+        </div>` : ''}
+        ${data.notes ? `
+        <div class="notes-block">
+          <strong>Notes</strong>
+          ${data.notes}
+        </div>` : ''}
+      </div>
+    `;
+    resultPanel.style.display = 'block';
+  }
+
+  function formatAmount(val, sym) {
+    if (!val && val !== 0) return '—';
+    const num = parseFloat(val);
+    return `${sym || ''}${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
+  function formatNum(val) {
+    if (!val && val !== 0) return '0.00';
+    return parseFloat(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function showError(msg) {
+    errorBlock.innerHTML = `<div class="error-block">⚠️ <div>${msg}</div></div>`;
+    errorBlock.style.display = 'block';
+  }
+
+  function addToHistory(data) {
+    const thumbSrc = previewImg.src;
+    const entry = {
+      thumb: thumbSrc,
+      total: formatAmount(data.total, data.symbol),
+      currency: data.currency,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    history.unshift(entry);
+    if (history.length > 5) history.pop();
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const section = document.getElementById('historySection');
+    const list = document.getElementById('historyList');
+    if (history.length === 0) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    list.innerHTML = history.map(h => `
+      <div class="history-item">
+        <img class="history-thumb" src="${h.thumb}" alt="">
+        <div>
+          <div class="history-amount">${h.total}</div>
+          <div class="history-meta">${h.currency || 'Currency'}</div>
+        </div>
+        <div class="history-time">${h.time}</div>
+      </div>
+    `).join('');
+  }
+</script>
+
+</body>
+</html>
