@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sudoku</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #111111;
+    --ink-light: #555555;
+    --ink-faint: #cccccc;
+    --accent: #1a1a2e;
+    --accent2: #c0392b;
+    --cell-hover: #f5f5f0;
+    --cell-selected: #e8e4f8;
+    --cell-highlight: #f0ede0;
+    --cell-given: #fafafa;
+    --success: #27ae60;
+    --error: #e74c3c;
+    --border-thick: 2.5px solid #111;
+    --border-thin: 1px solid #ccc;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 60px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 36px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 6vw, 3.8rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  header p {
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    margin-top: 6px;
+  }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeDown 0.6s 0.1s ease both;
+  }
+
+  .btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 9px 22px;
+    border: 1.5px solid var(--ink);
+    background: var(--bg);
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+  }
+
+  .btn:hover { background: var(--ink); color: var(--bg); }
+  .btn.active { background: var(--ink); color: var(--bg); }
+
+  .btn.danger { border-color: var(--accent2); color: var(--accent2); }
+  .btn.danger:hover { background: var(--accent2); color: #fff; }
+
+  .difficulty-group {
+    display: flex;
+    border: 1.5px solid var(--ink);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .difficulty-group .btn {
+    border: none;
+    border-right: 1.5px solid var(--ink);
+    border-radius: 0;
+  }
+
+  .difficulty-group .btn:last-child { border-right: none; }
+
+  .stats-bar {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 22px;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    animation: fadeDown 0.6s 0.15s ease both;
+  }
+
+  .stat { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .stat-val {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: 0;
+    line-height: 1;
+  }
+
+  /* GRID */
+  .game-area {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .grid-wrapper {
+    position: relative;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    width: min(468px, 90vw);
+    height: min(468px, 90vw);
+    border: var(--border-thick);
+  }
+
+  .cell {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(1rem, 3vw, 1.45rem);
+    font-weight: 400;
+    cursor: pointer;
+    border-right: var(--border-thin);
+    border-bottom: var(--border-thin);
+    transition: background 0.1s;
+    user-select: none;
+    position: relative;
+    color: var(--ink);
+    background: var(--bg);
+  }
+
+  /* Box borders */
+  .cell:nth-child(3n) { border-right: var(--border-thick); }
+  .cell:nth-child(9n) { border-right: none; }
+
+  .cell[data-row="2"], .cell[data-row="5"] { border-bottom: var(--border-thick); }
+  .cell[data-row="8"] { border-bottom: none; }
+
+  .cell.given {
+    background: var(--cell-given);
+    font-weight: 500;
+    cursor: default;
+  }
+
+  .cell.selected { background: var(--cell-selected) !important; }
+  .cell.highlighted { background: var(--cell-highlight); }
+  .cell:hover:not(.given):not(.selected) { background: var(--cell-hover); }
+
+  .cell.error { color: var(--error); }
+  .cell.hint-flash { animation: hintFlash 0.6s ease; }
+
+  /* Notes */
+  .cell .notes {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    padding: 1px;
+  }
+
+  .cell .notes span {
+    font-size: clamp(0.42rem, 1.1vw, 0.55rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-light);
+    line-height: 1;
+  }
+
+  /* Side panel */
+  .side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 180px;
+  }
+
+  .numpad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .num-btn {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 400;
+    border: 1.5px solid var(--ink-faint);
+    background: var(--bg);
+    cursor: pointer;
+    transition: all 0.12s;
+    border-radius: 3px;
+    color: var(--ink);
+    position: relative;
+  }
+
+  .num-btn:hover { border-color: var(--ink); background: var(--cell-hover); }
+  .num-btn .remaining {
+    position: absolute;
+    top: 3px; right: 5px;
+    font-size: 0.55rem;
+    color: var(--ink-light);
+    letter-spacing: 0;
+  }
+
+  .num-btn.used { opacity: 0.3; pointer-events: none; }
+
+  .mode-toggle {
+    display: flex;
+    border: 1.5px solid var(--ink);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .mode-toggle .btn {
+    flex: 1;
+    border: none;
+    border-right: 1.5px solid var(--ink);
+    border-radius: 0;
+    font-size: 0.65rem;
+    padding: 8px 4px;
+  }
+
+  .mode-toggle .btn:last-child { border-right: none; }
+
+  .actions { display: flex; flex-direction: column; gap: 6px; }
+  .actions .btn { width: 100%; text-align: center; }
+
+  /* Message overlay */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.92);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .overlay.show { display: flex; }
+
+  .overlay-box {
+    text-align: center;
+    padding: 48px 56px;
+    border: 2px solid var(--ink);
+    background: #fff;
+    max-width: 380px;
+  }
+
+  .overlay-box h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    margin-bottom: 8px;
+  }
+
+  .overlay-box p {
+    font-size: 0.8rem;
+    color: var(--ink-light);
+    letter-spacing: 0.08em;
+    margin-bottom: 24px;
+  }
+
+  .message-bar {
+    min-height: 24px;
+    text-align: center;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 10px;
+    color: var(--success);
+    animation: fadeDown 0.6s 0.25s ease both;
+  }
+
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes hintFlash { 0%,100% { background: var(--cell-selected); } 50% { background: #d4edda; } }
+</style>
+</head>
+<body>
+
+<a href="index.html" style="position:fixed;top:1rem;left:1rem;z-index:999;color:#555;text-decoration:none;font-size:0.85rem;background:#f5f5f0;padding:0.4rem 0.8rem;border-radius:6px;border:1px solid #ccc;transition:color 0.2s,background 0.2s;" onmouseover="this.style.color='#111';this.style.background='#e8e4f8'" onmouseout="this.style.color='#555';this.style.background='#f5f5f0'">&#8592; Back to Portfolio</a>
+
+<header>
+  <h1>Sudoku</h1>
+  <p>Fill the grid — one through nine</p>
+</header>
+
+<div class="toolbar">
+  <div class="difficulty-group">
+    <button class="btn active" id="easy-btn" onclick="setDifficulty('easy')">Easy</button>
+    <button class="btn" id="medium-btn" onclick="setDifficulty('medium')">Medium</button>
+    <button class="btn" id="hard-btn" onclick="setDifficulty('hard')">Hard</button>
+  </div>
+  <button class="btn" onclick="resetGame()">Reset</button>
+  <button class="btn" onclick="newGame()">New Game</button>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><span class="stat-val" id="timer-display">00:00</span><span>Time</span></div>
+  <div class="stat"><span class="stat-val" id="mistakes-display">0</span><span>Errors</span></div>
+  <div class="stat"><span class="stat-val" id="hints-display">3</span><span>Hints</span></div>
+</div>
+
+<div class="game-area">
+  <div class="grid-wrapper">
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="side-panel">
+    <div class="mode-toggle">
+      <button class="btn active" id="normal-mode" onclick="setMode('normal')">Normal</button>
+      <button class="btn" id="notes-mode" onclick="setMode('notes')">Notes</button>
+    </div>
+    <div class="numpad" id="numpad"></div>
+    <div class="actions">
+      <button class="btn" onclick="useHint()">💡 Hint</button>
+      <button class="btn danger" onclick="eraseCell()">⌫ Erase</button>
+    </div>
+  </div>
+</div>
+
+<div class="message-bar" id="message-bar"></div>
+
+<div class="overlay" id="win-overlay">
+  <div class="overlay-box">
+    <h2>Solved!</h2>
+    <p id="win-message">Puzzle complete</p>
+    <button class="btn" onclick="newGame(); hideOverlay()">Play Again</button>
+  </div>
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────
+let puzzle = [], solution = [], userGrid = [], notes = [];
+let selected = null, mode = 'normal', difficulty = 'easy';
+let mistakes = 0, hintsLeft = 3;
+let timerInterval = null, seconds = 0;
+const DIFFICULTIES = { easy: 30, medium: 40, hard: 52 };
+
+// ── Puzzle Generation ──────────────────────────────────────────────────────
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function isValid(board, row, col, num) {
+  for (let x = 0; x < 9; x++) {
+    if (board[row][x] === num) return false;
+    if (board[x][col] === num) return false;
+    const br = 3 * Math.floor(row / 3) + Math.floor(x / 3);
+    const bc = 3 * Math.floor(col / 3) + (x % 3);
+    if (board[br][bc] === num) return false;
+  }
+  return true;
+}
+
+function fillBoard(board) {
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (board[r][c] === 0) {
+        const nums = shuffle([1,2,3,4,5,6,7,8,9]);
+        for (const n of nums) {
+          if (isValid(board, r, c, n)) {
+            board[r][c] = n;
+            if (fillBoard(board)) return true;
+            board[r][c] = 0;
+          }
+        }
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+function generatePuzzle(clues) {
+  const sol = Array.from({length:9}, () => Array(9).fill(0));
+  fillBoard(sol);
+  const puz = sol.map(r => [...r]);
+  const positions = shuffle([...Array(81).keys()]);
+  let removed = 0, target = 81 - clues;
+  for (const pos of positions) {
+    if (removed >= target) break;
+    const r = Math.floor(pos / 9), c = pos % 9;
+    puz[r][c] = 0;
+    removed++;
+  }
+  return { sol, puz };
+}
+
+// ── Game Init ──────────────────────────────────────────────────────────────
+function newGame() {
+  clearInterval(timerInterval);
+  seconds = 0; mistakes = 0; hintsLeft = 3;
+  selected = null;
+  updateStats();
+  const { sol, puz } = generatePuzzle(81 - DIFFICULTIES[difficulty]);
+  solution = sol;
+  puzzle = puz;
+  userGrid = puz.map(r => [...r]);
+  notes = Array.from({length:9}, () => Array.from({length:9}, () => new Set()));
+  renderGrid();
+  renderNumpad();
+  startTimer();
+  setMessage('');
+}
+
+function resetGame() {
+  if (!puzzle.length) return;
+  clearInterval(timerInterval);
+  seconds = 0; mistakes = 0; hintsLeft = 3;
+  selected = null;
+  userGrid = puzzle.map(r => [...r]);
+  notes = Array.from({length:9}, () => Array.from({length:9}, () => new Set()));
+  updateStats();
+  document.getElementById('timer-display').textContent = '00:00';
+  renderGrid();
+  renderNumpad();
+  startTimer();
+  setMessage('Puzzle reset — start fresh!');
+  setTimeout(() => setMessage(''), 2000);
+}
+
+function setDifficulty(d) {
+  difficulty = d;
+  document.querySelectorAll('#easy-btn,#medium-btn,#hard-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(d + '-btn').classList.add('active');
+  newGame();
+}
+
+// ── Rendering ──────────────────────────────────────────────────────────────
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+      if (puzzle[r][c] !== 0) cell.classList.add('given');
+      cell.addEventListener('click', () => selectCell(r, c));
+      grid.appendChild(cell);
+    }
+  }
+  updateAllCells();
+}
+
+function updateAllCells() {
+  document.querySelectorAll('.cell').forEach(cell => {
+    const r = +cell.dataset.row, c = +cell.dataset.col;
+    cell.classList.remove('error', 'selected', 'highlighted');
+    const val = userGrid[r][c];
+    // Check error
+    if (val !== 0 && puzzle[r][c] === 0 && val !== solution[r][c]) {
+      cell.classList.add('error');
+    }
+    // Notes or value
+    const noteSet = notes[r][c];
+    if (val === 0 && noteSet.size > 0) {
+      cell.innerHTML = '';
+      const nd = document.createElement('div');
+      nd.className = 'notes';
+      for (let n = 1; n <= 9; n++) {
+        const sp = document.createElement('span');
+        sp.textContent = noteSet.has(n) ? n : '';
+        nd.appendChild(sp);
+      }
+      cell.appendChild(nd);
+    } else {
+      cell.textContent = val !== 0 ? val : '';
+    }
+  });
+  highlightSelected();
+}
+
+function highlightSelected() {
+  document.querySelectorAll('.cell').forEach(cell => cell.classList.remove('selected', 'highlighted'));
+  if (selected === null) return;
+  const [sr, sc] = selected;
+  const selVal = userGrid[sr][sc];
+  document.querySelectorAll('.cell').forEach(cell => {
+    const r = +cell.dataset.row, c = +cell.dataset.col;
+    if (r === sr && c === sc) { cell.classList.add('selected'); return; }
+    const sameBox = Math.floor(r/3)===Math.floor(sr/3) && Math.floor(c/3)===Math.floor(sc/3);
+    if (r === sr || c === sc || sameBox) cell.classList.add('highlighted');
+    if (selVal !== 0 && userGrid[r][c] === selVal) cell.classList.add('highlighted');
+  });
+}
+
+function renderNumpad() {
+  const np = document.getElementById('numpad');
+  np.innerHTML = '';
+  const counts = Array(10).fill(0);
+  for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) if (userGrid[r][c] !== 0) counts[userGrid[r][c]]++;
+  for (let n = 1; n <= 9; n++) {
+    const btn = document.createElement('button');
+    btn.className = 'num-btn' + (counts[n] >= 9 ? ' used' : '');
+    btn.innerHTML = n + `<span class="remaining">${counts[n] >= 9 ? '' : 9 - counts[n]}</span>`;
+    btn.onclick = () => inputNumber(n);
+    np.appendChild(btn);
+  }
+}
+
+// ── Interaction ────────────────────────────────────────────────────────────
+function selectCell(r, c) {
+  selected = [r, c];
+  highlightSelected();
+}
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('normal-mode').classList.toggle('active', m === 'normal');
+  document.getElementById('notes-mode').classList.toggle('active', m === 'notes');
+}
+
+function inputNumber(n) {
+  if (!selected) return;
+  const [r, c] = selected;
+  if (puzzle[r][c] !== 0) return;
+
+  if (mode === 'notes') {
+    if (userGrid[r][c] === 0) {
+      if (notes[r][c].has(n)) notes[r][c].delete(n);
+      else notes[r][c].add(n);
+    }
+  } else {
+    notes[r][c].clear();
+    userGrid[r][c] = n;
+    if (n !== solution[r][c]) {
+      mistakes++;
+      updateStats();
+      if (mistakes >= 10) {
+        setMessage('Too many errors — try again!');
+        return;
+      }
+    }
+    // Remove notes from peers
+    for (let i = 0; i < 9; i++) {
+      notes[r][i].delete(n);
+      notes[i][c].delete(n);
+    }
+    const br = Math.floor(r/3)*3, bc = Math.floor(c/3)*3;
+    for (let dr = 0; dr < 3; dr++) for (let dc = 0; dc < 3; dc++) notes[br+dr][bc+dc].delete(n);
+    if (isSolved()) { showWin(); return; }
+  }
+  updateAllCells();
+  renderNumpad();
+}
+
+function eraseCell() {
+  if (!selected) return;
+  const [r, c] = selected;
+  if (puzzle[r][c] !== 0) return;
+  userGrid[r][c] = 0;
+  notes[r][c].clear();
+  updateAllCells();
+  renderNumpad();
+}
+
+function useHint() {
+  if (hintsLeft <= 0) { setMessage('No hints remaining'); return; }
+  if (!selected) { setMessage('Select a cell first'); return; }
+  const [r, c] = selected;
+  if (puzzle[r][c] !== 0 || userGrid[r][c] === solution[r][c]) {
+    setMessage('Choose an empty cell');
+    return;
+  }
+  userGrid[r][c] = solution[r][c];
+  notes[r][c].clear();
+  hintsLeft--;
+  updateStats();
+  updateAllCells();
+  renderNumpad();
+  // Flash hint
+  const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+  cell.classList.add('hint-flash');
+  setTimeout(() => cell.classList.remove('hint-flash'), 600);
+  if (isSolved()) showWin();
+}
+
+function isSolved() {
+  for (let r = 0; r < 9; r++)
+    for (let c = 0; c < 9; c++)
+      if (userGrid[r][c] !== solution[r][c]) return false;
+  return true;
+}
+
+// ── Timer & Stats ──────────────────────────────────────────────────────────
+function startTimer() {
+  timerInterval = setInterval(() => {
+    seconds++;
+    const m = String(Math.floor(seconds/60)).padStart(2,'0');
+    const s = String(seconds%60).padStart(2,'0');
+    document.getElementById('timer-display').textContent = `${m}:${s}`;
+  }, 1000);
+}
+
+function updateStats() {
+  document.getElementById('mistakes-display').textContent = mistakes;
+  document.getElementById('hints-display').textContent = hintsLeft;
+}
+
+function setMessage(msg) {
+  document.getElementById('message-bar').textContent = msg;
+}
+
+// ── Win ────────────────────────────────────────────────────────────────────
+function showWin() {
+  clearInterval(timerInterval);
+  const m = String(Math.floor(seconds/60)).padStart(2,'0');
+  const s = String(seconds%60).padStart(2,'0');
+  document.getElementById('win-message').textContent =
+    `Completed in ${m}:${s} with ${mistakes} error${mistakes !== 1 ? 's' : ''}`;
+  document.getElementById('win-overlay').classList.add('show');
+}
+
+function hideOverlay() {
+  document.getElementById('win-overlay').classList.remove('show');
+}
+
+// ── Keyboard ───────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (!selected) return;
+  const [r, c] = selected;
+  if (e.key >= '1' && e.key <= '9') { inputNumber(+e.key); return; }
+  if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') { eraseCell(); return; }
+  if (e.key === 'n' || e.key === 'N') { setMode(mode === 'notes' ? 'normal' : 'notes'); return; }
+  const dirs = { ArrowUp: [-1,0], ArrowDown: [1,0], ArrowLeft: [0,-1], ArrowRight: [0,1] };
+  if (dirs[e.key]) {
+    e.preventDefault();
+    const [dr, dc] = dirs[e.key];
+    selected = [(r+dr+9)%9, (c+dc+9)%9];
+    highlightSelected();
+  }
+});
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+newGame();
+</script>
+</body>
+</html>

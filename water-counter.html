@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hydrate — Water Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --deep: #0a1628;
+    --ocean: #0e2a4a;
+    --wave: #1a4a7a;
+    --sky: #3a8fc9;
+    --foam: #7ecef5;
+    --mist: #b8e4f8;
+    --white: #f0f8ff;
+    --gold: #f5c842;
+    --goal: 2.5;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: var(--deep);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Ambient background particles */
+  .bg-bubbles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, rgba(122,206,245,0.15), transparent 70%);
+    border: 1px solid rgba(122,206,245,0.08);
+    animation: floatUp linear infinite;
+  }
+
+  @keyframes floatUp {
+    0%   { transform: translateY(110vh) scale(0.6); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 0.6; }
+    100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+  }
+
+  /* Main container */
+  .app {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 2rem;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    color: var(--white);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .header h1 em {
+    color: var(--foam);
+    font-style: italic;
+  }
+  .header p {
+    margin-top: 0.5rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(184,228,248,0.5);
+  }
+
+  /* Flask / water vessel */
+  .flask-wrap {
+    position: relative;
+    width: 180px;
+    height: 280px;
+    margin-bottom: 2rem;
+    cursor: pointer;
+    filter: drop-shadow(0 20px 40px rgba(58,143,201,0.25));
+    transition: transform 0.15s ease;
+  }
+  .flask-wrap:active { transform: scale(0.96); }
+
+  .flask-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  /* Water fill inside flask */
+  .water-fill {
+    transition: height 0.9s cubic-bezier(0.34, 1.56, 0.64, 1),
+                y 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Wave animation */
+  .wave-path {
+    animation: waveAnim 2.4s ease-in-out infinite;
+    transform-origin: center;
+  }
+  .wave-path2 {
+    animation: waveAnim2 3.1s ease-in-out infinite;
+    transform-origin: center;
+    opacity: 0.5;
+  }
+  @keyframes waveAnim {
+    0%, 100% { d: path("M0,8 Q22,0 45,8 Q68,16 90,8 L90,50 L0,50 Z"); }
+    50%       { d: path("M0,8 Q22,16 45,8 Q68,0 90,8 L90,50 L0,50 Z"); }
+  }
+  @keyframes waveAnim2 {
+    0%, 100% { d: path("M0,12 Q22,4 45,12 Q68,20 90,12 L90,50 L0,50 Z"); }
+    50%       { d: path("M0,12 Q22,20 45,12 Q68,4 90,12 L90,50 L0,50 Z"); }
+  }
+
+  /* Ripple on tap */
+  .ripple-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--foam);
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .ripple-ring.pop {
+    animation: ripplePop 0.6s ease-out forwards;
+  }
+  @keyframes ripplePop {
+    0%   { transform: translate(-50%,-50%) scale(0); opacity: 0.8; }
+    100% { transform: translate(-50%,-50%) scale(10); opacity: 0; }
+  }
+
+  /* Counter display */
+  .counter-display {
+    text-align: center;
+    margin-bottom: 1.8rem;
+  }
+  .counter-main {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.3rem;
+  }
+  .counter-num {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 10vw, 6rem);
+    color: var(--white);
+    line-height: 1;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), color 0.3s;
+    display: inline-block;
+  }
+  .counter-num.bump {
+    animation: numBump 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes numBump {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.18); color: var(--foam); }
+    100% { transform: scale(1); }
+  }
+  .counter-unit {
+    font-size: 1.2rem;
+    color: var(--foam);
+    letter-spacing: 0.05em;
+  }
+  .counter-goal {
+    font-size: 0.72rem;
+    color: rgba(184,228,248,0.45);
+    letter-spacing: 0.15em;
+    margin-top: 0.3rem;
+  }
+
+  /* Progress dots */
+  .progress-dots {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(122,206,245,0.3);
+    background: transparent;
+    transition: background 0.4s ease, border-color 0.4s ease, transform 0.3s ease;
+  }
+  .dot.filled {
+    background: var(--foam);
+    border-color: var(--foam);
+    transform: scale(1.15);
+    box-shadow: 0 0 8px var(--sky);
+  }
+  .dot.filled.gold {
+    background: var(--gold);
+    border-color: var(--gold);
+    box-shadow: 0 0 8px var(--gold);
+  }
+
+  /* Buttons */
+  .controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  .btn-add {
+    position: relative;
+    overflow: hidden;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--sky), var(--wave));
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(58,143,201,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: transform 0.15s, box-shadow 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-add:hover { transform: scale(1.06); box-shadow: 0 12px 32px rgba(58,143,201,0.55); }
+  .btn-add:active { transform: scale(0.94); }
+
+  .btn-add::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.25), transparent 65%);
+    pointer-events: none;
+  }
+
+  .btn-small {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(122,206,245,0.25);
+    background: rgba(14,42,74,0.6);
+    color: var(--mist);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    backdrop-filter: blur(8px);
+  }
+  .btn-small:hover { border-color: var(--foam); color: var(--foam); background: rgba(58,143,201,0.15); }
+  .btn-small:active { transform: scale(0.9); }
+
+  /* Amount selector */
+  .amount-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .amt-chip {
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    border: 1.5px solid rgba(122,206,245,0.2);
+    background: transparent;
+    color: rgba(184,228,248,0.6);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+  .amt-chip:hover { border-color: var(--foam); color: var(--foam); }
+  .amt-chip.active {
+    background: rgba(58,143,201,0.2);
+    border-color: var(--sky);
+    color: var(--white);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: rgba(10,22,40,0.9);
+    border: 1px solid rgba(122,206,245,0.3);
+    color: var(--foam);
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    padding: 0.7rem 1.5rem;
+    border-radius: 40px;
+    backdrop-filter: blur(12px);
+    z-index: 100;
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Divider line */
+  .divider {
+    width: 1px;
+    height: 32px;
+    background: rgba(122,206,245,0.15);
+  }
+
+  /* Glow line under flask */
+  .glow-line {
+    width: 80px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--sky), transparent);
+    margin: 0 auto 1.5rem;
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-bubbles" id="bubbles"></div>
+
+<a href="index.html" style="position:fixed;top:1rem;left:1rem;z-index:999;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;background:rgba(255,255,255,0.1);padding:0.4rem 0.8rem;border-radius:6px;backdrop-filter:blur(4px);transition:color 0.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">&#8592; Back to Portfolio</a>
+
+<div class="app">
+  <div class="header">
+    <h1><em>hydrate</em></h1>
+    <p>daily water intake</p>
+  </div>
+
+  <!-- Flask -->
+  <div class="flask-wrap" id="flask" onclick="addWater()" title="Tap to add water">
+    <div class="ripple-ring" id="ripple"></div>
+    <svg class="flask-svg" viewBox="0 0 100 160" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <clipPath id="flaskClip">
+          <path d="M30,18 L30,52 Q10,68 10,100 Q10,148 50,148 Q90,148 90,100 Q90,68 70,52 L70,18 Z"/>
+        </clipPath>
+        <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#1a3a5c"/>
+          <stop offset="50%" stop-color="#0e2a4a"/>
+          <stop offset="100%" stop-color="#0a1e36"/>
+        </linearGradient>
+        <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#3a8fc9"/>
+          <stop offset="100%" stop-color="#0e2a4a"/>
+        </linearGradient>
+        <linearGradient id="shineGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="rgba(255,255,255,0.12)"/>
+          <stop offset="40%" stop-color="rgba(255,255,255,0.04)"/>
+          <stop offset="100%" stop-color="transparent"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Flask body fill -->
+      <path d="M30,18 L30,52 Q10,68 10,100 Q10,148 50,148 Q90,148 90,100 Q90,68 70,52 L70,18 Z"
+            fill="url(#bodyGrad)" stroke="rgba(122,206,245,0.18)" stroke-width="1"/>
+
+      <!-- Water (clipped) -->
+      <g clip-path="url(#flaskClip)">
+        <rect class="water-fill" id="waterRect"
+              x="0" y="148" width="100" height="0"
+              fill="url(#waterGrad)"/>
+        <!-- Wave surface -->
+        <svg id="waveSvg" x="5" y="0" width="90" height="50" overflow="visible">
+          <path class="wave-path" id="wave1"
+                d="M0,8 Q22,0 45,8 Q68,16 90,8 L90,50 L0,50 Z"
+                fill="rgba(58,143,201,0.5)"/>
+          <path class="wave-path2" id="wave2"
+                d="M0,12 Q22,4 45,12 Q68,20 90,12 L90,50 L0,50 Z"
+                fill="rgba(122,206,245,0.3)"/>
+        </svg>
+      </g>
+
+      <!-- Flask shine -->
+      <path d="M35,25 Q33,60 28,90 Q27,110 30,130"
+            fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6" stroke-linecap="round"/>
+
+      <!-- Flask rim / neck -->
+      <rect x="28" y="12" width="44" height="8" rx="4"
+            fill="#122040" stroke="rgba(122,206,245,0.25)" stroke-width="1"/>
+
+      <!-- Cap -->
+      <rect x="32" y="4" width="36" height="12" rx="5"
+            fill="#0d1b30" stroke="rgba(122,206,245,0.3)" stroke-width="1"/>
+      <rect x="38" y="7" width="24" height="2" rx="1"
+            fill="rgba(122,206,245,0.15)"/>
+    </svg>
+  </div>
+
+  <div class="glow-line"></div>
+
+  <!-- Counter -->
+  <div class="counter-display">
+    <div class="counter-main">
+      <span class="counter-num" id="counterNum">0.0</span>
+      <span class="counter-unit">L</span>
+    </div>
+    <div class="counter-goal" id="goalText">of 2.5 L daily goal</div>
+  </div>
+
+  <!-- Progress dots -->
+  <div class="progress-dots" id="progressDots"></div>
+
+  <!-- Amount chips -->
+  <div class="amount-row" id="amountRow">
+    <button class="amt-chip active" data-val="0.25" onclick="setAmount(0.25, this)">250 ml</button>
+    <button class="amt-chip" data-val="0.5" onclick="setAmount(0.5, this)">500 ml</button>
+    <button class="amt-chip" data-val="1.0" onclick="setAmount(1.0, this)">1 L</button>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn-small" onclick="undoLast()" title="Undo last">↩</button>
+    <div class="divider"></div>
+    <button class="btn-add" onclick="addWater()" title="Add water">+</button>
+    <div class="divider"></div>
+    <button class="btn-small" onclick="resetAll()" title="Reset day">↺</button>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ─── State ───────────────────────────────────────────────
+  const GOAL = 2.5;
+  const DOTS = 10; // each dot = 0.25 L
+  let total = parseFloat(localStorage.getItem('hydrate_total') || '0');
+  let selectedAmt = 0.25;
+  let history = JSON.parse(localStorage.getItem('hydrate_history') || '[]');
+  // Check if saved data is from today
+  const savedDate = localStorage.getItem('hydrate_date');
+  const today = new Date().toDateString();
+  if (savedDate !== today) { total = 0; history = []; saveState(); }
+
+  // ─── DOM refs ────────────────────────────────────────────
+  const waterRect = document.getElementById('waterRect');
+  const waveSvg   = document.getElementById('waveSvg');
+  const counterNum = document.getElementById('counterNum');
+  const progressDots = document.getElementById('progressDots');
+  const toastEl  = document.getElementById('toast');
+  const rippleEl = document.getElementById('ripple');
+
+  // ─── Init bubbles ─────────────────────────────────────────
+  const bubbleWrap = document.getElementById('bubbles');
+  for (let i = 0; i < 18; i++) {
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    const size = 20 + Math.random() * 80;
+    b.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%;
+      animation-duration:${8+Math.random()*14}s;
+      animation-delay:${-Math.random()*14}s;
+    `;
+    bubbleWrap.appendChild(b);
+  }
+
+  // ─── Render dots ─────────────────────────────────────────
+  function renderDots() {
+    progressDots.innerHTML = '';
+    const filled = Math.round(total / 0.25);
+    for (let i = 0; i < DOTS; i++) {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i < filled ? (total >= GOAL ? ' filled gold' : ' filled') : '');
+      progressDots.appendChild(d);
+    }
+  }
+
+  // ─── Update flask water level ─────────────────────────────
+  function updateFlask() {
+    const pct = Math.min(total / GOAL, 1);
+    const maxH = 130; // max water height in flask SVG units
+    const waterH = pct * maxH;
+    const yPos = 148 - waterH;
+    waterRect.setAttribute('height', waterH);
+    waterRect.setAttribute('y', yPos);
+    // Position wave at water surface
+    waveSvg.setAttribute('y', yPos - 16);
+  }
+
+  // ─── Update counter text ──────────────────────────────────
+  function updateCounter() {
+    counterNum.textContent = total.toFixed(1);
+    counterNum.classList.remove('bump');
+    void counterNum.offsetWidth; // reflow
+    counterNum.classList.add('bump');
+  }
+
+  // ─── Save to localStorage ─────────────────────────────────
+  function saveState() {
+    localStorage.setItem('hydrate_total', total);
+    localStorage.setItem('hydrate_history', JSON.stringify(history));
+    localStorage.setItem('hydrate_date', new Date().toDateString());
+  }
+
+  // ─── Toast ────────────────────────────────────────────────
+  let toastTimer;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
+  }
+
+  // ─── Ripple ───────────────────────────────────────────────
+  function doRipple() {
+    rippleEl.classList.remove('pop');
+    void rippleEl.offsetWidth;
+    rippleEl.classList.add('pop');
+  }
+
+  // ─── Add water ───────────────────────────────────────────
+  function addWater() {
+    const prev = total;
+    total = Math.round((total + selectedAmt) * 100) / 100;
+    history.push(selectedAmt);
+    saveState();
+    updateCounter();
+    updateFlask();
+    renderDots();
+    doRipple();
+
+    if (prev < GOAL && total >= GOAL) {
+      showToast('🎉 Daily goal reached! Amazing!');
+    } else {
+      showToast(`+${selectedAmt < 1 ? selectedAmt*1000+'ml' : selectedAmt+'L'} — ${total.toFixed(2)}L total`);
+    }
+  }
+
+  // ─── Undo ────────────────────────────────────────────────
+  function undoLast() {
+    if (!history.length) { showToast('Nothing to undo'); return; }
+    const last = history.pop();
+    total = Math.max(0, Math.round((total - last) * 100) / 100);
+    saveState();
+    updateCounter();
+    updateFlask();
+    renderDots();
+    showToast(`Removed ${last < 1 ? last*1000+'ml' : last+'L'}`);
+  }
+
+  // ─── Reset ────────────────────────────────────────────────
+  function resetAll() {
+    if (!confirm('Reset today\'s count?')) return;
+    total = 0; history = [];
+    saveState();
+    updateCounter();
+    updateFlask();
+    renderDots();
+    showToast('Day reset. Stay hydrated! 💧');
+  }
+
+  // ─── Amount selector ──────────────────────────────────────
+  function setAmount(val, el) {
+    selectedAmt = val;
+    document.querySelectorAll('.amt-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // ─── Initial render ───────────────────────────────────────
+  updateFlask();
+  updateCounter();
+  renderDots();
+</script>
+</body>
+</html>
