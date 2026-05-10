@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Program Manager – Gantt Chart</title>
+  <style>
+    :root {
+      --primary: #2b579a;
+      --primary-dark: #1a3f72;
+      --primary-light: #4a7cbf;
+      --bg: #f0f0f0;
+      --border: #d0d0d0;
+      --text: #333;
+      --text-light: #666;
+      --row-hover: #e8f0fe;
+      --row-sel: #cce0ff;
+      --gantt-bg: #fafafa;
+      --today: #e63946;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 13px;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Toolbar ─────────────────────────────────────────────── */
+    #toolbar {
+      background: var(--primary);
+      color: white;
+      padding: 5px 10px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,.3);
+      flex-wrap: wrap;
+    }
+    .tb-title { font-size: 15px; font-weight: 700; margin-right: 10px; white-space: nowrap; }
+    .tb-sep { width: 1px; height: 26px; background: rgba(255,255,255,.3); margin: 0 4px; }
+    .tb-group { display: flex; align-items: center; gap: 2px; }
+    .tb-label { font-size: 11px; opacity: .8; white-space: nowrap; margin-right: 2px; }
+    button.tb { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.25); color: white;
+      padding: 3px 9px; border-radius: 3px; cursor: pointer; font-size: 12px; white-space: nowrap;
+      transition: background .15s; }
+    button.tb:hover { background: rgba(255,255,255,.25); }
+    button.tb:disabled { opacity: .4; cursor: default; }
+    button.tb.red:hover { background: rgba(180,0,0,.45); }
+    button.tb.active { background: rgba(255,255,255,.3); border-color: rgba(255,255,255,.6); }
+    select.tb-sel { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25);
+      color: white; padding: 3px 6px; border-radius: 3px; font-size: 12px; cursor: pointer; }
+    select.tb-sel option { background: var(--primary-dark); }
+
+    /* ── Project header ──────────────────────────────────────── */
+    #proj-header {
+      background: white;
+      border-bottom: 2px solid var(--primary);
+      padding: 6px 14px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-shrink: 0;
+    }
+    #proj-name {
+      font-size: 17px; font-weight: 700; color: var(--primary);
+      border: none; outline: none; background: transparent;
+      border-bottom: 2px solid transparent; min-width: 180px; margin-right: 16px;
+    }
+    #proj-name:hover, #proj-name:focus { border-bottom-color: var(--primary); }
+    .stat { display: flex; flex-direction: column; align-items: center;
+      padding: 0 14px; border-left: 1px solid var(--border); }
+    .stat-val { font-size: 19px; font-weight: 700; }
+    .stat-lbl { font-size: 10px; color: var(--text-light); text-transform: uppercase; letter-spacing: .4px; }
+    .c-blue { color: var(--primary); }
+    .c-green { color: #217346; }
+    .c-orange { color: #e37222; }
+    .c-red { color: #c00000; }
+
+    /* ── Main split ──────────────────────────────────────────── */
+    #main { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Task grid ───────────────────────────────────────────── */
+    #grid-wrap {
+      width: 570px; min-width: 260px;
+      display: flex; flex-direction: column;
+      border-right: 2px solid var(--primary);
+      flex-shrink: 0; background: white;
+    }
+    #grid-head {
+      display: flex; background: var(--primary); color: white;
+      font-weight: 600; font-size: 11px; flex-shrink: 0; height: 52px;
+    }
+    .gc { padding: 4px 5px; border-right: 1px solid rgba(255,255,255,.2);
+      display: flex; align-items: center; overflow: hidden; white-space: nowrap; }
+    .gc-wbs  { width: 38px; justify-content: center; }
+    .gc-name { flex: 1; min-width: 100px; }
+    .gc-dur  { width: 46px; justify-content: center; }
+    .gc-s    { width: 72px; }
+    .gc-e    { width: 72px; }
+    .gc-pct  { width: 42px; justify-content: center; }
+    .gc-who  { width: 72px; }
+    #grid-body { flex: 1; overflow-y: auto; overflow-x: hidden; }
+
+    .trow {
+      display: flex; height: 36px; border-bottom: 1px solid var(--border);
+      cursor: pointer; transition: background .1s;
+    }
+    .trow:hover { background: var(--row-hover); }
+    .trow.sel { background: var(--row-sel); }
+    .trow.sum { background: #f4f4f4; font-weight: 600; }
+    .trow.sum:hover { background: #e8e8e8; }
+    .trow .gc { border-right-color: var(--border); font-size: 12px; }
+
+    .name-cell { display: flex; align-items: center; gap: 3px; overflow: hidden; }
+    .coll-btn {
+      flex-shrink: 0; width: 15px; height: 15px; border: 1px solid #999;
+      background: white; border-radius: 2px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 9px; color: #333;
+    }
+    .ms-icon { color: #7b2d8b; flex-shrink: 0; font-size: 10px; }
+    .sdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .s-ns  { background: #aaa; }
+    .s-ip  { background: #4472c4; }
+    .s-cp  { background: #70ad47; }
+    .s-ar  { background: #e37222; }
+    .s-dl  { background: #c00000; }
+    .mpb { width: 34px; height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden; }
+    .mpf { height: 100%; background: #70ad47; border-radius: 3px; }
+    .tname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* ── Gantt ───────────────────────────────────────────────── */
+    #gantt-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    #gantt-head { flex-shrink: 0; height: 52px; overflow: hidden; position: relative; }
+    #gantt-head-scroll { overflow: hidden; height: 52px; }
+    #gantt-head-canvas { display: block; }
+    #gantt-body { flex: 1; overflow: auto; position: relative; }
+    #gantt-inner { position: relative; }
+    #gantt-canvas { display: block; }
+    #gantt-svg { position: absolute; top: 0; left: 0; pointer-events: none; overflow: visible; }
+    #today-line {
+      position: absolute; top: 0; bottom: 0; width: 2px;
+      background: var(--today); pointer-events: none; z-index: 10;
+    }
+    #today-line::after {
+      content: 'Today'; position: absolute; top: 3px; left: 4px;
+      font-size: 10px; color: var(--today); font-weight: 700; white-space: nowrap;
+    }
+
+    /* ── Status bar ──────────────────────────────────────────── */
+    #statusbar {
+      background: var(--primary); color: rgba(255,255,255,.8);
+      padding: 2px 12px; font-size: 11px;
+      display: flex; align-items: center; gap: 20px; flex-shrink: 0;
+    }
+
+    /* ── Modal ───────────────────────────────────────────────── */
+    .ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
+      z-index: 1000; align-items: center; justify-content: center; }
+    .ov.open { display: flex; }
+    .modal { background: white; border-radius: 6px; width: 510px; max-height: 90vh;
+      overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,.3); }
+    .mh { background: var(--primary); color: white; padding: 10px 14px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-radius: 6px 6px 0 0; }
+    .mh h3 { font-size: 14px; }
+    .mx { background: none; border: none; color: white; font-size: 20px; cursor: pointer; line-height: 1; }
+    .mb { padding: 14px; }
+    .fg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .fi { display: flex; flex-direction: column; gap: 3px; }
+    .fi.fw { grid-column: 1/-1; }
+    .fi label { font-size: 10px; font-weight: 700; color: var(--text-light);
+      text-transform: uppercase; letter-spacing: .4px; }
+    .fi input, .fi select, .fi textarea {
+      border: 1px solid var(--border); border-radius: 3px;
+      padding: 5px 7px; font-size: 13px; font-family: inherit; outline: none; }
+    .fi input:focus, .fi select:focus, .fi textarea:focus { border-color: var(--primary); }
+    .fi textarea { resize: vertical; min-height: 52px; }
+    .mf { padding: 10px 14px; border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: 7px; }
+    .btn { padding: 5px 14px; border-radius: 3px; border: 1px solid; cursor: pointer;
+      font-size: 13px; font-family: inherit; }
+    .btn-p { background: var(--primary); color: white; border-color: var(--primary); }
+    .btn-p:hover { background: var(--primary-dark); }
+    .btn-s { background: white; color: var(--text); border-color: var(--border); }
+    .btn-s:hover { background: #f5f5f5; }
+    .btn-d { background: #c00000; color: white; border-color: #c00000; }
+    .btn-d:hover { background: #a00000; }
+
+    /* ── Context menu ────────────────────────────────────────── */
+    #ctx { display: none; position: fixed; background: white; border: 1px solid var(--border);
+      border-radius: 4px; box-shadow: 0 4px 16px rgba(0,0,0,.15); z-index: 500; min-width: 170px; }
+    .ci { padding: 7px 14px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 7px; }
+    .ci:hover { background: var(--row-hover); }
+    .csep { height: 1px; background: var(--border); margin: 3px 0; }
+
+    /* ── Legend ──────────────────────────────────────────────── */
+    #legend {
+      background: white; border-bottom: 1px solid var(--border);
+      padding: 3px 14px; display: flex; align-items: center; gap: 14px;
+      font-size: 11px; color: var(--text-light); flex-shrink: 0;
+    }
+    .leg { display: flex; align-items: center; gap: 4px; }
+    .leg-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+    /* scrollbars */
+    #grid-body::-webkit-scrollbar, #gantt-body::-webkit-scrollbar { width: 10px; height: 10px; }
+    #grid-body::-webkit-scrollbar-track, #gantt-body::-webkit-scrollbar-track { background: #f0f0f0; }
+    #grid-body::-webkit-scrollbar-thumb, #gantt-body::-webkit-scrollbar-thumb
+      { background: #c0c0c0; border-radius: 5px; }
+  </style>
+</head>
+<body>
+
+<!-- Toolbar -->
+<div id="toolbar">
+  <span class="tb-title">📊 Program Manager</span>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <button class="tb" onclick="newProject()">📄 New</button>
+    <button class="tb" onclick="saveProject()">💾 Save</button>
+    <button class="tb" onclick="loadProject()">📂 Open</button>
+    <button class="tb" onclick="exportCSV()">⬇ Export CSV</button>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <button class="tb" onclick="addTask('task')">＋ Task</button>
+    <button class="tb" onclick="addTask('milestone')">◆ Milestone</button>
+    <button class="tb" onclick="addSubTask()">↳ Sub-task</button>
+    <button class="tb red" onclick="deleteSelected()">✕ Delete</button>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <button class="tb" onclick="indentTask()" title="Make child of previous task">→ Indent</button>
+    <button class="tb" onclick="outdentTask()" title="Promote to parent level">← Outdent</button>
+    <button class="tb" onclick="moveTask(-1)">▲</button>
+    <button class="tb" onclick="moveTask(1)">▼</button>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <span class="tb-label">Zoom:</span>
+    <select class="tb-sel" id="zoom-sel" onchange="setZoom(this.value)">
+      <option value="month">Month</option>
+      <option value="week" selected>Week</option>
+      <option value="day">Day</option>
+    </select>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <button class="tb" onclick="scrollToToday()">📍 Today</button>
+    <button class="tb" id="cp-btn" onclick="toggleCP()">🔴 Critical Path</button>
+  </div>
+</div>
+
+<!-- Project header / stats -->
+<div id="proj-header">
+  <input type="text" id="proj-name" value="New Project" />
+  <div class="stat"><span class="stat-val c-blue" id="s-total">0</span><span class="stat-lbl">Tasks</span></div>
+  <div class="stat"><span class="stat-val c-green" id="s-done">0</span><span class="stat-lbl">Complete</span></div>
+  <div class="stat"><span class="stat-val c-blue" id="s-ip">0</span><span class="stat-lbl">In Progress</span></div>
+  <div class="stat"><span class="stat-val c-orange" id="s-ar">0</span><span class="stat-lbl">At Risk</span></div>
+  <div class="stat"><span class="stat-val c-red" id="s-dl">0</span><span class="stat-lbl">Delayed</span></div>
+  <div class="stat"><span class="stat-val" id="s-pct">0%</span><span class="stat-lbl">Overall Progress</span></div>
+</div>
+
+<!-- Legend -->
+<div id="legend">
+  <strong>Legend:</strong>
+  <span class="leg"><span class="leg-dot" style="background:#9dc3e6"></span> Not Started</span>
+  <span class="leg"><span class="leg-dot" style="background:#4472c4"></span> In Progress</span>
+  <span class="leg"><span class="leg-dot" style="background:#70ad47"></span> Complete</span>
+  <span class="leg"><span class="leg-dot" style="background:#e37222"></span> At Risk</span>
+  <span class="leg"><span class="leg-dot" style="background:#c00000"></span> Delayed</span>
+  <span class="leg"><span class="leg-dot" style="background:#595959;height:6px;"></span> Summary</span>
+  <span class="leg"><span style="color:#7b2d8b;font-size:12px;">◆</span> Milestone</span>
+  <span style="margin-left:auto;font-size:11px;">Double-click row or bar to edit · Drag bar to reschedule</span>
+</div>
+
+<!-- Main split -->
+<div id="main">
+  <!-- Task Grid -->
+  <div id="grid-wrap">
+    <div id="grid-head">
+      <div class="gc gc-wbs">#</div>
+      <div class="gc gc-name">Task Name</div>
+      <div class="gc gc-dur">Dur</div>
+      <div class="gc gc-s">Start</div>
+      <div class="gc gc-e">Finish</div>
+      <div class="gc gc-pct">%</div>
+      <div class="gc gc-who">Assigned</div>
+    </div>
+    <div id="grid-body"></div>
+  </div>
+
+  <!-- Gantt Chart -->
+  <div id="gantt-wrap">
+    <div id="gantt-head">
+      <div id="gantt-head-scroll">
+        <canvas id="gantt-head-canvas"></canvas>
+      </div>
+    </div>
+    <div id="gantt-body">
+      <div id="gantt-inner">
+        <canvas id="gantt-canvas"></canvas>
+        <svg id="gantt-svg"></svg>
+        <div id="today-line"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Status bar -->
+<div id="statusbar">
+  <span id="st-msg">Ready — double-click a task to edit, drag bars to reschedule</span>
+  <span id="st-date"></span>
+  <span id="st-keys">Shortcuts: Insert=Add · Del=Delete · Enter=Edit · ↑↓=Navigate</span>
+</div>
+
+<!-- Task Edit Modal -->
+<div class="ov" id="task-modal">
+  <div class="modal">
+    <div class="mh">
+      <h3 id="modal-ttl">Edit Task</h3>
+      <button class="mx" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="mb">
+      <div class="fg">
+        <div class="fi fw"><label>Task Name</label>
+          <input type="text" id="f-name" placeholder="Task name…"/></div>
+        <div class="fi"><label>Type</label>
+          <select id="f-type">
+            <option value="task">Task</option>
+            <option value="milestone">Milestone</option>
+            <option value="summary">Summary</option>
+          </select></div>
+        <div class="fi"><label>Status</label>
+          <select id="f-status">
+            <option value="not-started">Not Started</option>
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="at-risk">At Risk</option>
+            <option value="delayed">Delayed</option>
+          </select></div>
+        <div class="fi"><label>Start Date</label>
+          <input type="date" id="f-start" onchange="syncDuration()"/></div>
+        <div class="fi"><label>End Date</label>
+          <input type="date" id="f-end" onchange="syncDuration()"/></div>
+        <div class="fi"><label>Duration (days)</label>
+          <input type="number" id="f-dur" min="0" step="1" onchange="syncEnd()"/></div>
+        <div class="fi"><label>Progress (%)</label>
+          <input type="number" id="f-pct" min="0" max="100" step="5"/></div>
+        <div class="fi"><label>Assigned To</label>
+          <input type="text" id="f-who" placeholder="Name / team…"/></div>
+        <div class="fi"><label>Predecessors (task IDs, comma-sep)</label>
+          <input type="text" id="f-pred" placeholder="e.g. 2, 5"/></div>
+        <div class="fi"><label>Priority</label>
+          <select id="f-pri">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+          </select></div>
+        <div class="fi fw"><label>Notes</label>
+          <textarea id="f-notes" placeholder="Description or notes…"></textarea></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-d" onclick="deleteFromModal()">Delete</button>
+      <button class="btn btn-s" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-p" onclick="saveModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Context menu -->
+<div id="ctx">
+  <div class="ci" onclick="ctxEdit()">✏️ Edit Task</div>
+  <div class="ci" onclick="ctxAdd()">＋ Add Task Below</div>
+  <div class="ci" onclick="ctxSub()">↳ Add Sub-task</div>
+  <div class="csep"></div>
+  <div class="ci" onclick="indentTask()">→ Indent</div>
+  <div class="ci" onclick="outdentTask()">← Outdent</div>
+  <div class="csep"></div>
+  <div class="ci" style="color:#c00000" onclick="deleteSelected()">✕ Delete</div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════════════ */
+const S = {
+  tasks: [],
+  nextId: 1,
+  selId: null,
+  zoom: 'week',
+  showCP: false,
+  projStart: null,
+  projEnd: null,
+};
+
+const PX = { day: 30, week: 15, month: 5 };
+const ROW_H = 36;
+const HEAD_H = 52;
+const MONTHS = ['January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
+const MSHORT = ['Jan','Feb','Mar','Apr','May','Jun',
+                'Jul','Aug','Sep','Oct','Nov','Dec'];
+
+/* ═══════════════════════════════════════════════════════════════════
+   DATE UTILS
+═══════════════════════════════════════════════════════════════════ */
+function pd(s) {
+  if (!s) return null;
+  const [y,m,d] = s.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+function fd(dt) {
+  if (!dt) return '';
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+}
+function fds(dt) { // short MM/DD
+  if (!dt) return '';
+  return `${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')}`;
+}
+function fdm(dt) { // "Jan 5"
+  if (!dt) return '';
+  return `${MSHORT[dt.getMonth()]} ${dt.getDate()}`;
+}
+function diff(a, b) { return Math.round((b - a) / 86400000); }
+function addD(dt, n) { const d = new Date(dt); d.setDate(d.getDate() + n); return d; }
+
+function calcProjRange() {
+  if (!S.tasks.length) {
+    const t = new Date(); S.projStart = addD(t,-14); S.projEnd = addD(t,90); return;
+  }
+  let mn = null, mx = null;
+  S.tasks.forEach(t => {
+    const s = pd(t.start), e = pd(t.end);
+    if (s && (!mn || s < mn)) mn = s;
+    if (e && (!mx || e > mx)) mx = e;
+  });
+  S.projStart = addD(mn || new Date(), -7);
+  S.projEnd   = addD(mx || new Date(), 30);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SAMPLE DATA
+═══════════════════════════════════════════════════════════════════ */
+function loadSample() {
+  const t = new Date();
+  const d = n => fd(addD(t, n));
+  S.tasks = [
+    mk(1,0,'Project Kickoff','summary','in-progress',d(-7),d(16),23,25,'','high','',false),
+    mk(2,1,'Requirements Gathering','summary','completed',d(-7),d(1),8,100,'','high','',false),
+    mk(3,2,'Stakeholder Interviews','task','completed',d(-7),d(-3),4,100,'Alice','high','',false),
+    mk(4,2,'Document Requirements','task','completed',d(-2),d(1),3,100,'Bob','high','',false),
+    mk(5,1,'Requirements Sign-off','milestone','completed',d(1),d(1),0,100,'','critical','',false),
+    mk(6,1,'Design Phase','summary','in-progress',d(2),d(16),14,55,'','high','',false),
+    mk(7,2,'System Architecture','task','completed',d(2),d(6),4,100,'Carol','critical','',false),
+    mk(8,2,'UI/UX Wireframes','task','in-progress',d(4),d(12),8,65,'David','high','',false),
+    mk(9,2,'Database Schema','task','in-progress',d(6),d(16),10,30,'Carol','high','',false),
+    mk(10,1,'Design Review','milestone','not-started',d(16),d(16),0,0,'','critical','',false),
+    mk(11,0,'Development','summary','not-started',d(17),d(55),38,0,'','high','',false),
+    mk(12,1,'Backend API','task','not-started',d(17),d(37),20,0,'Carol','high','',false),
+    mk(13,1,'Frontend UI','task','not-started',d(22),d(45),23,0,'David','high','',false),
+    mk(14,1,'Integration & Testing','task','not-started',d(45),d(55),10,0,'Alice','critical','',false),
+    mk(15,0,'QA & Release','summary','not-started',d(55),d(72),17,0,'','high','',false),
+    mk(16,1,'System Testing','task','not-started',d(55),d(63),8,0,'Bob','medium','',false),
+    mk(17,1,'UAT','task','at-risk',d(61),d(70),9,0,'Alice','high','Resource TBD',false),
+    mk(18,1,'Performance Testing','task','not-started',d(63),d(70),7,0,'Bob','medium','',false),
+    mk(19,0,'Go-Live','milestone','not-started',d(72),d(72),0,0,'','critical','Launch day',false),
+  ];
+  // Set up predecessors
+  const preds = {5:[4],6:[5],7:[5],8:[5],10:[8,9],11:[10],12:[10],13:[10],14:[12,13],15:[14],16:[14],17:[16],18:[16],19:[17,18]};
+  S.tasks.forEach(t => { t.predecessors = preds[t.id] || []; });
+  S.nextId = 20;
+  calcProjRange();
+}
+
+function mk(id,level,name,type,status,start,end,dur,pct,who,pri,notes,collapsed) {
+  return {id,level,name,type,status,start,end,duration:dur,progress:pct,
+          assignee:who,priority:pri,notes,collapsed,predecessors:[],isCritical:false};
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   VISIBILITY / WBS
+═══════════════════════════════════════════════════════════════════ */
+function visibleTasks() {
+  const collapsedLevels = [];
+  const out = [];
+  for (const t of S.tasks) {
+    let hide = false;
+    for (const {idx, level} of collapsedLevels) {
+      const ti = S.tasks.indexOf(t);
+      if (ti > idx && t.level > level) { hide = true; break; }
+    }
+    if (!hide) {
+      out.push(t);
+      if (t.collapsed) collapsedLevels.push({idx: S.tasks.indexOf(t), level: t.level});
+    }
+  }
+  return out;
+}
+
+function hasChildren(task) {
+  const i = S.tasks.indexOf(task);
+  return i < S.tasks.length - 1 && S.tasks[i+1].level > task.level;
+}
+
+function wbsMap(vis) {
+  const ctrs = [];
+  const map = {};
+  for (const t of vis) {
+    while (ctrs.length <= t.level) ctrs.push(0);
+    ctrs.length = t.level + 1;
+    ctrs[t.level]++;
+    map[t.id] = ctrs.slice(0, t.level + 1).join('.');
+  }
+  return map;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RENDER TASK GRID
+═══════════════════════════════════════════════════════════════════ */
+function renderGrid() {
+  const vis = visibleTasks();
+  const wbs = wbsMap(vis);
+  let html = '';
+  for (const t of vis) {
+    const sel = t.id === S.selId ? ' sel' : '';
+    const isSum = t.type === 'summary' || hasChildren(t);
+    const sumCls = isSum ? ' sum' : '';
+    const indent = t.level * 14;
+    let prefix = '';
+    if (isSum) {
+      prefix = `<button class="coll-btn" onclick="toggleColl(event,${t.id})">${t.collapsed?'+':'−'}</button>`;
+    } else if (t.type === 'milestone') {
+      prefix = `<span class="ms-icon">◆</span>`;
+    }
+    const sc = `s-${t.status.replace(/-/g,'').replace('notstarted','ns').replace('inprogress','ip').replace('completed','cp').replace('atrisk','ar').replace('delayed','dl')}`;
+    const dur = t.type === 'milestone' ? '—' : t.duration + 'd';
+    const ss = t.start ? fds(pd(t.start)) : '';
+    const es = t.end   ? fds(pd(t.end))   : '';
+    const pctCell = t.type === 'milestone'
+      ? '<span style="font-size:10px;color:#aaa;">—</span>'
+      : `<div class="mpb"><div class="mpf" style="width:${t.progress}%"></div></div>`;
+    html += `<div class="trow${sel}${sumCls}" data-id="${t.id}"
+      onclick="selTask(${t.id})" ondblclick="openModal(${t.id})"
+      oncontextmenu="showCtx(event,${t.id})">
+      <div class="gc gc-wbs" style="font-size:10px;color:#777">${wbs[t.id]||''}</div>
+      <div class="gc gc-name"><div class="name-cell">
+        <span style="width:${indent}px;flex-shrink:0"></span>
+        ${prefix}
+        <span class="sdot ${sc}"></span>
+        <span class="tname" title="${esc(t.name)}">${esc(t.name)}</span>
+      </div></div>
+      <div class="gc gc-dur" style="font-size:11px;color:#666">${dur}</div>
+      <div class="gc gc-s"  style="font-size:11px">${ss}</div>
+      <div class="gc gc-e"  style="font-size:11px">${es}</div>
+      <div class="gc gc-pct" style="padding:2px 4px">${pctCell}</div>
+      <div class="gc gc-who" style="font-size:11px;overflow:hidden;text-overflow:ellipsis">${esc(t.assignee||'')}</div>
+    </div>`;
+  }
+  document.getElementById('grid-body').innerHTML = html;
+}
+
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RENDER GANTT HEADER
+═══════════════════════════════════════════════════════════════════ */
+function renderHead(totalW) {
+  const hc = document.getElementById('gantt-head-canvas');
+  hc.width = totalW; hc.height = HEAD_H;
+  hc.style.width = totalW + 'px';
+  const ctx = hc.getContext('2d');
+  const ppd = PX[S.zoom];
+  const topH = 26, botH = HEAD_H - topH;
+
+  ctx.clearRect(0, 0, totalW, HEAD_H);
+  ctx.fillStyle = '#e8edf5';
+  ctx.fillRect(0, 0, totalW, HEAD_H);
+
+  // ── Draw top row (months or quarters) ──
+  if (S.zoom === 'month') {
+    // top = years
+    let yr = S.projStart.getFullYear();
+    for (;;) {
+      const ys = new Date(yr, 0, 1);
+      const ye = new Date(yr, 11, 31);
+      const vs = ys < S.projStart ? S.projStart : ys;
+      const ve = ye > S.projEnd   ? S.projEnd   : ye;
+      if (vs > S.projEnd) break;
+      const x = diff(S.projStart, vs) * ppd;
+      const w = (diff(vs, ve) + 1) * ppd;
+      drawHeaderCell(ctx, x, 0, w, topH, String(yr), '#1a3f72', 'white', true);
+      yr++;
+    }
+  } else {
+    // top = months
+    let ms = new Date(S.projStart.getFullYear(), S.projStart.getMonth(), 1);
+    for (;;) {
+      const me = new Date(ms.getFullYear(), ms.getMonth()+1, 0);
+      const vs = ms < S.projStart ? S.projStart : ms;
+      const ve = me > S.projEnd   ? S.projEnd   : me;
+      if (vs > S.projEnd) break;
+      const x = diff(S.projStart, vs) * ppd;
+      const w = (diff(vs, ve) + 1) * ppd;
+      drawHeaderCell(ctx, x, 0, w, topH, MONTHS[ms.getMonth()] + ' ' + ms.getFullYear(), '#2b579a', 'white', true);
+      ms = new Date(ms.getFullYear(), ms.getMonth()+1, 1);
+    }
+  }
+
+  // ── Draw bottom row ──
+  ctx.font = '10px Segoe UI, system-ui, sans-serif';
+  ctx.textBaseline = 'middle';
+
+  if (S.zoom === 'day') {
+    let d = new Date(S.projStart);
+    while (d <= S.projEnd) {
+      const x = diff(S.projStart, d) * ppd;
+      const we = d.getDay() === 0 || d.getDay() === 6;
+      ctx.fillStyle = we ? '#d4dce8' : '#f0f4f8';
+      ctx.fillRect(x, topH, ppd, botH);
+      ctx.strokeStyle = '#c0ccd8'; ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.moveTo(x+.5, topH); ctx.lineTo(x+.5, HEAD_H); ctx.stroke();
+      ctx.fillStyle = we ? '#888' : '#444';
+      ctx.textAlign = 'center';
+      ctx.fillText(d.getDate(), x + ppd/2, topH + botH/2);
+      d = addD(d, 1);
+    }
+  } else if (S.zoom === 'week') {
+    let d = new Date(S.projStart);
+    // align to Monday
+    const dow = d.getDay(); d = addD(d, -(dow === 0 ? 6 : dow - 1));
+    while (d <= S.projEnd) {
+      const x = diff(S.projStart, d) * ppd;
+      const w = 7 * ppd;
+      ctx.fillStyle = '#f0f4f8';
+      ctx.fillRect(x, topH, w, botH);
+      ctx.strokeStyle = '#c0ccd8'; ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.moveTo(x+.5, topH); ctx.lineTo(x+.5, HEAD_H); ctx.stroke();
+      if (x >= -ppd) {
+        ctx.fillStyle = '#444'; ctx.textAlign = 'left';
+        ctx.fillText(fdm(d), x + 2, topH + botH/2);
+      }
+      d = addD(d, 7);
+    }
+  } else {
+    // month zoom – bottom = months
+    let ms = new Date(S.projStart.getFullYear(), S.projStart.getMonth(), 1);
+    let alt = false;
+    for (;;) {
+      const me = new Date(ms.getFullYear(), ms.getMonth()+1, 0);
+      const vs = ms < S.projStart ? S.projStart : ms;
+      const ve = me > S.projEnd   ? S.projEnd   : me;
+      if (vs > S.projEnd) break;
+      const x = diff(S.projStart, vs) * ppd;
+      const w = (diff(vs, ve) + 1) * ppd;
+      ctx.fillStyle = alt ? '#e4eaf2' : '#f0f4f8'; alt = !alt;
+      ctx.fillRect(x, topH, w, botH);
+      ctx.strokeStyle = '#c0ccd8'; ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.moveTo(x+.5, topH); ctx.lineTo(x+.5, HEAD_H); ctx.stroke();
+      ctx.fillStyle = '#444'; ctx.textAlign = 'left';
+      ctx.fillText(MSHORT[ms.getMonth()], x + 3, topH + botH/2);
+      ms = new Date(ms.getFullYear(), ms.getMonth()+1, 1);
+    }
+  }
+
+  // bottom border
+  ctx.strokeStyle = '#a0aec0'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, HEAD_H-.5); ctx.lineTo(totalW, HEAD_H-.5); ctx.stroke();
+}
+
+function drawHeaderCell(ctx, x, y, w, h, text, bg, fg, bold) {
+  ctx.fillStyle = bg; ctx.fillRect(x, y, w, h);
+  ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(x+.5, y); ctx.lineTo(x+.5, y+h); ctx.stroke();
+  ctx.fillStyle = fg;
+  ctx.font = (bold ? 'bold ' : '') + '11px Segoe UI, system-ui, sans-serif';
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  ctx.fillText(text, x + 4, y + h/2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RENDER GANTT BODY
+═══════════════════════════════════════════════════════════════════ */
+function renderBody(vis, totalW) {
+  const bc = document.getElementById('gantt-canvas');
+  const gb = document.getElementById('gantt-body');
+  const totalH = Math.max(vis.length * ROW_H, gb.clientHeight - 2);
+  bc.width = totalW; bc.height = totalH;
+  const inner = document.getElementById('gantt-inner');
+  inner.style.width = totalW + 'px';
+  inner.style.height = totalH + 'px';
+  document.getElementById('gantt-svg').setAttribute('width', totalW);
+  document.getElementById('gantt-svg').setAttribute('height', totalH);
+
+  const ctx = bc.getContext('2d');
+  const ppd = PX[S.zoom];
+  ctx.clearRect(0, 0, totalW, totalH);
+
+  // Row backgrounds
+  for (let i = 0; i < vis.length; i++) {
+    const t = vis[i];
+    ctx.fillStyle = t.id === S.selId ? '#cce0ff' : i % 2 === 0 ? '#ffffff' : '#f7f9fc';
+    ctx.fillRect(0, i * ROW_H, totalW, ROW_H);
+  }
+
+  // Weekend shading
+  if (S.zoom !== 'month') {
+    let d = new Date(S.projStart);
+    while (d <= S.projEnd) {
+      if (d.getDay() === 0 || d.getDay() === 6) {
+        const x = diff(S.projStart, d) * ppd;
+        ctx.fillStyle = 'rgba(180,195,220,.18)';
+        ctx.fillRect(x, 0, ppd, totalH);
+      }
+      d = addD(d, 1);
+    }
+  }
+
+  // Vertical grid lines
+  ctx.strokeStyle = '#dde4ee'; ctx.lineWidth = 0.5;
+  if (S.zoom === 'day') {
+    let d = new Date(S.projStart);
+    while (d <= S.projEnd) {
+      const x = diff(S.projStart, d) * ppd;
+      ctx.beginPath(); ctx.moveTo(x+.5,0); ctx.lineTo(x+.5,totalH); ctx.stroke();
+      d = addD(d,1);
+    }
+  } else if (S.zoom === 'week') {
+    let d = new Date(S.projStart);
+    const dow = d.getDay(); d = addD(d, -(dow===0?6:dow-1));
+    while (d <= S.projEnd) {
+      const x = diff(S.projStart, d) * ppd;
+      ctx.beginPath(); ctx.moveTo(x+.5,0); ctx.lineTo(x+.5,totalH); ctx.stroke();
+      d = addD(d,7);
+    }
+  } else {
+    let ms = new Date(S.projStart.getFullYear(), S.projStart.getMonth(), 1);
+    for (;;) {
+      const x = diff(S.projStart, ms) * ppd;
+      if (x > totalW) break;
+      ctx.beginPath(); ctx.moveTo(x+.5,0); ctx.lineTo(x+.5,totalH); ctx.stroke();
+      ms = new Date(ms.getFullYear(), ms.getMonth()+1, 1);
+    }
+  }
+
+  // Horizontal row lines
+  ctx.strokeStyle = '#e4e8f0'; ctx.lineWidth = 0.5;
+  for (let i = 0; i <= vis.length; i++) {
+    const y = i * ROW_H;
+    ctx.beginPath(); ctx.moveTo(0,y+.5); ctx.lineTo(totalW,y+.5); ctx.stroke();
+  }
+
+  // Task bars
+  vis.forEach((t, i) => drawBar(ctx, t, i * ROW_H, ppd));
+}
+
+function barColor(t) {
+  if (S.showCP && t.isCritical) return '#c00000';
+  switch(t.status) {
+    case 'completed':  return '#70ad47';
+    case 'in-progress':return '#4472c4';
+    case 'at-risk':    return '#e37222';
+    case 'delayed':    return '#c00000';
+    default:           return '#9dc3e6';
+  }
+}
+
+function drawBar(ctx, t, rowY, ppd) {
+  if (!t.start) return;
+  const sx = diff(S.projStart, pd(t.start)) * ppd;
+  const ex = t.end ? (diff(S.projStart, pd(t.end)) + 1) * ppd : sx + ppd;
+  const bw = Math.max(ex - sx, 4);
+  const pad = 6;
+  const bh = ROW_H - pad * 2;
+  const by = rowY + pad;
+  const col = barColor(t);
+
+  if (t.type === 'milestone') {
+    const cx = sx + ppd/2, cy = rowY + ROW_H/2;
+    const r = Math.min(bh/2 + 1, 9);
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r); ctx.lineTo(cx + r, cy);
+    ctx.lineTo(cx, cy + r); ctx.lineTo(cx - r, cy);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = dark(col, 25); ctx.lineWidth = 1;
+    ctx.stroke();
+    return;
+  }
+
+  const isSum = t.type === 'summary' || hasChildren(t);
+  if (isSum) {
+    const sh = 8, sy2 = rowY + (ROW_H - sh)/2;
+    ctx.fillStyle = '#595959';
+    ctx.fillRect(sx, sy2, bw, sh);
+    // end-caps
+    const cap = 5;
+    ctx.fillStyle = '#333';
+    [[sx, sy2], [sx + bw, sy2]].forEach(([cx]) => {
+      ctx.beginPath();
+      ctx.moveTo(cx - cap, sy2);
+      ctx.lineTo(cx + cap, sy2);
+      ctx.lineTo(cx, sy2 + sh + cap);
+      ctx.closePath(); ctx.fill();
+    });
+    if (t.progress > 0) {
+      ctx.fillStyle = '#222';
+      ctx.fillRect(sx, sy2+1, bw * t.progress/100, 3);
+    }
+    return;
+  }
+
+  // Regular task
+  rr(ctx, sx, by, bw, bh, 3);
+  ctx.fillStyle = col; ctx.fill();
+
+  if (t.progress > 0) {
+    const pw = bw * t.progress/100;
+    ctx.save(); ctx.clip();
+    rr(ctx, sx, by, pw, bh, 3);
+    ctx.fillStyle = dark(col, 28); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = 'rgba(0,0,0,.35)';
+    ctx.fillRect(sx + pw - 1, by, 2, bh);
+  }
+
+  rr(ctx, sx, by, bw, bh, 3);
+  ctx.strokeStyle = dark(col, 20); ctx.lineWidth = 0.8; ctx.stroke();
+
+  // Label
+  ctx.font = '11px Segoe UI, system-ui, sans-serif';
+  ctx.textBaseline = 'middle';
+  const lbl = t.progress > 0 ? `${t.name} (${t.progress}%)` : t.name;
+  const lw = ctx.measureText(lbl).width;
+  if (lw + 8 <= bw) {
+    ctx.fillStyle = 'white'; ctx.textAlign = 'left';
+    ctx.fillText(lbl, sx + 5, by + bh/2);
+  } else if (t.progress > 0) {
+    ctx.fillStyle = '#444'; ctx.textAlign = 'left';
+    ctx.fillText(`${t.progress}%`, sx + bw + 4, by + bh/2);
+  }
+}
+
+function rr(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+function dark(hex, amt) {
+  let r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  r = Math.max(0,r-amt); g = Math.max(0,g-amt); b = Math.max(0,b-amt);
+  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DEPENDENCY ARROWS
+═══════════════════════════════════════════════════════════════════ */
+function renderArrows(vis) {
+  const ppd = PX[S.zoom];
+  const idx = {}; vis.forEach((t,i) => { idx[t.id] = i; });
+  let paths = '', defs = '';
+
+  defs = `<defs>
+    <marker id="arG" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0,0 L0,7 L7,3.5 z" fill="#7090b0" opacity=".7"/>
+    </marker>
+    <marker id="arR" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0,0 L0,7 L7,3.5 z" fill="#c00000"/>
+    </marker>
+  </defs>`;
+
+  for (const t of vis) {
+    if (!t.predecessors?.length) continue;
+    const toRow = idx[t.id];
+    if (toRow == null || !t.start) continue;
+    const toX = diff(S.projStart, pd(t.start)) * ppd;
+    const toY = toRow * ROW_H + ROW_H/2;
+
+    for (const pid of t.predecessors) {
+      const fromRow = idx[pid];
+      if (fromRow == null) continue;
+      const pred = vis[fromRow];
+      if (!pred?.end) continue;
+      const fromX = (diff(S.projStart, pd(pred.end)) + 1) * ppd;
+      const fromY = fromRow * ROW_H + ROW_H/2;
+      const isCP = S.showCP && t.isCritical && pred.isCritical;
+      const col = isCP ? '#c00000' : '#7090b0';
+      const marker = isCP ? 'arR' : 'arG';
+      const mx = fromX + 8;
+      paths += `<path d="M${fromX},${fromY} C${mx},${fromY} ${mx},${toY} ${toX},${toY}"
+        fill="none" stroke="${col}" stroke-width="${isCP?2:1.5}" opacity="${isCP?1:.75}"
+        marker-end="url(#${marker})"/>`;
+    }
+  }
+  document.getElementById('gantt-svg').innerHTML = defs + paths;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CRITICAL PATH
+═══════════════════════════════════════════════════════════════════ */
+function computeCP() {
+  const m = {}; S.tasks.forEach(t => { m[t.id] = {...t, es:0, ef:0, ls:1e9, lf:1e9}; });
+  const order = topoSort();
+  for (const id of order) {
+    const t = m[id];
+    const maxPred = (t.predecessors||[]).reduce((mx, pid) => m[pid] ? Math.max(mx, m[pid].ef) : mx, 0);
+    t.es = maxPred; t.ef = t.es + t.duration;
+  }
+  const projEF = Math.max(...Object.values(m).map(t => t.ef));
+  for (const id of [...order].reverse()) {
+    const t = m[id];
+    const succs = S.tasks.filter(s => (s.predecessors||[]).includes(id));
+    t.lf = succs.length ? Math.min(...succs.map(s => m[s.id] ? m[s.id].ls : projEF)) : projEF;
+    t.ls = t.lf - t.duration;
+  }
+  S.tasks.forEach(t => { const c = m[t.id]; t.isCritical = c ? Math.abs(c.ls - c.es) < 0.5 : false; });
+}
+
+function topoSort() {
+  const vis = new Set(), out = [];
+  function visit(id) {
+    if (vis.has(id)) return; vis.add(id);
+    const t = S.tasks.find(x => x.id === id);
+    if (t) (t.predecessors||[]).forEach(visit);
+    out.push(id);
+  }
+  S.tasks.forEach(t => visit(t.id));
+  return out;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TODAY LINE
+═══════════════════════════════════════════════════════════════════ */
+function renderToday(totalW) {
+  const ppd = PX[S.zoom];
+  const tl = document.getElementById('today-line');
+  const x = diff(S.projStart, new Date()) * ppd;
+  if (x >= 0 && x <= totalW) {
+    tl.style.display = 'block'; tl.style.left = x + 'px';
+  } else { tl.style.display = 'none'; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATS
+═══════════════════════════════════════════════════════════════════ */
+function updateStats() {
+  const ts = S.tasks.filter(t => t.type !== 'summary');
+  const total = ts.length;
+  const done  = ts.filter(t => t.status === 'completed').length;
+  const ip    = ts.filter(t => t.status === 'in-progress').length;
+  const ar    = ts.filter(t => t.status === 'at-risk').length;
+  const dl    = ts.filter(t => t.status === 'delayed').length;
+  const pct   = total ? Math.round(ts.reduce((s,t)=>s+t.progress,0)/total) : 0;
+  document.getElementById('s-total').textContent = total;
+  document.getElementById('s-done').textContent  = done;
+  document.getElementById('s-ip').textContent    = ip;
+  document.getElementById('s-ar').textContent    = ar;
+  document.getElementById('s-dl').textContent    = dl;
+  document.getElementById('s-pct').textContent   = pct + '%';
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MASTER RENDER
+═══════════════════════════════════════════════════════════════════ */
+function renderAll() {
+  calcProjRange();
+  const vis = visibleTasks();
+  const ppd = PX[S.zoom];
+  const gb  = document.getElementById('gantt-body');
+  const totalDays = diff(S.projStart, S.projEnd) + 2;
+  const totalW = Math.max(totalDays * ppd, gb.clientWidth);
+
+  renderGrid();
+  renderHead(totalW);
+  renderBody(vis, totalW);
+  renderArrows(vis);
+  renderToday(totalW);
+  updateStats();
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SELECTION
+═══════════════════════════════════════════════════════════════════ */
+function selTask(id) {
+  S.selId = id;
+  renderAll();
+  const t = S.tasks.find(x => x.id === id);
+  if (t) setMsg(`Selected: ${t.name}  |  ${t.start} → ${t.end}  |  ${t.progress}% complete  |  ${t.assignee||'Unassigned'}`);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TASK CRUD
+═══════════════════════════════════════════════════════════════════ */
+function addTask(type) {
+  const today = fd(new Date());
+  const end   = type === 'milestone' ? today : fd(addD(new Date(), 7));
+  const nt = {
+    id: S.nextId++, level: 0, name: type === 'milestone' ? 'New Milestone' : 'New Task',
+    type, status: 'not-started', start: today, end,
+    duration: type === 'milestone' ? 0 : 7, progress: 0,
+    predecessors: [], assignee: '', priority: 'medium', notes: '', collapsed: false, isCritical: false
+  };
+  if (S.selId !== null) {
+    const idx = S.tasks.findIndex(t => t.id === S.selId);
+    if (idx >= 0) {
+      nt.level = S.tasks[idx].level;
+      let ins = idx + 1;
+      while (ins < S.tasks.length && S.tasks[ins].level > nt.level) ins++;
+      S.tasks.splice(ins, 0, nt);
+      S.selId = nt.id; renderAll(); openModal(nt.id); return;
+    }
+  }
+  S.tasks.push(nt); S.selId = nt.id; renderAll(); openModal(nt.id);
+}
+
+function addSubTask() {
+  if (!S.selId) { alert('Select a parent task first.'); return; }
+  const pi = S.tasks.findIndex(t => t.id === S.selId);
+  if (pi < 0) return;
+  const par = S.tasks[pi];
+  const today = fd(new Date());
+  const nt = {
+    id: S.nextId++, level: par.level + 1, name: 'New Sub-task', type: 'task',
+    status: 'not-started', start: today, end: fd(addD(new Date(), 5)),
+    duration: 5, progress: 0, predecessors: [], assignee: par.assignee||'',
+    priority: 'medium', notes: '', collapsed: false, isCritical: false
+  };
+  let ins = pi + 1;
+  while (ins < S.tasks.length && S.tasks[ins].level > par.level) ins++;
+  S.tasks.splice(ins, 0, nt);
+  S.selId = nt.id; renderAll(); openModal(nt.id);
+}
+
+function deleteSelected() {
+  if (!S.selId) return;
+  const i = S.tasks.findIndex(t => t.id === S.selId);
+  if (i < 0) return;
+  const t = S.tasks[i];
+  if (!confirm(`Delete "${t.name}"${hasChildren(t)?' and all sub-tasks':''}?`)) return;
+  const lv = t.level, del = S.selId;
+  let end = i + 1;
+  while (end < S.tasks.length && S.tasks[end].level > lv) end++;
+  S.tasks.splice(i, end - i);
+  S.tasks.forEach(t => { t.predecessors = (t.predecessors||[]).filter(id => id !== del); });
+  S.selId = null; renderAll(); setMsg('Task deleted.');
+}
+
+function indentTask() {
+  if (!S.selId) return;
+  const i = S.tasks.findIndex(t => t.id === S.selId);
+  if (i <= 0) return;
+  const t = S.tasks[i], prev = S.tasks[i-1];
+  if (t.level > prev.level + 1) return; // already too deep relative to prev
+  const delta = 1;
+  t.level += delta;
+  let j = i+1; while (j < S.tasks.length && S.tasks[j].level > t.level - 1) { S.tasks[j].level += delta; j++; }
+  renderAll();
+}
+
+function outdentTask() {
+  if (!S.selId) return;
+  const i = S.tasks.findIndex(t => t.id === S.selId);
+  if (i < 0) return;
+  const t = S.tasks[i];
+  if (t.level === 0) return;
+  const orig = t.level; t.level--;
+  let j = i+1; while (j < S.tasks.length && S.tasks[j].level > orig) { S.tasks[j].level--; j++; }
+  renderAll();
+}
+
+function moveTask(dir) {
+  if (!S.selId) return;
+  const i = S.tasks.findIndex(t => t.id === S.selId);
+  if (i < 0) return;
+  const lv = S.tasks[i].level;
+  let end = i + 1;
+  while (end < S.tasks.length && S.tasks[end].level > lv) end++;
+  const grp = S.tasks.splice(i, end - i);
+  if (dir === -1) {
+    let ins = i - 1;
+    while (ins > 0 && S.tasks[ins-1].level > lv) ins--;
+    S.tasks.splice(Math.max(0, ins), 0, ...grp);
+  } else {
+    if (i < S.tasks.length && S.tasks[i].level === lv) {
+      let ne = i + 1;
+      while (ne < S.tasks.length && S.tasks[ne].level > lv) ne++;
+      S.tasks.splice(ne, 0, ...grp);
+    } else { S.tasks.splice(i, 0, ...grp); }
+  }
+  renderAll();
+}
+
+function toggleColl(e, id) {
+  e.stopPropagation();
+  const t = S.tasks.find(x => x.id === id);
+  if (t) { t.collapsed = !t.collapsed; renderAll(); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════════════════════ */
+let _editId = null;
+
+function openModal(id) {
+  const t = S.tasks.find(x => x.id === id);
+  if (!t) return;
+  _editId = id;
+  document.getElementById('modal-ttl').textContent = `Edit: ${t.name}`;
+  document.getElementById('f-name').value  = t.name;
+  document.getElementById('f-type').value  = t.type;
+  document.getElementById('f-status').value = t.status;
+  document.getElementById('f-start').value = t.start||'';
+  document.getElementById('f-end').value   = t.end||'';
+  document.getElementById('f-dur').value   = t.duration;
+  document.getElementById('f-pct').value   = t.progress;
+  document.getElementById('f-who').value   = t.assignee||'';
+  document.getElementById('f-pred').value  = (t.predecessors||[]).join(', ');
+  document.getElementById('f-pri').value   = t.priority||'medium';
+  document.getElementById('f-notes').value = t.notes||'';
+  document.getElementById('task-modal').classList.add('open');
+  document.getElementById('f-name').focus();
+}
+
+function closeModal() {
+  document.getElementById('task-modal').classList.remove('open');
+  _editId = null;
+}
+
+function syncDuration() {
+  const s = document.getElementById('f-start').value;
+  const e = document.getElementById('f-end').value;
+  if (s && e) {
+    const d = diff(pd(s), pd(e));
+    if (d >= 0) document.getElementById('f-dur').value = d;
+  }
+}
+
+function syncEnd() {
+  const s = document.getElementById('f-start').value;
+  const d = parseInt(document.getElementById('f-dur').value);
+  if (s && !isNaN(d) && d >= 0)
+    document.getElementById('f-end').value = fd(addD(pd(s), d));
+}
+
+function saveModal() {
+  if (_editId === null) return;
+  const t = S.tasks.find(x => x.id === _editId);
+  if (!t) return;
+  t.name     = document.getElementById('f-name').value || t.name;
+  t.type     = document.getElementById('f-type').value;
+  t.status   = document.getElementById('f-status').value;
+  t.start    = document.getElementById('f-start').value;
+  t.end      = document.getElementById('f-end').value;
+  t.duration = parseInt(document.getElementById('f-dur').value)||0;
+  t.progress = Math.min(100, Math.max(0, parseInt(document.getElementById('f-pct').value)||0));
+  t.assignee = document.getElementById('f-who').value;
+  t.priority = document.getElementById('f-pri').value;
+  t.notes    = document.getElementById('f-notes').value;
+  const ps   = document.getElementById('f-pred').value;
+  t.predecessors = ps.split(',').map(s=>parseInt(s.trim())).filter(n=>!isNaN(n));
+  if (t.start && t.end) t.duration = Math.max(0, diff(pd(t.start), pd(t.end)));
+  if (S.showCP) computeCP();
+  closeModal(); renderAll(); setMsg(`Saved: ${t.name}`);
+}
+
+function deleteFromModal() {
+  S.selId = _editId; closeModal(); deleteSelected();
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CONTEXT MENU
+═══════════════════════════════════════════════════════════════════ */
+function showCtx(e, id) {
+  e.preventDefault(); S.selId = id; renderAll();
+  const m = document.getElementById('ctx');
+  m.style.display = 'block';
+  m.style.left = Math.min(e.clientX, window.innerWidth-200)+'px';
+  m.style.top  = Math.min(e.clientY, window.innerHeight-180)+'px';
+}
+function hideCtx() { document.getElementById('ctx').style.display='none'; }
+function ctxEdit() { hideCtx(); if (S.selId) openModal(S.selId); }
+function ctxAdd()  { hideCtx(); addTask('task'); }
+function ctxSub()  { hideCtx(); addSubTask(); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   ZOOM / SCROLL
+═══════════════════════════════════════════════════════════════════ */
+function setZoom(z) { S.zoom = z; renderAll(); }
+
+function scrollToToday() {
+  const ppd = PX[S.zoom];
+  const x = diff(S.projStart, new Date()) * ppd;
+  const gb = document.getElementById('gantt-body');
+  gb.scrollLeft = Math.max(0, x - gb.clientWidth/2);
+}
+
+function toggleCP() {
+  S.showCP = !S.showCP;
+  if (S.showCP) computeCP();
+  document.getElementById('cp-btn').classList.toggle('active', S.showCP);
+  renderAll();
+  setMsg(S.showCP ? 'Critical path highlighted in red.' : 'Critical path display off.');
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SAVE / LOAD / EXPORT
+═══════════════════════════════════════════════════════════════════ */
+function saveProject() {
+  const name = document.getElementById('proj-name').value || 'Project';
+  const data = { name, tasks: S.tasks, nextId: S.nextId, zoom: S.zoom, v: 1, savedAt: new Date().toISOString() };
+  localStorage.setItem('pm_' + name, JSON.stringify(data));
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = name.replace(/\W+/g,'_') + '_gantt.json'; a.click();
+  URL.revokeObjectURL(url);
+  setMsg(`Saved "${name}" to file + browser storage.`);
+}
+
+function loadProject() {
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='.json';
+  inp.onchange = e => {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      try {
+        const d = JSON.parse(ev.target.result);
+        S.tasks = d.tasks||[]; S.nextId = d.nextId||100; S.zoom = d.zoom||'week';
+        S.selId = null;
+        document.getElementById('proj-name').value = d.name||'Project';
+        document.getElementById('zoom-sel').value = S.zoom;
+        renderAll(); setMsg(`Loaded: ${d.name}`);
+      } catch { alert('Invalid project file.'); }
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+}
+
+function newProject() {
+  if (S.tasks.length && !confirm('Start a new project? Unsaved changes will be lost.')) return;
+  S.tasks = []; S.nextId = 1; S.selId = null;
+  document.getElementById('proj-name').value = 'New Project';
+  renderAll(); setMsg('New project created. Click "+ Task" to add tasks.');
+}
+
+function exportCSV() {
+  const rows = [['WBS','Task Name','Type','Level','Status','Priority','Start','End','Duration','Progress%','Assigned To','Predecessors','Notes']];
+  const ctrs = [];
+  for (const t of S.tasks) {
+    while (ctrs.length <= t.level) ctrs.push(0);
+    ctrs.length = t.level + 1; ctrs[t.level]++;
+    const wbs = ctrs.slice(0,t.level+1).join('.');
+    rows.push([wbs,t.name,t.type,t.level,t.status,t.priority||'',t.start||'',t.end||'',t.duration,t.progress,t.assignee||'',(t.predecessors||[]).join(';'),t.notes||'']);
+  }
+  const csv = rows.map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url;
+  a.download = (document.getElementById('proj-name').value||'project').replace(/\W+/g,'_')+'_tasks.csv';
+  a.click(); URL.revokeObjectURL(url);
+  setMsg('Exported to CSV.');
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SCROLL SYNC
+═══════════════════════════════════════════════════════════════════ */
+function initScrollSync() {
+  const grid = document.getElementById('grid-body');
+  const gantt = document.getElementById('gantt-body');
+  const headScroll = document.getElementById('gantt-head-scroll');
+  let lockG = false, lockB = false;
+  grid.addEventListener('scroll', () => {
+    if (lockB) return; lockG = true; gantt.scrollTop = grid.scrollTop; lockG = false;
+  });
+  gantt.addEventListener('scroll', () => {
+    if (lockG) return; lockB = true; grid.scrollTop = gantt.scrollTop; lockB = false;
+    headScroll.scrollLeft = gantt.scrollLeft;
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   GANTT INTERACTION (click, dblclick, drag)
+═══════════════════════════════════════════════════════════════════ */
+function initGanttInteraction() {
+  const canvas = document.getElementById('gantt-canvas');
+  let drag = null;
+
+  canvas.addEventListener('click', e => {
+    const gb = document.getElementById('gantt-body');
+    const y = e.clientY - canvas.getBoundingClientRect().top + gb.scrollTop;
+    const ri = Math.floor(y / ROW_H);
+    const vis = visibleTasks();
+    if (ri >= 0 && ri < vis.length) selTask(vis[ri].id);
+  });
+
+  canvas.addEventListener('dblclick', e => {
+    const gb = document.getElementById('gantt-body');
+    const y = e.clientY - canvas.getBoundingClientRect().top + gb.scrollTop;
+    const ri = Math.floor(y / ROW_H);
+    const vis = visibleTasks();
+    if (ri >= 0 && ri < vis.length) openModal(vis[ri].id);
+  });
+
+  canvas.addEventListener('mousedown', e => {
+    const gb = document.getElementById('gantt-body');
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left + gb.scrollLeft;
+    const y = e.clientY - rect.top  + gb.scrollTop;
+    const ri = Math.floor(y / ROW_H);
+    const vis = visibleTasks();
+    if (ri < 0 || ri >= vis.length) return;
+    const t = vis[ri];
+    if (!t.start) return;
+    const ppd = PX[S.zoom];
+    const sx = diff(S.projStart, pd(t.start)) * ppd;
+    const ex = t.end ? (diff(S.projStart, pd(t.end))+1)*ppd : sx+ppd;
+    if (x >= sx - 3 && x <= ex + 3) {
+      e.preventDefault();
+      drag = { task:t, mx0: e.clientX, s0: t.start, e0: t.end };
+      canvas.style.cursor = 'grabbing';
+    }
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!drag) return;
+    const ppd = PX[S.zoom];
+    const dd = Math.round((e.clientX - drag.mx0) / ppd);
+    if (dd === 0) return;
+    drag.task.start = fd(addD(pd(drag.s0), dd));
+    drag.task.end   = fd(addD(pd(drag.e0), dd));
+    renderAll();
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (drag) { drag = null; canvas.style.cursor = 'default'; calcProjRange(); renderAll(); }
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATUS BAR
+═══════════════════════════════════════════════════════════════════ */
+function setMsg(m) { document.getElementById('st-msg').textContent = m; }
+function updateClock() {
+  document.getElementById('st-date').textContent =
+    new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   KEYBOARD SHORTCUTS
+═══════════════════════════════════════════════════════════════════ */
+function initKeys() {
+  document.addEventListener('keydown', e => {
+    const tag = e.target.tagName;
+    if (tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT') return;
+    switch(e.key) {
+      case 'Delete':
+      case 'Backspace':   e.preventDefault(); deleteSelected(); break;
+      case 'Insert':      e.preventDefault(); addTask('task'); break;
+      case 'Enter':       if (S.selId) openModal(S.selId); break;
+      case 'ArrowUp':
+        e.preventDefault();
+        if (S.selId) {
+          const vis = visibleTasks(), i = vis.findIndex(t=>t.id===S.selId);
+          if (i > 0) selTask(vis[i-1].id);
+        } break;
+      case 'ArrowDown':
+        e.preventDefault();
+        if (S.selId) {
+          const vis = visibleTasks(), i = vis.findIndex(t=>t.id===S.selId);
+          if (i < vis.length-1) selTask(vis[i+1].id);
+        } break;
+      case 'Escape': hideCtx(); closeModal(); break;
+      case '+': case '=': addTask('task'); break;
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════════════ */
+window.addEventListener('load', () => {
+  loadSample();
+  initScrollSync();
+  initGanttInteraction();
+  initKeys();
+  renderAll();
+  updateClock();
+  setInterval(updateClock, 60000);
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#ctx')) hideCtx();
+  });
+  document.getElementById('task-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+  window.addEventListener('resize', renderAll);
+
+  setTimeout(scrollToToday, 150);
+  setMsg('Loaded sample project — double-click any task to edit, drag bars to reschedule.');
+});
+</script>
+</body>
+</html>
