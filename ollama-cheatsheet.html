@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ollama Command Cheat Sheet</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; max-width: 1200px; margin: 0 auto; padding: 20px; color: #333; }
+        h1 { text-align: center; color: #2c3e50; padding-bottom: 10px; border-bottom: 2px solid #7c3aed; }
+        h2 { color: #7c3aed; margin-top: 30px; padding-bottom: 5px; border-bottom: 1px solid #ddd; }
+        .section { margin-bottom: 40px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { padding: 12px 15px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f3f0ff; font-weight: bold; }
+        tr:nth-child(even) { background-color: #f9f7ff; }
+        .command { font-family: 'Courier New', Courier, monospace; font-weight: bold; color: #7c3aed; white-space: nowrap; }
+        .example { font-family: 'Courier New', Courier, monospace; background-color: #1e1e2e; color: #cdd6f4; padding: 2px 8px; border-radius: 4px; font-size: 13px; white-space: nowrap; }
+        .note { background-color: #fef9c3; border-left: 4px solid #f59e0b; padding: 10px 14px; border-radius: 4px; margin: 10px 0; font-size: 14px; }
+        .tip { background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 10px 14px; border-radius: 4px; margin: 10px 0; font-size: 14px; }
+        footer { margin-top: 40px; text-align: center; font-size: 14px; color: #7f8c8d; border-top: 1px solid #ddd; padding-top: 20px; }
+        .nav-button { display: inline-block; padding: 10px 20px; background-color: #7c3aed; color: white; text-decoration: none; border-radius: 5px; font-weight: 500; margin-bottom: 20px; }
+        .nav-button:hover { background-color: #6d28d9; }
+        .badge { display: inline-block; font-size: 11px; background: #7c3aed; color: white; border-radius: 4px; padding: 1px 6px; margin-left: 6px; vertical-align: middle; }
+        .flag { font-family: 'Courier New', monospace; color: #0891b2; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="nav-button">&larr; Return to Index</a>
+    <h1>🦙 Ollama Command Cheat Sheet</h1>
+
+    <!-- Running Models -->
+    <div class="section">
+        <h2>Running Models</h2>
+        <table>
+            <tr><th>Command</th><th>Description</th><th>Example</th></tr>
+            <tr>
+                <td class="command">ollama run</td>
+                <td>Run a model interactively in the terminal</td>
+                <td class="example">ollama run llama3.2</td>
+            </tr>
+            <tr>
+                <td class="command">ollama run</td>
+                <td>Run with a one-shot prompt (non-interactive)</td>
+                <td class="example">ollama run llama3.2 "What is Docker?"</td>
+            </tr>
+            <tr>
+                <td class="command">ollama run</td>
+                <td>Pipe input from stdin</td>
+                <td class="example">cat file.txt | ollama run llama3.2</td>
+            </tr>
+            <tr>
+                <td class="command">ollama run</td>
+                <td>Run a specific model version/tag</td>
+                <td class="example">ollama run llama3.2:1b</td>
+            </tr>
+            <tr>
+                <td class="command">ollama run</td>
+                <td>Run a multimodal model with an image</td>
+                <td class="example">ollama run llava "describe this" /path/img.jpg</td>
+            </tr>
+        </table>
+        <div class="tip">Inside an interactive session, type <span class="flag">/bye</span> to exit, <span class="flag">/clear</span> to reset context, <span class="flag">/help</span> for all commands.</div>
+    </div>
+
+    <!-- Model Management -->
+    <div class="section">
+        <h2>Model Management</h2>
+        <table>
+            <tr><th>Command</th><th>Description</th><th>Example</th></tr>
+            <tr>
+                <td class="command">ollama pull</td>
+                <td>Download a model from the Ollama library</td>
+                <td class="example">ollama pull mistral</td>
+            </tr>
+            <tr>
+                <td class="command">ollama pull</td>
+                <td>Pull a specific tag/size variant</td>
+                <td class="example">ollama pull llama3.2:3b</td>
+            </tr>
+            <tr>
+                <td class="command">ollama push</td>
+                <td>Push a model to the Ollama library (requires account)</td>
+                <td class="example">ollama push myuser/mymodel</td>
+            </tr>
+            <tr>
+                <td class="command">ollama list</td>
+                <td>List all locally downloaded models</td>
+                <td class="example">ollama list</td>
+            </tr>
+            <tr>
+                <td class="command">ollama show</td>
+                <td>Show model info (parameters, template, license)</td>
+                <td class="example">ollama show llama3.2</td>
+            </tr>
+            <tr>
+                <td class="command">ollama show --modelfile</td>
+                <td>Show the Modelfile for a model</td>
+                <td class="example">ollama show llama3.2 --modelfile</td>
+            </tr>
+            <tr>
+                <td class="command">ollama cp</td>
+                <td>Copy a model under a new name</td>
+                <td class="example">ollama cp llama3.2 my-llama</td>
+            </tr>
+            <tr>
+                <td class="command">ollama rm</td>
+                <td>Delete a local model</td>
+                <td class="example">ollama rm mistral</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Creating Custom Models -->
+    <div class="section">
+        <h2>Creating Custom Models</h2>
+        <table>
+            <tr><th>Command</th><th>Description</th><th>Example</th></tr>
+            <tr>
+                <td class="command">ollama create</td>
+                <td>Create a model from a Modelfile</td>
+                <td class="example">ollama create mymodel -f ./Modelfile</td>
+            </tr>
+            <tr>
+                <td class="command">ollama create</td>
+                <td>Create from a Modelfile in the current directory</td>
+                <td class="example">ollama create mymodel</td>
+            </tr>
+        </table>
+
+        <div class="note">
+            <strong>Modelfile example:</strong><br>
+            <pre style="margin:6px 0; background:#1e1e2e; color:#cdd6f4; padding:10px; border-radius:6px; font-size:13px; overflow-x:auto;">FROM llama3.2
+SYSTEM "You are a helpful Python tutor. Keep answers concise."
+PARAMETER temperature 0.7
+PARAMETER num_ctx 4096</pre>
+        </div>
+
+        <table>
+            <tr><th>Modelfile Instruction</th><th>Description</th></tr>
+            <tr><td class="command">FROM</td><td>Base model or GGUF file path</td></tr>
+            <tr><td class="command">SYSTEM</td><td>System prompt prepended to every conversation</td></tr>
+            <tr><td class="command">PARAMETER</td><td>Set model parameters (temperature, top_p, num_ctx, etc.)</td></tr>
+            <tr><td class="command">TEMPLATE</td><td>Override the prompt template</td></tr>
+            <tr><td class="command">ADAPTER</td><td>Apply a LoRA adapter file</td></tr>
+            <tr><td class="command">LICENSE</td><td>Specify the model license</td></tr>
+            <tr><td class="command">MESSAGE</td><td>Pre-seed conversation history (user/assistant turns)</td></tr>
+        </table>
+    </div>
+
+    <!-- Server & API -->
+    <div class="section">
+        <h2>Server &amp; API</h2>
+        <table>
+            <tr><th>Command</th><th>Description</th><th>Example</th></tr>
+            <tr>
+                <td class="command">ollama serve</td>
+                <td>Start the Ollama server (auto-starts on most installs)</td>
+                <td class="example">ollama serve</td>
+            </tr>
+            <tr>
+                <td class="command">ollama ps</td>
+                <td>List currently loaded/running models</td>
+                <td class="example">ollama ps</td>
+            </tr>
+            <tr>
+                <td class="command">ollama stop</td>
+                <td>Unload a model from memory</td>
+                <td class="example">ollama stop llama3.2</td>
+            </tr>
+        </table>
+
+        <div class="note">By default Ollama listens on <span class="flag">http://localhost:11434</span>. Set <span class="flag">OLLAMA_HOST=0.0.0.0</span> to expose it on the network.</div>
+
+        <h2>REST API Quick Reference</h2>
+        <table>
+            <tr><th>Endpoint</th><th>Method</th><th>Description</th></tr>
+            <tr>
+                <td class="command">/api/generate</td>
+                <td>POST</td>
+                <td>Generate a completion (streaming by default)</td>
+            </tr>
+            <tr>
+                <td class="command">/api/chat</td>
+                <td>POST</td>
+                <td>Chat with message history</td>
+            </tr>
+            <tr>
+                <td class="command">/api/embeddings</td>
+                <td>POST</td>
+                <td>Generate text embeddings</td>
+            </tr>
+            <tr>
+                <td class="command">/api/tags</td>
+                <td>GET</td>
+                <td>List local models (same as <span class="flag">ollama list</span>)</td>
+            </tr>
+            <tr>
+                <td class="command">/api/show</td>
+                <td>POST</td>
+                <td>Show model info</td>
+            </tr>
+            <tr>
+                <td class="command">/api/pull</td>
+                <td>POST</td>
+                <td>Pull a model via API</td>
+            </tr>
+            <tr>
+                <td class="command">/api/delete</td>
+                <td>DELETE</td>
+                <td>Delete a model via API</td>
+            </tr>
+            <tr>
+                <td class="command">/api/copy</td>
+                <td>POST</td>
+                <td>Copy a model via API</td>
+            </tr>
+            <tr>
+                <td class="command">/api/ps</td>
+                <td>GET</td>
+                <td>List running models via API</td>
+            </tr>
+        </table>
+
+        <div class="tip">
+            <strong>curl example — chat:</strong><br>
+            <pre style="margin:6px 0; background:#1e1e2e; color:#cdd6f4; padding:10px; border-radius:6px; font-size:13px; overflow-x:auto;">curl http://localhost:11434/api/chat -d '{
+  "model": "llama3.2",
+  "messages": [{"role": "user", "content": "Why is the sky blue?"}],
+  "stream": false
+}'</pre>
+        </div>
+
+        <div class="tip">
+            <strong>Python example (openai-compatible endpoint):</strong><br>
+            <pre style="margin:6px 0; background:#1e1e2e; color:#cdd6f4; padding:10px; border-radius:6px; font-size:13px; overflow-x:auto;">from openai import OpenAI
+client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+resp = client.chat.completions.create(
+    model="llama3.2",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+print(resp.choices[0].message.content)</pre>
+        </div>
+    </div>
+
+    <!-- Key Parameters -->
+    <div class="section">
+        <h2>Common Model Parameters</h2>
+        <table>
+            <tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
+            <tr><td class="command">temperature</td><td>0.8</td><td>Randomness of output (0 = deterministic, 1+ = creative)</td></tr>
+            <tr><td class="command">top_p</td><td>0.9</td><td>Nucleus sampling — cumulative probability cutoff</td></tr>
+            <tr><td class="command">top_k</td><td>40</td><td>Limit next-token choices to top K</td></tr>
+            <tr><td class="command">num_ctx</td><td>2048</td><td>Context window size in tokens</td></tr>
+            <tr><td class="command">num_predict</td><td>128</td><td>Max tokens to generate (-1 = unlimited)</td></tr>
+            <tr><td class="command">repeat_penalty</td><td>1.1</td><td>Penalize repeated tokens (higher = less repetition)</td></tr>
+            <tr><td class="command">seed</td><td>0</td><td>Random seed for reproducibility</td></tr>
+            <tr><td class="command">stop</td><td>—</td><td>Stop sequences — model stops when it generates these</td></tr>
+            <tr><td class="command">num_gpu</td><td>auto</td><td>Number of GPU layers to use (0 = CPU only)</td></tr>
+            <tr><td class="command">num_thread</td><td>auto</td><td>Number of CPU threads</td></tr>
+        </table>
+    </div>
+
+    <!-- Environment Variables -->
+    <div class="section">
+        <h2>Environment Variables</h2>
+        <table>
+            <tr><th>Variable</th><th>Description</th><th>Example</th></tr>
+            <tr>
+                <td class="command">OLLAMA_HOST</td>
+                <td>Address and port the server binds to</td>
+                <td class="example">OLLAMA_HOST=0.0.0.0:11434</td>
+            </tr>
+            <tr>
+                <td class="command">OLLAMA_MODELS</td>
+                <td>Directory where models are stored</td>
+                <td class="example">OLLAMA_MODELS=/mnt/models</td>
+            </tr>
+            <tr>
+                <td class="command">OLLAMA_ORIGINS</td>
+                <td>Allowed CORS origins (comma-separated)</td>
+                <td class="example">OLLAMA_ORIGINS=*</td>
+            </tr>
+            <tr>
+                <td class="command">OLLAMA_KEEP_ALIVE</td>
+                <td>How long models stay loaded after last request</td>
+                <td class="example">OLLAMA_KEEP_ALIVE=10m</td>
+            </tr>
+            <tr>
+                <td class="command">OLLAMA_NUM_PARALLEL</td>
+                <td>Max parallel requests handled simultaneously</td>
+                <td class="example">OLLAMA_NUM_PARALLEL=4</td>
+            </tr>
+            <tr>
+                <td class="command">OLLAMA_MAX_LOADED_MODELS</td>
+                <td>Max models kept in memory at once</td>
+                <td class="example">OLLAMA_MAX_LOADED_MODELS=2</td>
+            </tr>
+            <tr>
+                <td class="command">OLLAMA_FLASH_ATTENTION</td>
+                <td>Enable flash attention (1 = on)</td>
+                <td class="example">OLLAMA_FLASH_ATTENTION=1</td>
+            </tr>
+            <tr>
+                <td class="command">CUDA_VISIBLE_DEVICES</td>
+                <td>Select which GPU(s) to use</td>
+                <td class="example">CUDA_VISIBLE_DEVICES=0,1</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Popular Models -->
+    <div class="section">
+        <h2>Popular Models (ollama.com/library)</h2>
+        <table>
+            <tr><th>Model</th><th>Pull Command</th><th>Notes</th></tr>
+            <tr><td class="command">llama3.2</td><td class="example">ollama pull llama3.2</td><td>Meta's Llama 3.2 (3B / 1B) — fast, general purpose</td></tr>
+            <tr><td class="command">llama3.1</td><td class="example">ollama pull llama3.1</td><td>Meta's Llama 3.1 8B — strong reasoning</td></tr>
+            <tr><td class="command">mistral</td><td class="example">ollama pull mistral</td><td>Mistral 7B — efficient and capable</td></tr>
+            <tr><td class="command">gemma3</td><td class="example">ollama pull gemma3</td><td>Google Gemma 3 — multilingual</td></tr>
+            <tr><td class="command">qwen2.5</td><td class="example">ollama pull qwen2.5</td><td>Alibaba Qwen 2.5 — strong coding &amp; math</td></tr>
+            <tr><td class="command">deepseek-r1</td><td class="example">ollama pull deepseek-r1</td><td>DeepSeek R1 — advanced reasoning / chain-of-thought</td></tr>
+            <tr><td class="command">phi4</td><td class="example">ollama pull phi4</td><td>Microsoft Phi-4 — small but powerful</td></tr>
+            <tr><td class="command">codellama</td><td class="example">ollama pull codellama</td><td>Meta CodeLlama — code completion &amp; generation</td></tr>
+            <tr><td class="command">llava</td><td class="example">ollama pull llava</td><td>Multimodal — understands images</td></tr>
+            <tr><td class="command">nomic-embed-text</td><td class="example">ollama pull nomic-embed-text</td><td>Text embeddings for RAG pipelines</td></tr>
+        </table>
+        <div class="tip">Browse all models at <strong>ollama.com/library</strong>. Tags like <span class="flag">:7b</span>, <span class="flag">:13b</span>, <span class="flag">:latest</span>, <span class="flag">:q4_0</span> select size and quantization.</div>
+    </div>
+
+    <!-- In-session slash commands -->
+    <div class="section">
+        <h2>In-Session Slash Commands</h2>
+        <table>
+            <tr><th>Command</th><th>Description</th></tr>
+            <tr><td class="command">/help</td><td>List all available slash commands</td></tr>
+            <tr><td class="command">/bye</td><td>Exit the session</td></tr>
+            <tr><td class="command">/clear</td><td>Reset conversation history</td></tr>
+            <tr><td class="command">/set system &lt;text&gt;</td><td>Override the system prompt mid-session</td></tr>
+            <tr><td class="command">/set parameter &lt;key&gt; &lt;val&gt;</td><td>Adjust a parameter (e.g. <span class="flag">/set parameter temperature 0.5</span>)</td></tr>
+            <tr><td class="command">/show info</td><td>Show current model info</td></tr>
+            <tr><td class="command">/show modelfile</td><td>Show the current Modelfile</td></tr>
+            <tr><td class="command">/show parameters</td><td>Show active parameters</td></tr>
+            <tr><td class="command">/show template</td><td>Show the prompt template</td></tr>
+            <tr><td class="command">/show system</td><td>Show the system prompt</td></tr>
+            <tr><td class="command">/load &lt;model&gt;</td><td>Switch to a different model in the same session</td></tr>
+            <tr><td class="command">/save &lt;name&gt;</td><td>Save the current session as a named model/context</td></tr>
+        </table>
+    </div>
+
+    <footer>
+        <p>Ollama Cheat Sheet &mdash; <a href="https://ollama.com/docs" style="color:#7c3aed;">ollama.com/docs</a></p>
+    </footer>
+</body>
+</html>
