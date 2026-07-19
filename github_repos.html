@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Repositories</title>
+    <style>
+        :root {
+            --bg-body: #0d1117;
+            --bg-header: #161b22;
+            --bg-card: #161b22;
+            --bg-input: #0d1117;
+            --bg-btn: #21262d;
+            --bg-meta-border: #21262d;
+            --border: #30363d;
+            --text-primary: #f0f6fc;
+            --text-body: #c9d1d9;
+            --text-muted: #8b949e;
+            --text-faint: #484f58;
+            --accent: #1f6feb;
+            --link: #58a6ff;
+            --transition: 0.3s ease;
+        }
+
+        [data-theme="light"] {
+            --bg-body: #f6f8fa;
+            --bg-header: #ffffff;
+            --bg-card: #ffffff;
+            --bg-input: #f6f8fa;
+            --bg-btn: #f3f4f6;
+            --bg-meta-border: #eaecef;
+            --border: #d0d7de;
+            --text-primary: #1f2328;
+            --text-body: #1f2328;
+            --text-muted: #656d76;
+            --text-faint: #8c959f;
+            --accent: #0969da;
+            --link: #0969da;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-body);
+            min-height: 100vh;
+            transition: background var(--transition), color var(--transition);
+        }
+
+        header {
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border);
+            padding: 24px 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: background var(--transition), border-color var(--transition);
+        }
+
+        header h1 {
+            font-size: 1.6rem;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: color var(--transition);
+        }
+
+        header h1 .count {
+            background: var(--accent);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 10px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-body);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s, background var(--transition), color var(--transition);
+        }
+
+        .search-box:focus { border-color: var(--accent); }
+        .search-box::placeholder { color: var(--text-faint); }
+
+        .filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 7px 16px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--bg-btn);
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--text-muted);
+            color: var(--text-body);
+        }
+
+        .filter-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .sort-btn {
+            padding: 7px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-btn);
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sort-btn:hover { border-color: var(--text-muted); color: var(--text-body); }
+
+        .sort-btn.active { border-color: var(--accent); color: var(--accent); }
+
+        .theme-toggle {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-btn);
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            line-height: 1;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .theme-toggle .label {
+            font-size: 0.78rem;
+            font-weight: 500;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 40px;
+        }
+
+        .repo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 16px;
+        }
+
+        .repo-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            transition: border-color 0.2s, transform 0.2s, background var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .repo-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .repo-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .repo-icon {
+            width: 20px;
+            height: 20px;
+            fill: var(--text-muted);
+            flex-shrink: 0;
+            transition: fill var(--transition);
+        }
+
+        .repo-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--link);
+            text-decoration: none;
+        }
+
+        .repo-name:hover { text-decoration: underline; }
+
+        .repo-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            flex: 1;
+        }
+
+        .repo-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 0.78rem;
+            color: var(--text-faint);
+            margin-top: auto;
+            padding-top: 10px;
+            border-top: 1px solid var(--bg-meta-border);
+            transition: border-color var(--transition);
+        }
+
+        .repo-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .repo-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-ai { background: #1a2332; color: #58a6ff; }
+        .tag-web { background: #1a2a1a; color: #7ee787; }
+        .tag-tools { background: #2a2a1a; color: #e3b341; }
+        .tag-data { background: #2a1a2a; color: #d2a8ff; }
+        .tag-quiz { background: #2a1a1a; color: #f78166; }
+        .tag-productivity { background: #1a2a2a; color: #76e3ea; }
+        .tag-security { background: #2a1a1a; color: #ffa198; }
+        .tag-blog { background: #1a2a1a; color: #a5d6ff; }
+        .tag-portfolio { background: #2a2a2a; color: #8b949e; }
+
+        [data-theme="light"] .tag-ai { background: #dbeafe; color: #1d4ed8; }
+        [data-theme="light"] .tag-web { background: #dcfce7; color: #15803d; }
+        [data-theme="light"] .tag-tools { background: #fef9c3; color: #a16207; }
+        [data-theme="light"] .tag-data { background: #f3e8ff; color: #7e22ce; }
+        [data-theme="light"] .tag-quiz { background: #ffedd5; color: #c2410c; }
+        [data-theme="light"] .tag-productivity { background: #cffafe; color: #0e7490; }
+        [data-theme="light"] .tag-security { background: #fee2e2; color: #dc2626; }
+        [data-theme="light"] .tag-blog { background: #e0f2fe; color: #0369a1; }
+        [data-theme="light"] .tag-portfolio { background: #f3f4f6; color: #4b5563; }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-faint);
+            font-size: 1.1rem;
+        }
+
+        .no-results .emoji { font-size: 3rem; margin-bottom: 16px; display: block; }
+
+        .repo-count-text {
+            color: var(--text-faint);
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        .sun-icon, .moon-icon { display: none; }
+        [data-theme="dark"] .sun-icon { display: inline; }
+        [data-theme="light"] .moon-icon { display: inline; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>
+        <svg class="repo-icon" viewBox="0 0 16 16"><path d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1h-8a1 1 0 00-1 1v6.708A2.486 2.486 0 014.5 9h8.5V1.5zM5 12.25v3.25a.25.25 0 00.4.2l1.45-1.095a.25.25 0 01.3 0L8.6 15.7a.25.25 0 00.4-.2v-3.25a.25.25 0 00-.25-.25h-3.5a.25.25 0 00-.25.25z"/></svg>
+        GitHub Repositories
+        <span class="count" id="visibleCount">53</span>
+    </h1>
+    <div class="controls">
+        <input type="text" class="search-box" id="search" placeholder="Search repositories...">
+        <div class="filters" id="filters"></div>
+        <button class="sort-btn" id="sortDate" onclick="toggleSort()">↕ Newest</button>
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+            <span class="sun-icon">☀️</span>
+            <span class="moon-icon">🌙</span>
+            <span class="label" id="themeLabel">Light</span>
+        </button>
+    </div>
+</header>
+
+<main>
+    <div class="repo-count-text" id="countText">Showing all 53 repositories</div>
+    <div class="repo-grid" id="repoGrid"></div>
+    <div class="no-results" id="noResults" style="display:none">
+        <span class="emoji">🔍</span>
+        No repositories match your search.
+    </div>
+</main>
+
+<script>
+const REPOS = [
+    { name: "macFolderManager", desc: "Manage Folders on MacBook", url: "https://github.com/aphadke77/macFolderManager", created: "2026-07-19", cat: "tools" },
+    { name: "MyCalendar", desc: "Calendar with multiple special holiday json files", url: "https://github.com/aphadke77/MyCalendar", created: "2026-07-19", cat: "productivity" },
+    { name: "medAssitant", desc: "A medical assistant based on medGamma Model", url: "https://github.com/aphadke77/medAssitant", created: "2026-07-12", cat: "ai" },
+    { name: "aphadke77.github.io", desc: "My profile and project Site", url: "https://github.com/aphadke77/aphadke77.github.io", created: "2025-04-08", cat: "portfolio" },
+    { name: "CDFquiz", desc: "Cognite Data Fusion Quiz", url: "https://github.com/aphadke77/CDFquiz", created: "2026-06-30", cat: "quiz" },
+    { name: "myfoodgta", desc: "My Fav Food Places", url: "https://github.com/aphadke77/myfoodgta", created: "2026-06-28", cat: "web" },
+    { name: "demosite1", desc: "demosite1", url: "https://github.com/aphadke77/demosite1", created: "2026-06-28", cat: "web" },
+    { name: "loan-repaytracker", desc: "Loan repayments tracking", url: "https://github.com/aphadke77/loan-repaytracker", created: "2026-06-26", cat: "productivity" },
+    { name: "xcelHelp", desc: "Excel assistant", url: "https://github.com/aphadke77/xcelHelp", created: "2026-06-13", cat: "tools" },
+    { name: "ATSresume", desc: "ATS compliant resume builder", url: "https://github.com/aphadke77/ATSresume", created: "2026-06-08", cat: "tools" },
+    { name: "pythonRepo", desc: "Python scripts collection", url: "https://github.com/aphadke77/pythonRepo", created: "2026-06-06", cat: "tools" },
+    { name: "myProfile", desc: "My Profile", url: "https://github.com/aphadke77/myProfile", created: "2026-06-03", cat: "portfolio" },
+    { name: "-gen-ai-portal", desc: "gen-ai-portal tracking progress", url: "https://github.com/aphadke77/-gen-ai-portal", created: "2026-05-16", cat: "ai" },
+    { name: "pollcraft", desc: "pollcraft", url: "https://github.com/aphadke77/pollcraft", created: "2026-05-29", cat: "web" },
+    { name: "promptlab", desc: "prompt lab", url: "https://github.com/aphadke77/promptlab", created: "2026-05-28", cat: "ai" },
+    { name: "pmo", desc: "Project Management Portal", url: "https://github.com/aphadke77/pmo", created: "2026-05-22", cat: "productivity" },
+    { name: "utilities", desc: "Utilities for everyday", url: "https://github.com/aphadke77/utilities", created: "2026-05-20", cat: "tools" },
+    { name: "travel", desc: "Create and compare travel itinerary", url: "https://github.com/aphadke77/travel", created: "2026-05-21", cat: "productivity" },
+    { name: "Date-calc", desc: "Date calculator", url: "https://github.com/aphadke77/Date-calc", created: "2026-05-21", cat: "tools" },
+    { name: "lightQuiz", desc: "Quiz with Custom light background", url: "https://github.com/aphadke77/lightQuiz", created: "2026-05-18", cat: "quiz" },
+    { name: "quizApp", desc: "Generic Quiz Application", url: "https://github.com/aphadke77/quizApp", created: "2025-02-16", cat: "quiz" },
+    { name: "quiz", desc: "Quiz app", url: "https://github.com/aphadke77/quiz", created: "2026-05-18", cat: "quiz" },
+    { name: "greencut-lawn-app", desc: "Lawnmower service", url: "https://github.com/aphadke77/greencut-lawn-app", created: "2026-05-17", cat: "web" },
+    { name: "blog-forge-gh", desc: "Blog forge", url: "https://github.com/aphadke77/blog-forge-gh", created: "2026-05-04", cat: "blog" },
+    { name: "cont", desc: "cont", url: "https://github.com/aphadke77/cont", created: "2026-05-09", cat: "portfolio" },
+    { name: "mywhitebrd", desc: "Whiteboard app", url: "https://github.com/aphadke77/mywhitebrd", created: "2026-05-07", cat: "web" },
+    { name: "pmplog", desc: "Log your PMP PDUs", url: "https://github.com/aphadke77/pmplog", created: "2026-05-07", cat: "productivity" },
+    { name: "resume-match-analyser", desc: "Compares your resume with job description and provides analysis", url: "https://github.com/aphadke77/resume-match-analyser", created: "2026-05-02", cat: "ai" },
+    { name: "agile-phase-tracker", desc: "Tracker the status for multiple projects in single dashboard", url: "https://github.com/aphadke77/agile-phase-tracker", created: "2026-05-02", cat: "productivity" },
+    { name: "currency-counter", desc: "Currency counter", url: "https://github.com/aphadke77/currency-counter", created: "2026-05-01", cat: "tools" },
+    { name: "my-tech-blog", desc: "Blog site", url: "https://github.com/aphadke77/my-tech-blog", created: "2026-04-25", cat: "blog" },
+    { name: "abhijitphadke", desc: "Profile", url: "https://github.com/aphadke77/abhijitphadke", created: "2024-03-28", cat: "portfolio" },
+    { name: "chat_maint_guide", desc: "RAG for Equipment Maintenance Use Case", url: "https://github.com/aphadke77/chat_maint_guide", created: "2025-03-18", cat: "ai" },
+    { name: "infochatbot", desc: "Chatbot that shares information about the team", url: "https://github.com/aphadke77/infochatbot", created: "2023-02-05", cat: "ai" },
+    { name: "git-workshop", desc: "Workshop", url: "https://github.com/aphadke77/git-workshop", created: "2025-04-15", cat: "tools" },
+    { name: "github.io", desc: "My Website For portfolio and Projects", url: "https://github.com/aphadke77/github.io", created: "2025-04-08", cat: "portfolio" },
+    { name: "mysite", desc: "My Site", url: "https://github.com/aphadke77/mysite", created: "2025-03-31", cat: "portfolio" },
+    { name: "tagManagment", desc: "Tool to generate and display Tags", url: "https://github.com/aphadke77/tagManagment", created: "2025-03-04", cat: "tools" },
+    { name: "stock", desc: "Stock Recommendation", url: "https://github.com/aphadke77/stock", created: "2025-02-17", cat: "data" },
+    { name: "cybersecurity-keylogger", desc: "keylogger app for learning", url: "https://github.com/aphadke77/cybersecurity-keylogger", created: "2024-11-09", cat: "security" },
+    { name: "kproject", desc: "my Kaggle project", url: "https://github.com/aphadke77/kproject", created: "2024-07-18", cat: "data" },
+    { name: "tagscraping", desc: "Tag scraping", url: "https://github.com/aphadke77/tagscraping", created: "2024-07-18", cat: "tools" },
+    { name: "creationsforu", desc: "Creations", url: "https://github.com/aphadke77/creationsforu", created: "2024-04-02", cat: "portfolio" },
+    { name: "html-css-and-generative-ai-speed-up-your-process-2705330", desc: "LinkedIn Learning: HTML, CSS, and Generative AI", url: "https://github.com/aphadke77/html-css-and-generative-ai-speed-up-your-process-2705330", created: "2024-04-02", cat: "ai" },
+    { name: "tagExtractor", desc: "Read CSV tag list, process PDFs, identify matching tags", url: "https://github.com/aphadke77/tagExtractor", created: "2023-11-15", cat: "tools" },
+    { name: "dataValidator", desc: "Data Validation tool", url: "https://github.com/aphadke77/dataValidator", created: "2023-03-19", cat: "data" },
+    { name: "mergeWatermark", desc: "Merge PDFs, watermark the merged file", url: "https://github.com/aphadke77/mergeWatermark", created: "2023-02-05", cat: "tools" },
+    { name: "safetycomplaince", desc: "Safety Compliance", url: "https://github.com/aphadke77/safetycomplaince", created: "2022-10-16", cat: "productivity" },
+    { name: "passwordvalidator", desc: "Validate a password, run as executable from Mac", url: "https://github.com/aphadke77/passwordvalidator", created: "2022-09-29", cat: "security" },
+    { name: "gaspriceforecast", desc: "Project to Forecast the gas prices", url: "https://github.com/aphadke77/gaspriceforecast", created: "2022-09-25", cat: "data" },
+    { name: "AutoHotkey_L-Docs", desc: "Documentation for AutoHotkey", url: "https://github.com/aphadke77/AutoHotkey_L-Docs", created: "2020-05-23", cat: "tools" },
+    { name: "Data-Analysis", desc: "Data Science Using Python", url: "https://github.com/aphadke77/Data-Analysis", created: "2019-02-19", cat: "data" },
+    { name: "Classification", desc: "Data Science based classification", url: "https://github.com/aphadke77/Classification", created: "2019-02-09", cat: "data" },
+];
+
+const CAT_LABELS = {
+    all: "All",
+    ai: "AI & ML",
+    web: "Web Apps",
+    tools: "Tools & Utils",
+    productivity: "Productivity",
+    quiz: "Quiz",
+    data: "Data Science",
+    blog: "Blog",
+    portfolio: "Portfolio",
+    security: "Security",
+};
+
+let activeCategory = "all";
+let sortNewest = true;
+
+function renderFilters() {
+    const container = document.getElementById("filters");
+    // Count per category
+    const counts = { all: REPOS.length };
+    REPOS.forEach(r => { counts[r.cat] = (counts[r.cat] || 0) + 1; });
+
+    for (const [key, label] of Object.entries(CAT_LABELS)) {
+        const btn = document.createElement("button");
+        btn.className = `filter-btn${key === activeCategory ? " active" : ""}`;
+        btn.textContent = `${label} (${counts[key] || 0})`;
+        btn.onclick = () => {
+            activeCategory = key;
+            renderFilters();
+            renderRepos();
+        };
+        container.appendChild(btn);
+    }
+}
+
+function renderRepos() {
+    const grid = document.getElementById("repoGrid");
+    const search = document.getElementById("search").value.toLowerCase();
+    const noResults = document.getElementById("noResults");
+    const countText = document.getElementById("countText");
+
+    let filtered = REPOS.filter(r => {
+        const matchCat = activeCategory === "all" || r.cat === activeCategory;
+        const matchSearch = !search || r.name.toLowerCase().includes(search) || r.desc.toLowerCase().includes(search);
+        return matchCat && matchSearch;
+    });
+
+    filtered.sort((a, b) => {
+        return sortNewest
+            ? new Date(b.created) - new Date(a.created)
+            : new Date(a.created) - new Date(b.created);
+    });
+
+    document.getElementById("visibleCount").textContent = filtered.length;
+    countText.textContent = filtered.length === REPOS.length
+        ? `Showing all ${REPOS.length} repositories`
+        : `Showing ${filtered.length} of ${REPOS.length} repositories`;
+
+    grid.innerHTML = "";
+
+    if (filtered.length === 0) {
+        noResults.style.display = "block";
+        return;
+    }
+    noResults.style.display = "none";
+
+    filtered.forEach((r, i) => {
+        const card = document.createElement("div");
+        card.className = "repo-card";
+        card.style.animationDelay = `${i * 0.03}s`;
+
+        const yearsAgo = Math.floor((Date.now() - new Date(r.created)) / (365.25 * 24 * 60 * 60 * 1000));
+        const ageText = yearsAgo < 1 ? "Created this year" : yearsAgo === 1 ? "Created 1 year ago" : `Created ${yearsAgo} years ago`;
+
+        card.innerHTML = `
+            <div class="repo-header">
+                <svg class="repo-icon" viewBox="0 0 16 16"><path d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1h-8a1 1 0 00-1 1v6.708A2.486 2.486 0 014.5 9h8.5V1.5z"/></svg>
+                <a class="repo-name" href="${r.url}" target="_blank">${r.name}</a>
+                <span class="repo-tag tag-${r.cat}">${CAT_LABELS[r.cat] || r.cat}</span>
+            </div>
+            <div class="repo-desc">${r.desc || '<em>No description</em>'}</div>
+            <div class="repo-meta">
+                <span>📅 ${r.created}</span>
+                <span>🕐 ${ageText}</span>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function toggleSort() {
+    sortNewest = !sortNewest;
+    const btn = document.getElementById("sortDate");
+    btn.textContent = sortNewest ? "↕ Newest" : "↕ Oldest";
+    renderRepos();
+}
+
+document.getElementById("search").addEventListener("input", renderRepos);
+
+function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute("data-theme");
+    const next = current === "light" ? "dark" : "light";
+    html.setAttribute("data-theme", next);
+    localStorage.setItem("theme", next);
+    document.getElementById("themeLabel").textContent = next === "light" ? "Dark" : "Light";
+}
+
+// Restore saved theme or default to dark
+const savedTheme = localStorage.getItem("theme") || "dark";
+document.documentElement.setAttribute("data-theme", savedTheme);
+document.getElementById("themeLabel").textContent = savedTheme === "light" ? "Dark" : "Light";
+
+renderFilters();
+renderRepos();
+</script>
+</body>
+</html>
